@@ -13,7 +13,7 @@ deploy_development:
   stage: deploy
   script:
       # Use Envoy to trigger the deployment task on your production server(s)
-    - /home/gitlab-runner/.config/composer/vendor/bin/envoy run deploy --branch=dev
+    - /home/gitlab-runner/.config/composer/vendor/bin/envoy run deploy\
   environment:
     name: dev
     url: http://10.11.11.17

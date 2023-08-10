@@ -1,19 +1,27 @@
+default:
+  image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
+
 stages:
   - test
   - deploy
 
-# unit_test:
-#   stage: test
-#   script:
-#     - cp .env.example .env
-#     - composer install --no-plugins
-#     - vendor/bin/phpunit
+unit_test:
+  stage: test
+  script:
+    - cp .env.example .env
+    - composer install --no-plugins
+    - vendor/bin/phpunit
 
 deploy_development:
   stage: deploy
   script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
       # Use Envoy to trigger the deployment task on your production server(s)
-    - /home/gitlab-runner/.config/composer/vendor/bin/envoy run deploy\
+    - ~/.composer/vendor/bin/envoy run deploy 
   environment:
     name: dev
     url: http://10.11.11.17

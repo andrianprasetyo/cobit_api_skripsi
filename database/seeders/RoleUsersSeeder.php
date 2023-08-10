@@ -30,6 +30,7 @@ class RoleUsersSeeder extends Seeder
             RoleUsers::create([
                 'users_id' => $item['users_id'],
                 'roles_id' => $item['roles_id'],
+                'default'=>true
             ]);
         }
     }

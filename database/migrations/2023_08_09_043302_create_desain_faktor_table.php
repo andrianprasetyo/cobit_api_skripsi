@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('desain_faktor', function (Blueprint $table) {
+        Schema::create('design_faktor', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
             $table->primary('id');
+            $table->string('kode',10);
             $table->string('nama');
             $table->text('deskripsi')->nullable();
             // $table->foreignUuid('isections_id');
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('desain_faktor');
+        Schema::dropIfExists('design_faktor');
     }
 };

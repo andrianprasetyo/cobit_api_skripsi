@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('divisi')->nullable();
             $table->string('posisi')->nullable();
-            $table->char('status')->default('pending')->comment('active,pending,banned');
+            $table->string('status',30)->default('pending')->comment('active,pending,banned');
             $table->boolean('internal')->default(true);
             $table->rememberToken();
             $table->timestamps();

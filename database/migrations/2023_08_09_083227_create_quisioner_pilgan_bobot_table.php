@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
             $table->primary('id');
             $table->foreignUuid('quisioner_id');
+            $table->foreignUuid('grup_pilgan_id');
             $table->foreignUuid('pilgan_id');
             $table->integer('bobot');
             $table->timestamps();

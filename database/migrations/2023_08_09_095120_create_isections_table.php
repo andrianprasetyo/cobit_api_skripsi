@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('desain_faktor_ref', function (Blueprint $table) {
+        Schema::create('design_faktor_komponen', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
             $table->primary('id');
             $table->string('nama');
-            $table->foreignUuid('desain_faktor_id')->nullable();
+            $table->foreignUuid('design_faktor_id')->nullable();
             $table->text('deskripsi')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('desain_faktor_ref');
+        Schema::dropIfExists('design_faktor_komponen');
     }
 };

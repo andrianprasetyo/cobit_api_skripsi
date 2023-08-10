@@ -12,7 +12,7 @@ class QuisionerPilgan extends Model
     public $incrementing = false;
     protected $table = 'quisioner_pilgan';
     protected $keyType = 'string';
-    protected $fillable = ['jawaban','sorting'];
+    protected $fillable = ['jawaban','sorting','quisioner_grup_pilgan_id'];
 
     protected $hidden = [
         'deleted_at',

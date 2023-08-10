@@ -1,2 +1,2 @@
 <?php
-Route::get('/', 'WelcomeController@halo');
+Route::get('/welcome', 'WelcomeController@halo');

@@ -16,6 +16,12 @@ class RoleUsers extends Model
 
     protected $hidden = [
         'deleted_at',
-        'updated_at'
+        'updated_at',
+        'created_at'
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Roles::class, 'roles_id');
+    }
 }

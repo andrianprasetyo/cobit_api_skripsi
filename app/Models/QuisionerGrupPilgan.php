@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DesainFaktor extends Model
+class QuisionerGrupPilgan extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     public $incrementing = false;
-    protected $table = 'desain_faktor';
+    protected $table = 'quisioner_grup_pilgan';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'deskripsi','desain_faktor_id'];
+    protected $fillable = ['nama'];
 
     protected $hidden = [
         'deleted_at',

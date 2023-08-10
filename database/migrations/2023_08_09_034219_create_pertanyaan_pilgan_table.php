@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
             $table->primary('id');
             $table->text('jawaban');
+            $table->foreignUuid('quisioner_grup_pilgan_id')->nullable();
             $table->tinyInteger('sorting')->nullable();
             $table->timestamps();
             $table->softDeletes();

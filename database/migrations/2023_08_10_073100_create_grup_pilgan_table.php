@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles_users', function (Blueprint $table) {
+        Schema::create('quisioner_grup_pilgan', function (Blueprint $table) {
             $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
             $table->primary('id');
-            $table->foreignUuid('roles_id');
-            $table->foreignUuid('users_id');
-            $table->boolean('default')->default(false);
+            $table->string('nama');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles_users');
+        Schema::dropIfExists('grup_pilgan');
     }
 };

@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Quisioner extends Model
+class DesignFaktor extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public $incrementing = false;
-    protected $table = 'quisioner';
+    protected $table = 'design_faktor';
     protected $keyType = 'string';
-    protected $fillable = ['pertanyaan','design_faktor_id','sorting'];
+    protected $fillable = ['kode', 'nama', 'deskripsi'];
 
     protected $hidden = [
         'deleted_at',

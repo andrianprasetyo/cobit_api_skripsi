@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quisioner_desain_faktor', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
-            $table->foreignUuid('quisioner_id');
-            $table->foreignUuid('desain_faktor_id');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        // Schema::create('quisioner_design_faktor', function (Blueprint $table) {
+        //     $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
+        //     $table->primary('id');
+        //     $table->foreignUuid('quisioner_id');
+        //     $table->foreignUuid('design_faktor_id');
+        //     $table->timestamps();
+        //     $table->softDeletes();
+        // });
     }
 
     /**
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quisioner_desain_faktor');
+        // Schema::dropIfExists('quisioner_design_faktor');
     }
 };

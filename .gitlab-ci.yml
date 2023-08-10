@@ -1,6 +1,3 @@
-default:
-  image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
-
 stages:
   - test
   - deploy
@@ -14,16 +11,9 @@ stages:
 
 deploy_development:
   stage: deploy
-  before_script:
-  - git checkout dev
   script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
       # Use Envoy to trigger the deployment task on your production server(s)
-    - ~/.composer/vendor/bin/envoy run deploy
+    - /home/gitlab-runner/.config/composer/vendor/bin/envoy run deploy
   environment:
     name: dev
     url: http://10.11.11.17

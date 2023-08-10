@@ -19,7 +19,6 @@
     [ -d {{ $releases_dir }} ] || mkdir {{ $releases_dir }}
     git clone {{ $repository }} --branch={{ $branch }} --depth 1 -q {{ $new_release_dir }}
     cd {{ $new_release_dir }}
-    git reset --hard {{ $commit }}
 @endtask
 
 @task('run_composer')

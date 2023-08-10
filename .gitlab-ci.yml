@@ -25,7 +25,7 @@ deploy_development:
       # Use Envoy to trigger the deployment task on your production server(s)
     - ~/.composer/vendor/bin/envoy run deploy
   environment:
-    name: development
+    name: dev
     url: http://10.11.11.17
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"

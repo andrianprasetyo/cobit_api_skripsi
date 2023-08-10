@@ -1,4 +1,4 @@
-@servers(['web' => 'msi@10.11.11.17'])
+@servers(['web' => 'msi@10.11.11.18'])
 
 @setup
     $repository = 'git@gitlab.millennia-solusi.xyz:cobit/cobit_api.git';

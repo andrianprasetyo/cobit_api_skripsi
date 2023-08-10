@@ -15,7 +15,7 @@ unit_test:
 deploy_development:
   stage: deploy
   before_script:
-  - git pull origin dev
+  - git checkout dev
   script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)

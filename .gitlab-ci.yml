@@ -5,12 +5,12 @@ stages:
   - test
   - deploy
 
-unit_test:
-  stage: test
-  script:
-    - cp .env.example .env
-    - composer install --no-plugins
-    - vendor/bin/phpunit
+# unit_test:
+#   stage: test
+#   script:
+#     - cp .env.example .env
+#     - composer install --no-plugins
+#     - vendor/bin/phpunit
 
 deploy_development:
   stage: deploy

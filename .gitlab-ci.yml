@@ -1,0 +1,22 @@
+stages:
+  - test
+  - deploy
+
+unit_test:
+  stage: test
+  image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
+  script:
+    - cp .env.example .env
+    - composer install --no-plugins
+    - vendor/bin/phpunit
+
+deploy_development:
+  stage: deploy
+  script:
+      # Use Envoy to trigger the deployment task on your production server(s)
+    - /home/gitlab-runner/.config/composer/vendor/bin/envoy run deploy
+  environment:
+    name: development
+    url: http://10.11.11.17
+  rules:
+    - if: $CI_COMMIT_BRANCH == "development"

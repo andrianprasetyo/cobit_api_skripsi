@@ -4,6 +4,7 @@ stages:
 
 unit_test:
   stage: test
+  image: php:8.1-alpine
   script:
     - cp .env.example .env
     - composer install --no-plugins

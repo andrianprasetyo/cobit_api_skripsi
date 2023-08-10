@@ -1,7 +1,7 @@
 @servers(['web' => 'msi@10.11.11.17'])
 
 @setup
-    $repository = 'git@gitlab.millennia-solusi.xyz:cobit/cobit.git';
+    $repository = 'git@gitlab.millennia-solusi.xyz:cobit/cobit-api.git';
     $releases_dir = '/home/msi/app/releases';
     $app_dir = '/home/msi/app';
     $release = date('YmdHis');

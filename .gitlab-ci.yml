@@ -7,7 +7,6 @@ unit_test:
   image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
   script:
     - cp .env.example .env
-    - php artisan key:generate
     - composer install --no-plugins
     - vendor/bin/phpunit
 

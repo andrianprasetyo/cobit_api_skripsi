@@ -23,7 +23,7 @@ deploy_development:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
       # Use Envoy to trigger the deployment task on your production server(s)
-    - ~/.composer/vendor/bin/envoy run deploy --commit="$CI_COMMIT"
+    - ~/.composer/vendor/bin/envoy run deploy --commit="$CI_COMMIT_REF"
   environment:
     name: development
     url: http://10.11.11.17

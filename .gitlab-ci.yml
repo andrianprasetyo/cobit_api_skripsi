@@ -1,10 +1,12 @@
+default:
+  image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
+
 stages:
   - test
   - deploy
 
 unit_test:
   stage: test
-  image: gitlab.millennia-solusi.xyz:5050/cobit/cobit_api
   script:
     - cp .env.example .env
     - composer install --no-plugins

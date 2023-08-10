@@ -6,7 +6,7 @@
     $app_dir = '/home/msi/app';
     $release = date('YmdHis');
     $new_release_dir = $releases_dir .'/'. $release;
-    $branch = dev
+    $branch = 'dev'
 @endsetup
 
 @story('deploy')

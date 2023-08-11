@@ -31,7 +31,7 @@ trait JsonResponse
         $list->limit($limit);
         $list->skip(($offset * $limit) - $limit);
 
-        $data['rows'] = $list->get();
+        $data['list'] = $list->get();
         $meta['total'] = $total;
         $meta['total_page'] = ceil($total / $limit);
         $meta['per_page'] = (int) $limit;

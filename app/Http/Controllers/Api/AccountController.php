@@ -11,7 +11,13 @@ class AccountController extends Controller
     use JsonResponse;
     public function me()
     {
-        $data=auth()->user();
+        $data=auth()->payload();
         return $this->successResponse($data);
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+        return $this->successResponse();
     }
 }

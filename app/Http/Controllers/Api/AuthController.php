@@ -16,7 +16,6 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credential=$request->only(['username','password']);
         $request->validate(
             [
                 'username'=>'required',
@@ -42,7 +41,7 @@ class AuthController extends Controller
             return $this->errorResponse('Akun anda sudah tidak aktif', 401);
         }
 
-        $account = User::select('id','username','nama','email')
+        $account = User::select('id','username','nama','email','divisi','posisi','status','internal')
             ->with([
                 'role.role'
             ])
@@ -52,9 +51,9 @@ class AuthController extends Controller
         $token=Auth::login($account);
 
         $role_users=RoleUsers::with(['role'])->where('users_id',$account->id)->get();
-        $user=array(
-            'roles'=>$role_users
-        );
+
+        $user=$account;
+        $user['roles']=$role_users;
         $data=[
             'access_token' => $token,
             'token_type' => 'bearer',

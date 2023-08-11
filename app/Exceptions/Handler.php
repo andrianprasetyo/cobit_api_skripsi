@@ -10,6 +10,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -74,7 +75,7 @@ class Handler extends ExceptionHandler
             }
         });
 
-        $this->renderable(function (AuthenticationException $e, $request) {
+        $this->renderable(function (UnauthorizedHttpException $e, $request) {
             if ($request->is('api/*')) {
                 return $this->errorResponse('User tidak dikenal / ' . $e->getMessage(), 401);
             }

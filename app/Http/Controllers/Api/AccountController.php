@@ -11,7 +11,19 @@ class AccountController extends Controller
     use JsonResponse;
     public function me()
     {
-        $data=auth()->payload();
+        $data=auth()->user();
+        return $this->successResponse($data);
+    }
+
+    public function refresh()
+    {
+        $data = [
+            'access_token' => auth()->refresh(),
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user' => auth()->user()
+        ];
+
         return $this->successResponse($data);
     }
 

@@ -60,7 +60,7 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => $user
         ];
-        return $this->successResponse($account);
+        return $this->successResponse($data);
     }
 
     public function refresh(){

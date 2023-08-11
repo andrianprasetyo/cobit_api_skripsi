@@ -27,6 +27,7 @@
     echo "Starting deployment ({{ $release }})"
     cd {{ $new_release_dir }}
     composer install --no-plugins
+    php artisan route:cache
 @endtask
 
 @task('update_symlinks')

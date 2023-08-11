@@ -1,2 +1,5 @@
 <?php
-Route::post('/login', 'AuthController@login');
+
+Route::group(['prefix' => 'auth'], function ($router) {
+    Route::post('/login', 'AuthController@login');
+});

@@ -18,10 +18,17 @@ class GrupJawabanController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
+        $sortBy = $request->get('sortBy', 'created_at');
+        $sortType = $request->get('sortType', 'desc');
+        $search = $request->search;
 
         $list = QuisionerGrupJawaban::query();
+        if ($request->filled('search')) {
+            $list->where('nama', 'ilike', '%' . $search . '%');
+        }
 
-        $data = $this->paging($list);
+        $list->orderBy($sortBy, $sortType);
+        $data = $this->paging($list, $limit, $page);
         return $this->successResponse($data);
     }
 

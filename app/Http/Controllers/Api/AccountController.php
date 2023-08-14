@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class AccountController extends Controller
 {
@@ -55,6 +57,35 @@ class AccountController extends Controller
         ];
 
         return $this->successResponse($data);
+    }
+
+    public function ubahPassword(Request $request)
+    {
+        $request->validate(
+            [
+                'old_password' => ['required'],
+                'password' => ['required', 'confirmed', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
+                'password_confirmation' => ['required'],
+            ],
+            [
+                'old_password.required'=>'Password sebelumnya harus di isi',
+                'password.required' => 'Password harus di isi',
+                'password.confirmed' => 'Password tidak sama',
+                'password_confirmation' => 'Konfirmasi password harus di isi',
+            ]
+        );
+
+        $account = Auth::user();
+        $user=User::find($account->id);
+        $password = $request->password;
+        $old_password = $request->old_password;
+        if (!Hash::check($old_password, $user->password)) {
+            return $this->errorResponse("Password yang anda masukan salah", 400);
+        }
+
+        $user->password = $password;
+        $user->save();
+        return $this->successResponse(null);
     }
 
     public function logout()

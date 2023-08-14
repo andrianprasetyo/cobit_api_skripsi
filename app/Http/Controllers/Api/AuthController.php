@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Otp;
 use App\Models\RoleUsers;
 use App\Models\User;
 use App\Traits\JsonResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -72,5 +76,55 @@ class AuthController extends Controller
         ];
 
         return $this->successResponse($data);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate(
+            [
+                'email'=>'required|email|exists:users,email',
+            ],
+            [
+                'email.required'=>'Harap masukan email anda',
+                'email.email' => 'Email tidak valid',
+                'email.exists' => 'Email tidak terdaftar',
+            ]
+        );
+
+        $user=User::where('email',$request->email)->first();
+        $kode = strtoupper(Str::random(6));
+        $otp=new Otp();
+        $otp->kode=$kode;
+        $otp->users_id=$user->id;
+        $otp->expire_at = Carbon::now()->addMinute(1);
+        $otp->aksi='reset-password';
+        $otp->verify_by = 'email';
+        $otp->save();
+
+        return $this->successResponse($otp,'Email reset password terkirim');
+    }
+
+    public function detailByOtp($id)
+    {
+
+    }
+
+    public function verifyResetPassword(Request $request)
+    {
+        $request->validate(
+            [
+                'otp'=>'required',
+                'password' => ['required', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
+            ],
+            [
+                'otp.required' => 'Kode OTP harus di isi',
+                'password.required' => 'Password harus di isi',
+                'password.min' => 'Password minimal 8 karakter',
+            ]
+        );
+
+        $otp=Otp::where('kode',$request->otp)->first();
+        $user=User::with(['otp'])->find($otp->users_id);
+        return $this->successResponse($user);
     }
 }

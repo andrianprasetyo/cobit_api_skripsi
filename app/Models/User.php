@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -100,5 +101,11 @@ class User extends Authenticatable implements JWTSubject
     public function organisasi()
     {
         return $this->belongsTo(Organisasi::class, 'organisasi_id');
+    }
+
+    public function otp()
+    {
+        $currentDatetime = Carbon::now();
+        return $this->belongsTo(Otp::class, 'id','users_id');
     }
 }

@@ -6,19 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class RoleUsers extends Model
+class QuisionerJawaban extends Model
 {
     use HasFactory;
 
     public $incrementing = false;
-    protected $table = 'roles_users';
+    protected $table = 'quisioner_jawaban';
     protected $keyType = 'string';
-    protected $fillable = ['roles_id', 'users_id'];
+    protected $fillable = ['jawaban','sorting','quisioner_grup_jawaban_id','bobot'];
 
     protected $hidden = [
         'deleted_at',
-        'updated_at',
-        'created_at'
+        'updated_at'
     ];
 
     protected static function boot()
@@ -28,10 +27,5 @@ class RoleUsers extends Model
         static::creating(function ($model) {
             $model->id = Str::uuid();
         });
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(Roles::class, 'roles_id');
     }
 }

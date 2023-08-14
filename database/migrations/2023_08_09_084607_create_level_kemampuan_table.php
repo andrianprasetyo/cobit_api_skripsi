@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('level_kemampuan', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->text('kegiatan');
             $table->text('translate');
             $table->integer('bobot');

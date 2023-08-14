@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assesment', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->char('nama', 4);
             $table->text('deskripsi')->nullable();
             $table->timestamps();

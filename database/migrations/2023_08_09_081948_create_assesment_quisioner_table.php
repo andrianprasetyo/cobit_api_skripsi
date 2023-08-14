@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assesment_quisioner', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->foreignUuid('assesment_id');
             $table->foreignUuid('quisioner_id');
             $table->foreignUuid('organisasi_id');

@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('domain', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->string('kode', 30)->unique();
             // $table->string('nama', 75)->nullable();
             $table->text('ket')->nullable();

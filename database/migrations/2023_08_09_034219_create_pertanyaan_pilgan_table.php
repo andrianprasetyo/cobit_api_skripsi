@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+        DB::statement('ALTER TABLE quisioner_jawaban ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

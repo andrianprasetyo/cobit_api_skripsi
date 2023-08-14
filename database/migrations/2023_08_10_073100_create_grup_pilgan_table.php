@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('jenis',30)->nullable()->comment('pilgan | persentase');
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE quisioner_grup_jawaban ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

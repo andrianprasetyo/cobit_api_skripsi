@@ -13,19 +13,19 @@ class QuisionerJawaban extends Model
     public $incrementing = false;
     protected $table = 'quisioner_jawaban';
     protected $keyType = 'string';
-    protected $fillable = ['jawaban','sorting','quisioner_grup_jawaban_id','bobot'];
+    protected $fillable = ['id','jawaban','sorting','quisioner_grup_jawaban_id','bobot'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
+    //     static::creating(function ($model) {
+    //         $model->id = Str::uuid();
+    //     });
+    // }
 }

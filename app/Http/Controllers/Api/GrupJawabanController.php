@@ -69,7 +69,7 @@ class GrupJawabanController extends Controller
             QuisionerJawaban::insert($_jawaban);
 
             DB::commit();
-            return $this->successResponse($_jawaban);
+            return $this->successResponse($grup);
 
         } catch (\Exception $e) {
             DB::rollback();

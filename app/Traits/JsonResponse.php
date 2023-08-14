@@ -28,8 +28,10 @@ trait JsonResponse
 
         if($limit != null || $offset !=null)
         {
+            $page=($offset * $limit) - $limit;
             $list->limit($limit);
-            $list->skip(($offset * $limit) - $limit);
+            $list->skip($page);
+            // $list->skip($offset);
 
             $meta['per_page'] = (int) $limit;
             $meta['total_page'] = ceil($total / $limit);

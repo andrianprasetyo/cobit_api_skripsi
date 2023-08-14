@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles_akses_menu', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('role_id');
-            $table->foreignUuid('menu_id');
-            $table->foreignUuid('menu_code');
-            $table->boolean('akses')->default(false);
-            $table->timestamps();
-        });
+        // Schema::create('roles_akses_menu', function (Blueprint $table) {
+        //     $table->uuid('id')->primary();
+        //     $table->foreignUuid('role_id');
+        //     $table->foreignUuid('menu_id');
+        //     $table->foreignUuid('menu_code');
+        //     $table->boolean('akses')->default(false);
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles_akses_menu');
+        // Schema::dropIfExists('roles_akses_menu');
     }
 };

@@ -17,7 +17,7 @@ class GrupJawabanController extends Controller
     public function list(Request $request)
     {
         $limit = $request->get('limit', 10);
-        $offset = $request->get('offset', 0);
+        $page = $request->get('page', 1);
 
         $list = QuisionerGrupJawaban::query();
 

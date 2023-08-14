@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('posisi')->nullable();
             $table->string('status',30)->default('pending')->comment('active,pending,banned');
             $table->boolean('internal')->default(true);
+            $table->json('avatar')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

@@ -14,7 +14,7 @@ class UsersController extends Controller
     public function list(Request $request)
     {
         $limit=$request->get('limit',10);
-        $offset = $request->get('offset', 0);
+        $page = $request->get('page', 1);
         $order = $request->get('order', 'created_at');
         $sort = $request->get('sort', 'desc');
         $search = $request->search;
@@ -28,7 +28,7 @@ class UsersController extends Controller
         }
         $list->orderBy($order, $sort);
 
-        $data=$this->paging($list,$limit,$offset);
+        $data=$this->paging($list,$limit,$page);
         return $this->successResponse($data);
     }
 

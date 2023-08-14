@@ -52,14 +52,14 @@ class User extends Authenticatable implements JWTSubject
     ];
 
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
+    //     static::creating(function ($model) {
+    //         $model->id = Str::uuid();
+    //     });
+    // }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

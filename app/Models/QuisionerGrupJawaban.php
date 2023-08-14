@@ -13,21 +13,21 @@ class QuisionerGrupJawaban extends Model
     public $incrementing = false;
     protected $table = 'quisioner_grup_jawaban';
     protected $keyType = 'string';
-    protected $fillable = ['nama','jenis'];
+    protected $fillable = ['id','nama','jenis'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
+    //     static::creating(function ($model) {
+    //         $model->id = Str::uuid();
+    //     });
+    // }
 
     public function jawabans()
     {

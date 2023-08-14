@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quisioner', function (Blueprint $table) {
+        Schema::create('quisioner_pertanyaan', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->longText('pertanyaan');
             $table->foreignUuid('design_faktor_id')->nullable();
+            $table->foreignUuid('quisioner_grup_jawaban_id')->nullable();
+            $table->foreignUuid('quisioner_id')->nullable();
             $table->tinyInteger('sorting')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
-        DB::statement('ALTER TABLE quisioner ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        DB::statement('ALTER TABLE quisioner_pertanyaan ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

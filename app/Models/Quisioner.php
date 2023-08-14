@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quisioner extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids,SoftDeletes;
 
     public $incrementing = false;
     protected $table = 'quisioner';
     protected $keyType = 'string';
-    protected $fillable = ['pertanyaan','design_faktor_id','sorting'];
+    protected $fillable = ['title','aktif'];
 
     protected $hidden = [
         'deleted_at',

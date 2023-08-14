@@ -28,8 +28,9 @@ class AuthController extends Controller
         );
 
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
-        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password')
+        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password','organisasi_id')
             ->with([
+                'organisasi',
                 'roleaktif.role'
             ])
             ->where('username', $request->username)

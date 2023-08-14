@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('skor_relative_importance')->nullable();
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE skor_hasil ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

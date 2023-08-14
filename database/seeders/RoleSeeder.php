@@ -20,9 +20,6 @@ class RoleSeeder extends Seeder
             ],
             [
                 'nama' => 'Assesor',
-            ],
-            [
-                'nama' => 'Respondent',
             ]
         ];
 

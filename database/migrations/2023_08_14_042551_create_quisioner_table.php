@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('domain', function (Blueprint $table) {
+        Schema::create('quisioner', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('kode', 30)->unique();
-            // $table->string('nama', 75)->nullable();
-            $table->text('ket')->nullable();
+            $table->longText('title');
+            $table->boolean('aktif')->default(true);
             $table->timestamps();
             $table->softDeletes();
         });
-
-        DB::statement('ALTER TABLE domain ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        DB::statement('ALTER TABLE quisioner ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('domain');
+        Schema::dropIfExists('quisioner');
     }
 };

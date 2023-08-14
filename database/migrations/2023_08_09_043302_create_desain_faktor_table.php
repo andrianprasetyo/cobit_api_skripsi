@@ -16,11 +16,12 @@ return new class extends Migration
             $table->string('kode',10);
             $table->string('nama');
             $table->text('deskripsi')->nullable();
-            $table->text('pertanyaan')->nullable();
-            $table->foreignUuid('quisioner_grup_jawaban_id')->nullable();
+            // $table->text('pertanyaan')->nullable();
+            // $table->foreignUuid('quisioner_grup_jawaban_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
+        DB::statement('ALTER TABLE design_faktor ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

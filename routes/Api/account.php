@@ -3,4 +3,5 @@ Route::group(['middleware' => ['jwt.auth'],'prefix'=>'account'], function ($rout
     Route::get('/me', 'AccountController@me');
     Route::get('/token-refresh', 'AccountController@refresh');
     Route::post('/logout', 'AccountController@logout');
+    Route::post('/ubah-password', 'AccountController@ubahPassword');
 });

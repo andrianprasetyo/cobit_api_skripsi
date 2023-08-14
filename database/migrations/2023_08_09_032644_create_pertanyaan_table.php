@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quisioner', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->longText('pertanyaan');
             $table->foreignUuid('design_faktor_id')->nullable();
             $table->tinyInteger('sorting')->nullable();

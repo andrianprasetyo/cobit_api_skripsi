@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DesainFaktorRefSeeder::class,
             QuisionerSeeder::class,
             QuisionerPilganSeeder::class,
+            QuisionerGrupPilganSeeder::class,
             RoleUsersSeeder::class,
         ]);
         // \App\Models\User::factory(10)->create();

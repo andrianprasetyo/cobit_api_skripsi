@@ -21,21 +21,23 @@ trait JsonResponse
         ], $code);
     }
 
-    protected function paging($list,$limit,$offset)
+    protected function paging($list,$limit=null,$offset=null)
     {
 
         $total = $list->count();
 
-        // $offset = $offset == 1 ? 0 : $total - $limit + 1;
-        //$offset = $offset == 1 ? 0 : $total - $limit + 1;
-        $list->limit($limit);
-        $list->skip(($offset * $limit) - $limit);
+        if($limit != null || $offset !=null)
+        {
+            $list->limit($limit);
+            $list->skip(($offset * $limit) - $limit);
+
+            $meta['per_page'] = (int) $limit;
+            $meta['total_page'] = ceil($total / $limit);
+            $meta['current_page'] = ceil($offset / $limit) + 1;
+        }
 
         $data['list'] = $list->get();
         $meta['total'] = $total;
-        $meta['total_page'] = ceil($total / $limit);
-        $meta['per_page'] = (int) $limit;
-        $meta['current_page'] = ceil($offset / $limit) + 1;
         $data['meta'] = $meta;
 
         return $data;

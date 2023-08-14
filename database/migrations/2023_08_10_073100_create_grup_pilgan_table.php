@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quisioner_grup_pilgan', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+        Schema::create('quisioner_grup_jawaban', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->string('nama');
+            $table->string('jenis',30)->nullable()->comment('pilgan | persentase');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('grup_pilgan');
+        Schema::dropIfExists('grup_jawaban');
     }
 };

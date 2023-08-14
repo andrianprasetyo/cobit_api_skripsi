@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\QuisionerGrupPilgan;
+use App\Models\QuisionerGrupJawaban;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,16 +15,19 @@ class QuisionerGrupPilganSeeder extends Seeder
     {
         $data = [
             [
-                'nama' => 'Grup A',
+                'nama' => 'Grup Pilgan',
+                'jenis'=>'pilgan',
             ],
             [
-                'nama' => 'Grup B',
+                'nama' => 'Grup Persentase',
+                'jenis'=>'persentase'
             ]
         ];
 
         foreach ($data as $item) {
-            QuisionerGrupPilgan::create([
+            QuisionerGrupJawaban::create([
                 'nama' => $item['nama'],
+                'jenis' => $item['jenis'],
             ]);
         }
     }

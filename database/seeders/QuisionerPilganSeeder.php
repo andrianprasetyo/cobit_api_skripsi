@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\QuisionerPilgan;
+use App\Models\QuisionerJawaban;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -33,7 +33,7 @@ class QuisionerPilganSeeder extends Seeder
 
         $i=1;
         foreach ($data as $item) {
-            QuisionerPilgan::create([
+            QuisionerJawaban::create([
                 'jawaban' => $item['jawaban'],
                 'sorting'=>$i,
             ]);

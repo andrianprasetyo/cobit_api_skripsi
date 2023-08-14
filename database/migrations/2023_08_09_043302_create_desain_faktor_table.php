@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('design_faktor', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->string('kode',10);
             $table->string('nama');
             $table->text('deskripsi')->nullable();
-            // $table->foreignUuid('isections_id');
+            $table->text('pertanyaan')->nullable();
+            $table->foreignUuid('quisioner_grup_jawaban_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

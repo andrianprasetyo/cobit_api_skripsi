@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('menu', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->string('nama', 100)->comment('nama menu');
             $table->string('code', 50)->comment('kode menu');
             $table->string('url')->nullable()->comment('url menu');

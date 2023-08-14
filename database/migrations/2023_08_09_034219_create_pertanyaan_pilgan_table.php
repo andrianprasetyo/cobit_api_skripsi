@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quisioner_pilgan', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+        Schema::create('quisioner_jawaban', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->text('jawaban');
-            $table->foreignUuid('quisioner_grup_pilgan_id')->nullable();
+            $table->foreignUuid('quisioner_grup_jawaban_id')->nullable();
+            $table->integer('bobot')->nullable();
             $table->tinyInteger('sorting')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quisioner_pilgan');
+        Schema::dropIfExists('quisioner_jawaban');
     }
 };

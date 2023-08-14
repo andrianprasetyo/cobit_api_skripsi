@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('skor_hasil', function (Blueprint $table) {
-            $table->uuid('id')->default(DB::raw('(uuid_generate_v1())'));
-            $table->primary('id');
+            $table->uuid('id')->primary();
             $table->foreignUuid('domain_id');
             $table->foreignUuid('organisasi_id');
             $table->integer('skor')->nullable();

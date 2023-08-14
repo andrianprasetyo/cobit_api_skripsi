@@ -22,12 +22,18 @@ class AuthController extends Controller
                 'password'=>'required'
             ],
             [
-                'username'=>'Username harus di isi',
-                'password' => 'Username harus di isi',
+                'username.required'=>'Username harus di isi',
+                'password.required' => 'Username harus di isi',
             ]
         );
 
-        $auth=User::select(['username','password'])->where('username',$request->username)->first();
+        // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
+        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password')
+            ->with([
+                'roleaktif.role'
+            ])
+            ->where('username', $request->username)
+            ->first();
 
         if(!$auth || !Hash::check($request->password, $auth->password)){
             return $this->errorResponse('Username atau password anda salah', 401);
@@ -41,18 +47,21 @@ class AuthController extends Controller
             return $this->errorResponse('Akun anda sudah tidak aktif', 401);
         }
 
-        $account = User::select('id','username','nama','email','divisi','posisi','status','internal')
-            ->with([
-                'role.role'
-            ])
-            ->where('username', $request->username)
-            ->first();
+        if($auth->roleaktif == null)
+        {
+            return $this->errorResponse('Role belum terdaftar', 401);
+        }
 
-        $token=Auth::login($account);
+        // $account = User::select('id','username','nama','email','divisi','posisi','status','internal')
+        //     ->with([
+        //         'roleaktif.role'
+        //     ])
+        //     // ->where('username', $request->username)
+        //     ->find($auth->id);
 
-        $role_users=RoleUsers::with(['role'])->where('users_id',$account->id)->get();
-
-        $user=$account;
+        $token=Auth::login($auth);
+        $role_users=RoleUsers::with(['role'])->where('users_id',$auth->id)->get();
+        $user=$auth;
         $user['roles']=$role_users;
         $data=[
             'access_token' => $token,

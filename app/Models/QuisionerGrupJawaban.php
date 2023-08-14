@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class QuisionerGrupJawaban extends Model
 {
-    use HasFactory;
+    use HasFactory,HasUuids;
 
     public $incrementing = false;
     protected $table = 'quisioner_grup_jawaban';

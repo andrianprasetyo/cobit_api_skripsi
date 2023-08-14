@@ -21,7 +21,7 @@ class UsersController extends Controller
         $status = $request->status;
         $role = $request->role;
 
-        $list=User::with(['roles']);
+        $list=User::with(['roles','roles.role']);
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
             $list->orWhere('username', 'ilike', '%' . $search . '%');
@@ -50,7 +50,7 @@ class UsersController extends Controller
 
     public function detail($id)
     {
-        $data=User::find($id);
+        $data=User::with(['roles','roles.role'])->find($id);
         if(!$data)
         {
             return $this->errorResponse('Pengguna tidak ditemukan',404);

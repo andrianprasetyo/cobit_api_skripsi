@@ -43,8 +43,8 @@ class QuisionerSeeder extends Seeder
         $i=1;
         foreach ($data as $item) {
             Quisioner::create([
-                'pertanyaan' => $item['pertanyaan'],
-                'sorting'=>$i,
+                'title' => $item['pertanyaan'],
+                'aktif'=>true,
             ]);
             $i++;
         }

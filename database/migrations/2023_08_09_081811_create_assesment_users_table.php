@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+        DB::statement('ALTER TABLE assesment_users ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

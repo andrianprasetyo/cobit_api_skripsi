@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('organisasi_users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('organisasi_id');
-            $table->foreignUuid('users_id');
-            $table->timestamps();
-        });
+        // Schema::create('organisasi_users', function (Blueprint $table) {
+        //     $table->uuid('id')->primary();
+        //     $table->foreignUuid('organisasi_id');
+        //     $table->foreignUuid('users_id');
+        //     $table->timestamps();
+        // });
+        // DB::statement('ALTER TABLE organisasi_users ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

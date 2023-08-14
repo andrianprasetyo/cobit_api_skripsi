@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasUuids;
 
     public $incrementing = false;
     protected $keyType = 'string';
@@ -95,5 +96,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(RoleUsers::class, 'users_id','id');
         // return $this->belongsTo(RoleUsers::class, 'id','users_id');
+    }
+    public function organisasi()
+    {
+        return $this->belongsTo(Organisasi::class, 'organisasi_id');
     }
 }

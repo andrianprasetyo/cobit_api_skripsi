@@ -58,4 +58,28 @@ class UsersController extends Controller
 
         return $this->successResponse($data);
     }
+
+    public function edit(Request $request,$id)
+    {
+        $request->validate(
+            [
+                'status'=>'required|in:active,banned,pending',
+            ],
+            [
+                'status.required'=>'Status harus di isi',
+                'status.in' => 'Status tidak valid (active,banned,pending)',
+            ]
+        );
+        $data=User::find($id);
+        if(!$data)
+        {
+            $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        $data->nama=$request->nama;
+        $data->status = $request->status;
+        $data->save();
+
+        return $this->successResponse();
+    }
 }

@@ -103,30 +103,57 @@ class GrupJawabanController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
         $data->delete();
+
+        return $this->successResponse();
     }
 
     public function editGrup(Request $request,$id)
     {
-        $request->validate(
-            [
-                'nama'=>'required',
-                'jenis' => 'required|in:pilgan,persentase',
-            ],
-            [
-                'nama.required'=>'Nama grup harus di isi',
-                'jenis.required' => 'Jenis grup harus di isi',
-                'jenis.in' => 'Jenis grup hanya pilgan|persentase',
-            ]
-        );
+        $validation['nama']='required';
+        $validation['jenis'] = 'required|in:pilgan,persentase';
 
+        $message['nama.required']='Nama grup harus di isi';
+        $message['jenis.required'] = 'Jenis grup harus di isi';
+        $message['jenis.in'] = 'Jenis grup hanya pilgan|persentase';
+
+        if ($request->filled('jawaban'))
+        {
+            $validation['jawaban'] = 'array';
+            $validation['jawaban.*.nama'] = 'required';
+            $validation['jawaban.*.bobot'] = 'required|integer';
+
+            $validation['jawaban'] = 'array';
+            $message['jawaban.array'] = 'Jawaban harus dalam bentuk array';
+            $message['jawaban.*.nama.required'] = 'Pertanyaan harus di isi';
+            $message['jawaban.*.bobot.required'] = 'Bobot harus di isi';
+            $message['jawaban.*.bobot.integer'] = 'Bobot harus dalam bentuk int';
+        }
+
+        $request->validate($validation,$message);
+        $jawabans=$request->jawaban;
         $grup = QuisionerGrupJawaban::find($id);
         if (!$grup)
         {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
+
         $grup->nama=$request->nama;
         $grup->jenis = $request->jenis;
         $grup->save();
+
+        foreach ($jawabans as $_item_jawaban)
+        {
+            $jawaban=new QuisionerJawaban();
+            if($_item_jawaban['id'] != null)
+            {
+                $jawaban=QuisionerJawaban::find($_item_jawaban['id']);
+            }
+
+            $jawaban->quisioner_grup_jawaban_id= $id;
+            $jawaban->jawaban = $_item_jawaban['nama'];
+            $jawaban->bobot = $_item_jawaban['bobot'];
+            $jawaban->save();
+        }
 
         return $this->successResponse();
     }
@@ -169,6 +196,17 @@ class GrupJawabanController extends Controller
     public function deleteJawabanID($id)
     {
         $data = QuisionerJawaban::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
+    }
+
+    public function deleteAllJawabanID($id)
+    {
+        $data = QuisionerJawaban::where('quisioner_grup_jawaban_id',$id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

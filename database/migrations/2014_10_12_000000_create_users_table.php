@@ -24,6 +24,7 @@ return new class extends Migration
             $table->boolean('internal')->default(true);
             $table->json('avatar')->nullable();
             $table->foreignUuid('organisasi_id')->nullable();
+            $table->foreignUuid('assesment_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

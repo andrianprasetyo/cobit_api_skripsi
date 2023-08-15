@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('quisioner_hasil', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('quisioner_id');
+            $table->foreignUuid('quisioner_pertanyaan_id');
             $table->foreignUuid('jawaban_id');
-            $table->foreignUuid('users_id');
+            $table->foreignUuid('assesment_users_id');
+            $table->integer('bobot');
             $table->timestamps();
             $table->softDeletes();
         });

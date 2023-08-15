@@ -14,7 +14,7 @@ class OrganisasiSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
+        /*$data = [
             [
                 'nama' => 'MSI',
                 'assesment_id'=>Assesment::where('nama',date('Y'))->first()->id
@@ -26,6 +26,6 @@ class OrganisasiSeeder extends Seeder
                 'nama' => $item['nama'],
                 'assesment_id' => $item['assesment_id'],
             ]);
-        }
+        }*/
     }
 }

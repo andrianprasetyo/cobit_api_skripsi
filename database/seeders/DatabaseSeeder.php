@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             OrganisasiSeeder::class,
             DesainFaktorSeeder::class,
             DesainFaktorRefSeeder::class,
-            // QuisionerSeeder::class,
+            QuisionerSeeder::class,
             // QuisionerPilganSeeder::class,
             QuisionerGrupPilganSeeder::class,
             RoleUsersSeeder::class,

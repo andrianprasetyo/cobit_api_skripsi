@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('organisasi', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nama', 75);
-            $table->foreignUuid('assesment_id');
+//            $table->foreignUuid('assesment_id');
             $table->text('desksipsi')->nullable();
             $table->timestamps();
             $table->softDeletes();

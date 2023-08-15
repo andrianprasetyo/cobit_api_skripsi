@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('assesment', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->char('nama', 4);
+            $table->char('nama', 150);
+            $table->char('tahun',4);
+            $table->foreignUuid('organisasi_id');
+            $table->char('status')->default('ongoing')->comment('ongoing, completed');// ongoing, completed
             $table->text('deskripsi')->nullable();
             $table->timestamps();
             $table->softDeletes();

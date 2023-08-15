@@ -2,4 +2,7 @@
 Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/design-faktor/list', 'DesignFaktorController@list');
     Route::get('/design-faktor/detail/{id}', 'DesignFaktorController@detail');
+    Route::post('/design-faktor/add', 'DesignFaktorController@add');
+    Route::put('/design-faktor/edit/{id}', 'DesignFaktorController@edit');
+    Route::delete('/design-faktor/remove/{id}', 'DesignFaktorController@remove');
 });

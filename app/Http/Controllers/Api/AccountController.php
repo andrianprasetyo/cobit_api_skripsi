@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Models\RoleUsers;
 use App\Models\User;
@@ -86,6 +87,80 @@ class AccountController extends Controller
         $user->password = $password;
         $user->save();
         return $this->successResponse(null);
+    }
+
+
+    public function edit(Request $request)
+    {
+
+        $data = User::find(Auth::user()->id);
+        if (!$data)
+        {
+            $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        if($request->filled('status'))
+        {
+            $validate['status']='in:active,banned,pending';
+            $validate_msg['status.in'] = 'Status tidak valid (active,banned,pending)';
+            $data->status = $request->status;
+        }
+
+        if ($request->filled('email'))
+        {
+            $validate['email']='email';
+            $validate_msg['email.email'] = 'Email tidak valid';
+            $data->email = $request->email;
+
+            $_check_email = User::where('email', $request->email)
+                ->where('id', '!=', Auth::user()->id)
+                ->exists();
+
+            if ($_check_email) {
+                return $this->errorResponse('Email sudah digunakan', 400);
+            }
+        }
+
+        if ($request->filled('username'))
+        {
+            $data->email = $request->email;
+            $_check_username = User::where('username', $request->username)
+                ->where('id', '!=', Auth::user()->id)
+                ->exists();
+
+            if ($_check_username)
+            {
+                return $this->errorResponse('Username sudah digunakan', 400);
+            }
+            $data->username = $request->username;
+        }
+
+        if($request->filled('nama'))
+        {
+            $data->nama = $request->nama;
+        }
+
+        if($request->hasFile('avatar'))
+        {
+            $validate['avatar'] = 'mimes|'.config('filesystems.validation.mimes').'|max:'.config('filesystems.validation.size');
+            $validate_msg['avatar.mimes']='Mimes invalid '.config('filesystems.validation.mimes');
+            $validate_msg['avatar.max']='File maksimal '.config('filesystems.validation.size').' Kb';
+
+            $path=config('filesystems.path.avatar');
+            $avatar = $request->file('avatar');
+            $filename = Auth::user()->username.'-'. $avatar->hashName();
+            $avatar->storeAs($path, $filename);
+            $data->avatar=CobitHelper::Media($filename,$path,$avatar);
+        }
+
+        if($request->filled('status') || $request->filled('email'))
+        {
+            $request->validate($validate, $validate_msg);
+        }
+
+        $data->save();
+
+        return $this->successResponse($data);
     }
 
     public function logout()

@@ -51,17 +51,14 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'avatar'=>'array'
     ];
 
 
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($model) {
-    //         $model->id = Str::uuid();
-    //     });
-    // }
+    public function getAvatarAttribute($value)
+    {
+        return json_decode($value);
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

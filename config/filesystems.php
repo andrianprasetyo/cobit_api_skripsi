@@ -71,6 +71,16 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
+        public_path('media') => storage_path('app/media'),
     ],
+    'validation' => [
+        'image' => [
+            'mimes'=>'jpg,png,jpeg',
+            'size'=>500
+        ],
+    ],
+    'path'=>[
+        'avatar'=>'media/avatar/'
+    ]
 
 ];

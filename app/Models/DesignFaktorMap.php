@@ -20,4 +20,19 @@ class DesignFaktorMap extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function domain()
+    {
+        $this->belongsTo(Domain::class,'domain_id');
+    }
+
+    public function deisgnfaktor()
+    {
+        $this->belongsTo(DesignFaktor::class, 'design_faktor_id');
+    }
+
+    public function deisgnfaktorkomponen()
+    {
+        $this->belongsTo(DesignFaktorKomponen::class, 'design_faktor_komponen_id');
+    }
 }

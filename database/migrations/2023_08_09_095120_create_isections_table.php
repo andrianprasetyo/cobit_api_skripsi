@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('design_faktor_komponen', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nama');
-            $table->foreignUuid('design_faktor_id')->nullable();
+            // $table->foreignUuid('design_faktor_id')->nullable();
             $table->text('deskripsi')->nullable();
             $table->integer('baseline')->nullable();
             $table->timestamps();

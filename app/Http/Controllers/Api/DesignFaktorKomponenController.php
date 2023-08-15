@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,5 +44,70 @@ class DesignFaktorKomponenController extends Controller
         }
 
         return $this->successResponse($data);
+    }
+
+    public function add(Request $request)
+    {
+        $request->validate(
+            [
+                'nama' => 'required|unique:design_faktor_komponen,nama',
+                'design_faktor_id' => 'required|uuid|exists:design_faktor,id',
+            ],
+            [
+                'nama.required' => 'nama harus di isi',
+                'nama.unique' => 'nama sudah digunakan',
+                'design_faktor_id.required' => 'Harap pilih design faktor',
+                'design_faktor_id.uuid' => 'Design faktor ID tidak valid',
+                'design_faktor_id.exists' => 'Design faktor tidak terdaftar',
+            ]
+        );
+
+        $data = new DesignFaktorKomponen();
+        $data->nama = $request->nama;
+        $data->design_faktor_id = $request->design_faktor_id;
+        $data->deskripsi = $request->deskripsi;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function edit(Request $request,$id)
+    {
+        $request->validate(
+            [
+                'nama' => 'required',
+                'design_faktor_id' => 'required|uuid|exists:design_faktor,id',
+            ],
+            [
+                'nama.required' => 'nama harus di isi',
+                'design_faktor_id.required' => 'Harap pilih design faktor',
+                'design_faktor_id.uuid' => 'Design faktor ID tidak valid',
+                'design_faktor_id.exists' => 'Design faktor tidak terdaftar',
+            ]
+        );
+
+        $data = DesignFaktorKomponen::find($id);
+        if(!$data)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        $data->nama = $request->nama;
+        $data->design_faktor_id = $request->design_faktor_id;
+        $data->deskripsi = $request->deskripsi;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function remove($id)
+    {
+        $data = DesignFaktorKomponen::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
     }
 }

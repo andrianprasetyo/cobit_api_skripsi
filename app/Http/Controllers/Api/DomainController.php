@@ -38,4 +38,58 @@ class DomainController extends Controller
 
         return $this->successResponse($data);
     }
+
+    public function add(Request $request)
+    {
+        $request->validate(
+            [
+                'kode'=>'required|unique:domain,kode',
+            ],
+            [
+                'kode.required'=>'kode harus di isi',
+                'kode.unique' => 'Kode sudah digunakan',
+            ]
+        );
+
+        $data=New Domain();
+        $data=$request->kode;
+        $data = $request->ket;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function edit(Request $request,$id)
+    {
+        $request->validate(
+            [
+                'kode' => 'required',
+            ],
+            [
+                'kode.required' => 'kode harus di isi',
+            ]
+        );
+
+        $data = Domain::find($id);
+        if(!$data)
+        {
+            return $this->errorResponse('Data tidak di temukan',404);
+        }
+        $data->kode = $request->kode;
+        $data->ket = $request->ket;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function remove($id)
+    {
+        $data = Domain::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
+    }
 }

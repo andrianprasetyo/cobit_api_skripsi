@@ -142,9 +142,9 @@ class AccountController extends Controller
 
         if($request->hasFile('avatar'))
         {
-            $validate['avatar'] = 'mimes|'.config('filesystems.validation.mimes').'|max:'.config('filesystems.validation.size');
-            $validate_msg['avatar.mimes']='Mimes invalid '.config('filesystems.validation.mimes');
-            $validate_msg['avatar.max']='File maksimal '.config('filesystems.validation.size').' Kb';
+            $validate['avatar'] = 'mimes:' . config('filesystems.validation.image.mimes') . '|max:' . config('filesystems.validation.image.size');
+            $validate_msg['avatar.mimes']='Mimes invalid '.config('filesystems.validation.image.mimes');
+            $validate_msg['avatar.max']='File maksimal '.config('filesystems.validation.image.size').' Kb';
 
             $path=config('filesystems.path.avatar');
             $avatar = $request->file('avatar');
@@ -153,7 +153,7 @@ class AccountController extends Controller
             $data->avatar=CobitHelper::Media($filename,$path,$avatar);
         }
 
-        if($request->filled('status') || $request->filled('email'))
+        if($request->filled('status') || $request->filled('email') || $request->hasFile('avatar'))
         {
             $request->validate($validate, $validate_msg);
         }

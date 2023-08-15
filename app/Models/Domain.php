@@ -6,16 +6,15 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
-class Organisasi extends Model
+class Domain extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
 
     public $incrementing = false;
-    protected $table = 'organisasi';
+    protected $table = 'domain';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'assesment_id', 'deskripsi'];
+    protected $fillable = ['kode', 'ket'];
 
     protected $hidden = [
         'deleted_at',

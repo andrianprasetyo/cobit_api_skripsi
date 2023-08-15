@@ -32,7 +32,7 @@ class AuthController extends Controller
         );
 
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
-        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password','organisasi_id')
+        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password','organisasi_id','avatar')
             ->with([
                 'organisasi',
                 'roleaktif.role'

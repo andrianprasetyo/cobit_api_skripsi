@@ -39,4 +39,59 @@ class DesignFaktorController extends Controller
         }
         return $this->successResponse($data);
     }
+
+    public function add(Request $request)
+    {
+        $request->validate(
+            [
+                'kode' => 'required|unique:design_faktor,kode',
+            ],
+            [
+                'kode.required' => 'kode harus di isi',
+                'kode.unique' => 'Kode sudah digunakan',
+            ]
+        );
+
+        $data = new DesignFaktor();
+        $data->kode = $request->kode;
+        $data->nama = $request->nama;
+        $data->deskripsi = $request->deskripsi;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $request->validate(
+            [
+                'kode' => 'required',
+            ],
+            [
+                'kode.required' => 'kode harus di isi',
+            ]
+        );
+
+        $data = DesignFaktor::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->nama = $request->nama;
+        $data->deskripsi = $request->deskripsi;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    public function remove($id)
+    {
+        $data = DesignFaktor::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
+    }
+
 }

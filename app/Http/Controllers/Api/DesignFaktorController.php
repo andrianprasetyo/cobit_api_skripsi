@@ -14,11 +14,16 @@ class DesignFaktorController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'created_at');
-        $sortType = $request->get('sortType', 'desc');
+        $sortBy = $request->get('sortBy', 'kode');
+        $sortType = $request->get('sortType', 'asc');
+        $search = $request->search;
 
         $list=DesignFaktor::query();
-
+        if ($request->filled('search'))
+        {
+            $list->where('kode', 'ilike', '%' . $search . '%');
+            $list->orWhere('nama', 'ilike', '%' . $search . '%');
+        }
         $list->orderBy($sortBy, $sortType);
 
         $data = $this->paging($list, $limit, $page);

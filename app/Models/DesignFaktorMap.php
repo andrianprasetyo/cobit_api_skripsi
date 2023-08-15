@@ -14,7 +14,7 @@ class DesignFaktorMap extends Model
     public $incrementing = false;
     protected $table = 'design_faktor_map';
     protected $keyType = 'string';
-    protected $fillable = ['domain_id', 'design_faktor_id', 'growth','innovation','cost_leadership','client_service'];
+    protected $fillable = ['domain_id', 'design_faktor_id', 'design_faktor_komponen_id','nilai'];
 
     protected $hidden = [
         'deleted_at',

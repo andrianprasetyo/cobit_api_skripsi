@@ -15,10 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('domain_id');
             $table->foreignUuid('design_faktor_id');
-            $table->float('growth')->nullable();
-            $table->float('innovation')->nullable();
-            $table->float('cost_leadership')->nullable();
-            $table->float('client_service')->nullable();
+            $table->foreignUuid('design_faktor_komponen_id');
+            $table->float('nilai')->nullable();
             $table->timestamps();
         });
         DB::statement('ALTER TABLE design_faktor_map ALTER COLUMN id SET DEFAULT uuid_generate_v4();');

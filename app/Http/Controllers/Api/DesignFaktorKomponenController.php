@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Domain;
+use App\Models\DesignFaktorKomponen;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 
-class DomainController extends Controller
+class DesignFaktorKomponenController extends Controller
 {
     use JsonResponse;
 
@@ -15,13 +15,19 @@ class DomainController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'kode');
+        $sortBy = $request->get('sortBy', 'nama');
         $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
+        $df_id = $request->design_faktor_id;
 
-        $list = Domain::query();
+        $list = DesignFaktorKomponen::with('designfaktor');
         if ($request->filled('search')) {
-            $list->where('kode', 'ilike', '%' . $search . '%');
+            $list->where('nama', 'ilike', '%' . $search . '%');
+        }
+
+        if($request->filled('design_faktor_id'))
+        {
+            $list->where('design_faktor_id',$df_id);
         }
 
         $list->orderBy($sortBy, $sortType);
@@ -29,9 +35,9 @@ class DomainController extends Controller
         return $this->successResponse($data);
     }
 
-    public function detailByID($id)
+    public function detail($id)
     {
-        $data = Domain::find($id);
+        $data = DesignFaktorKomponen::with('designfaktor')->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

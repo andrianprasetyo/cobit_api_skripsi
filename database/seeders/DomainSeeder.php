@@ -32,6 +32,36 @@ class DomainSeeder extends Seeder
         ];*/
         $data=[
             [
+                'kode'=>'EDM01'
+            ],
+            [
+                'kode'=>'EDM02'
+            ],
+            [
+                'kode'=>'EDM03'
+            ],
+            [
+                'kode'=>'EDM04'
+            ],
+            [
+                'kode'=>'EDM05'
+            ],
+            [
+                'kode'=>'APO01'
+            ],
+            [
+                'kode'=>'APO02'
+            ],
+            [
+                'kode'=>'APO03'
+            ],
+            [
+                'kode'=>'APO04'
+            ],
+            [
+                'kode'=>'APO05'
+            ],
+            [
                 'kode'=>'APO06'
             ],
             [
@@ -120,7 +150,7 @@ class DomainSeeder extends Seeder
             ],
             [
                 'kode'=>'MEA04'
-            ]
+            ],
         ];
 
         foreach ($data as $item) {

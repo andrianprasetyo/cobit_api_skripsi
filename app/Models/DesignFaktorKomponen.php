@@ -21,12 +21,8 @@ class DesignFaktorKomponen extends Model
         'updated_at'
     ];
 
-    protected static function boot()
+    public function designfaktor()
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
+        return $this->belongsTo(DesignFaktor::class, 'design_faktor_id');
     }
 }

@@ -10,9 +10,9 @@ class QuisionerPertanyaan extends Model
     use HasFactory;
 
     public $incrementing = false;
-    protected $table = 'quisioner';
+    protected $table = 'quisioner_pertanyaan';
     protected $keyType = 'string';
-    protected $fillable = ['pertanyaan', 'design_faktor_id', 'sorting','quisioner_id'];
+//    protected $fillable = ['pertanyaan', 'design_faktor_id', 'sorting','quisioner_id'];
 
     protected $hidden = [
         'deleted_at',

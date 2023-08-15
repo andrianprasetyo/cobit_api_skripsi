@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('assesment_id');
             $table->char('email',50);
+            $table->char('nama',150);
             $table->char('divisi',100);
             $table->char('jabatan',100);
             $table->char('code',100)->comment('Kode invitation random string 50 karakter');

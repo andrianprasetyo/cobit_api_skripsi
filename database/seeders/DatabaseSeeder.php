@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             QuisionerGrupPilganSeeder::class,
             RoleUsersSeeder::class,
             DomainSeeder::class,
+            QuesionerPertanyaan::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

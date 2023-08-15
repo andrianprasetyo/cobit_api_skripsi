@@ -105,20 +105,52 @@ class GrupJawabanController extends Controller
         $data->delete();
     }
 
-    public function addJawaban(Request $request,$grupid)
+    public function editGrup(Request $request,$id)
     {
         $request->validate(
             [
                 'nama'=>'required',
+                'jenis' => 'required|in:pilgan,persentase',
+            ],
+            [
+                'nama.required'=>'Nama grup harus di isi',
+                'jenis.required' => 'Jenis grup harus di isi',
+                'jenis.in' => 'Jenis grup hanya pilgan|persentase',
+            ]
+        );
+
+        $grup = QuisionerGrupJawaban::find($id);
+        if (!$grup)
+        {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+        $grup->nama=$request->nama;
+        $grup->jenis = $request->jenis;
+        $grup->save();
+
+        return $this->successResponse();
+    }
+
+    public function addJawaban(Request $request)
+    {
+        $request->validate(
+            [
+                'grupid'=>'required|uuid|exists:quisioner_grup_jawaban,id',
+                'nama'=>'required',
                 'bobot' => 'required|integer',
             ],
             [
+
+                'grupid.required' => 'Grup jawaban ID harus di isi',
+                'grupid.uuid' => 'Grup jawaban ID tidak valid',
+                'grupid.exists' => 'Grup jawaban ID tidak terdaftar',
                 'nama.required'=>'Jawaban harus di isi',
                 'bobot.required' => 'Bobot harus di isi',
                 'bobot.integer' => 'Bobot harus berupa integer',
             ]
         );
 
+        $grupid=$request->grupid;
         $grup=QuisionerGrupJawaban::find($grupid);
         if (!$grup)
         {
@@ -141,5 +173,34 @@ class GrupJawabanController extends Controller
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
         $data->delete();
+
+        return $this->successResponse();
+    }
+
+    public function editJawaban(Request $request, $id)
+    {
+        $request->validate(
+            [
+                'nama' => 'required',
+                'bobot' => 'required|integer',
+            ],
+            [
+                'nama.required' => 'Jawaban harus di isi',
+                'bobot.required' => 'Bobot harus di isi',
+                'bobot.integer' => 'Bobot harus berupa integer',
+            ]
+        );
+
+        $jawaban = QuisionerJawaban::find($id);
+        if (!$jawaban)
+        {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        $jawaban->jawaban = $request->nama;
+        $jawaban->bobot = $request->bobot;
+        $jawaban->save();
+
+        return $this->successResponse();
     }
 }

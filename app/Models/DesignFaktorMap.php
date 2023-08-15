@@ -6,16 +6,15 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
-class Organisasi extends Model
+class DesignFaktorMap extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
 
     public $incrementing = false;
-    protected $table = 'organisasi';
+    protected $table = 'design_faktor_map';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'assesment_id', 'deskripsi'];
+    protected $fillable = ['domain_id', 'design_faktor_id', 'growth','innovation','cost_leadership','client_service'];
 
     protected $hidden = [
         'deleted_at',

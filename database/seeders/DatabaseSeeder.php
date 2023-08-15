@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             // QuisionerPilganSeeder::class,
             QuisionerGrupPilganSeeder::class,
             RoleUsersSeeder::class,
+            DomainSeeder::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Quisioner;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class QuisionerSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class QuisionerSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
+        /*$data = [
             [
                 'pertanyaan' => 'Menurut Bapak/Ibu, seberapa penting masing-masing strategi perusahaan diatas yang seharusnya dapat',
             ],
@@ -47,6 +48,11 @@ class QuisionerSeeder extends Seeder
                 'aktif'=>true,
             ]);
             $i++;
-        }
+        }*/
+        DB::table('quisioner')->insert([
+            'id' => '81987685-8beb-4005-9ef3-9c74661552bf',
+            'title' => 'Quesioner 1',
+            'aktif' => true,
+        ]);
     }
 }

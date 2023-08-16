@@ -8,5 +8,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
 
     Route::post('/design-faktor/quisioner/add', 'DesignFaktorController@addQuisioner');
     Route::get('/design-faktor/quisioner/detail/{id}', 'DesignFaktorController@detailQuisioner');
-    Route::post('/design-faktor/quisioner/edit/{id}', 'DesignFaktorController@editQuisioner');
+    Route::put('/design-faktor/quisioner/edit/{id}', 'DesignFaktorController@editQuisioner');
 });

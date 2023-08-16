@@ -9,6 +9,7 @@ use App\Models\Quisioner;
 use App\Models\QuisionerPertanyaan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DesignFaktorController extends Controller
 {
@@ -108,79 +109,83 @@ class DesignFaktorController extends Controller
 
     public function addQuisioner(Request $request)
     {
-        $validate['df_kode'] = 'required';
-        $validate['df_nama'] = 'required';
-        $validate_msg['df_kode.required'] = 'Kode Design faktor harus di isi';
-        $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
-        // $validate_msg['df_kode.unique'] = 'Kode Design faktor sudah digunakan';
+        DB::beginTransaction();
+        try {
+            $validate['df_kode'] = 'required';
+            $validate['df_nama'] = 'required';
+            $validate_msg['df_kode.required'] = 'Kode Design faktor harus di isi';
+            $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
+            // $validate_msg['df_kode.unique'] = 'Kode Design faktor sudah digunakan';
 
-        // $validate['pertanyaan'] = 'required|unique:quisioner,title';
-        // $validate_msg['pertanyaan.required'] = 'Nama pertanyaan harus di isi';
-        // $validate_msg['pertanyaan.unique'] = 'Nama pertanyaan sudah tersedia';
+            // $validate['pertanyaan'] = 'required|unique:quisioner,title';
+            // $validate_msg['pertanyaan.required'] = 'Nama pertanyaan harus di isi';
+            // $validate_msg['pertanyaan.unique'] = 'Nama pertanyaan sudah tersedia';
 
-        $validate['question']='required|array';
-        $validate_msg['question.required'] = 'Question harus di isi';
-        $validate_msg['question.array'] = 'Question harus dalam bentuk array';
+            $validate['question'] = 'required|array';
+            $validate_msg['question.required'] = 'Question harus di isi';
+            $validate_msg['question.array'] = 'Question harus dalam bentuk array';
 
-        $validate['question.*.grup_id']='required|uuid|exists:quisioner_grup_jawaban,id';
-        $validate['question.*.pertanyaan']='required';
+            $validate['question.*.grup_id'] = 'required|uuid|exists:quisioner_grup_jawaban,id';
+            $validate['question.*.pertanyaan'] = 'required';
 
-        // $validate['quisioner_grup_jawaban_id'] = 'required|uuid|exists:quisioner_grup_jawaban,id';
-        $validate_msg['question.*.grup_id.required'] = 'Grup jawaban harus di isi';
-        $validate_msg['question.*.grup_id.uuid'] = 'Grup jawaban ID tidak valid';
-        $validate_msg['question.*.grup_id.exists'] = 'Grup jawaban tidak terdaftar';
-        $validate_msg['question.*.pertanyaan.required'] = 'Pertanyaan harus di isi';
+            // $validate['quisioner_grup_jawaban_id'] = 'required|uuid|exists:quisioner_grup_jawaban,id';
+            $validate_msg['question.*.grup_id.required'] = 'Grup jawaban harus di isi';
+            $validate_msg['question.*.grup_id.uuid'] = 'Grup jawaban ID tidak valid';
+            $validate_msg['question.*.grup_id.exists'] = 'Grup jawaban tidak terdaftar';
+            $validate_msg['question.*.pertanyaan.required'] = 'Pertanyaan harus di isi';
 
-        $validate['df_komponen'] = 'required|array';
-        $validate['df_komponen.*.nama'] = 'required';
-        $validate['df_komponen.*.baseline'] = 'required|integer';
+            $validate['df_komponen'] = 'required|array';
+            $validate['df_komponen.*.nama'] = 'required';
+            $validate['df_komponen.*.baseline'] = 'required|integer';
 
-        $validate_msg['df_komponen.required'] = 'komponen harus di isi';
-        $validate_msg['df_komponen.array'] = 'komponen harus dalam bentuk array';
+            $validate_msg['df_komponen.required'] = 'komponen harus di isi';
+            $validate_msg['df_komponen.array'] = 'komponen harus dalam bentuk array';
 
-        $validate_msg['df_komponen.*.nama.required'] = 'Nama komponen harus di isi';
-        $validate_msg['df_komponen.*.baseline.required'] = 'Baseline komponen harus di isi';
-        $validate_msg['df_komponen.*.baseline.integer'] = 'Baseline komponen harus dalam bentuk angka';
+            $validate_msg['df_komponen.*.nama.required'] = 'Nama komponen harus di isi';
+            $validate_msg['df_komponen.*.baseline.required'] = 'Baseline komponen harus di isi';
+            $validate_msg['df_komponen.*.baseline.integer'] = 'Baseline komponen harus dalam bentuk angka';
 
-        $request->validate($validate, $validate_msg);
+            $request->validate($validate, $validate_msg);
 
-        $quesioner = Quisioner::where('aktif', true)->first();
-        if (!$quesioner) {
-            return $this->errorResponse('Quisioner aktif berlum tersedia', 404);
+            $quesioner = Quisioner::where('aktif', true)->first();
+            if (!$quesioner) {
+                return $this->errorResponse('Quisioner aktif berlum tersedia', 404);
+            }
+
+            $_df = DesignFaktor::where('kode', $request->df_kode)->first();
+            if ($_df) {
+                return $this->errorResponse('Kode ' . $request->df_kode . ' sudah digunakan', 400);
+            }
+
+            $df = new DesignFaktor();
+            $df->kode = $request->df_kode;
+            $df->nama = $request->df_nama;
+            $df->deskripsi = $request->df_deskripsi;
+            $df->save();
+
+            foreach ($request->df_komponen as $_item_komponen) {
+                $df_komponen = new DesignFaktorKomponen();
+                $df_komponen->nama = $_item_komponen['nama'];
+                $df_komponen->baseline = $_item_komponen['baseline'];
+                $df_komponen->design_faktor_id = $df->id;
+                $df_komponen->save();
+            }
+
+            foreach ($request->question as $_item_question) {
+                $quesioner_pertanyaan = new QuisionerPertanyaan();
+                $quesioner_pertanyaan->design_faktor_id = $df->id;
+                $quesioner_pertanyaan->quisioner_id = $quesioner->id;
+                $quesioner_pertanyaan->quisioner_grup_jawaban_id = $_item_question['grup_id'];
+                $quesioner_pertanyaan->pertanyaan = $_item_question['pertanyaan'];
+                $quesioner_pertanyaan->save();
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
         }
-
-        $_df = DesignFaktor::where('kode', $request->df_kode)->first();
-        if ($_df)
-        {
-            return $this->errorResponse('Kode '.$request->df_kode.' sudah digunakan',400);
-        }
-
-        $df = new DesignFaktor();
-        $df->kode = $request->df_kode;
-        $df->nama = $request->df_nama;
-        $df->deskripsi = $request->df_deskripsi;
-        $df->save();
-
-        foreach ($request->df_komponen as $_item_komponen)
-        {
-            $df_komponen = new DesignFaktorKomponen();
-            $df_komponen->nama = $_item_komponen['nama'];
-            $df_komponen->baseline = $_item_komponen['baseline'];
-            $df_komponen->design_faktor_id = $df->id;
-            $df_komponen->save();
-        }
-
-        foreach ($request->question as $_item_question)
-        {
-            $quesioner_pertanyaan = new QuisionerPertanyaan();
-            $quesioner_pertanyaan->design_faktor_id = $df->id;
-            $quesioner_pertanyaan->quisioner_id = $quesioner->id;
-            $quesioner_pertanyaan->quisioner_grup_jawaban_id = $_item_question['grup_id'];
-            $quesioner_pertanyaan->pertanyaan = $_item_question['pertanyaan'];
-            $quesioner_pertanyaan->save();
-        }
-
-        return $this->successResponse();
     }
 
     public function detailQuisioner($id)
@@ -197,30 +202,107 @@ class DesignFaktorController extends Controller
 
     public function editQuisioner(Request $request,$id)
     {
-        $validate['df_id'] = 'required|uuid';
-        $validate['df_kode'] = 'required';
-        $validate['df_nama'] = 'required';
-        $validate_msg['df_kode.required'] = 'Kode Design faktor harus di isi';
-        $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
+        DB::beginTransaction();
+        try {
+            $validate=[];
+            $validate_msg=[];
 
-        $validate['question'] = 'required|array';
-        $validate_msg['question.required'] = 'Question harus di isi';
-        $validate_msg['question.array'] = 'Question harus dalam bentuk array';
+            if($request->filled('question'))
+            {
+                $validate['question'] = 'required|array';
+                $validate_msg['question.required'] = 'Question harus di isi';
+                $validate_msg['question.array'] = 'Question harus dalam bentuk array';
 
-        $validate['question.*.grup_id']='required|uuid|exists:quisioner_grup_jawaban,id';
-        $validate['question.*.pertanyaan']='required';
+                $validate['question.*.grup_id'] = 'required|uuid|exists:quisioner_grup_jawaban,id';
+                $validate['question.*.pertanyaan'] = 'required';
 
-        $request->validate($validate,$validate_msg);
+                $validate_msg['question.*.grup_id.required'] = 'Grup jawaban harus di isi';
+                $validate_msg['question.*.grup_id.uuid'] = 'Grup jawaban ID tidak valid';
+                $validate_msg['question.*.grup_id.exists'] = 'Grup jawaban tidak terdaftar';
+                $validate_msg['question.*.pertanyaan.required'] = 'Pertanyaan harus di isi';
+            }
 
-        $_check_kode_df=DesignFaktor::where('kode',$request->kode)
-            ->where('id','!=',$id)
-            ->exists();
+            if ($request->filled('df_komponen'))
+            {
+                $validate['df_komponen'] = 'required|array';
+                $validate['df_komponen.*.nama'] = 'required';
+                $validate['df_komponen.*.baseline'] = 'required|integer';
 
-        if($_check_kode_df)
-        {
-            return $this->errorResponse('Kode sudah digunakan',400);
+                $validate_msg['df_komponen.required'] = 'komponen harus di isi';
+                $validate_msg['df_komponen.array'] = 'komponen harus dalam bentuk array';
+
+                $validate_msg['df_komponen.*.nama.required'] = 'Nama komponen harus di isi';
+                $validate_msg['df_komponen.*.baseline.required'] = 'Baseline komponen harus di isi';
+                $validate_msg['df_komponen.*.baseline.integer'] = 'Baseline komponen harus dalam bentuk angka';
+            }
+
+            $request->validate($validate, $validate_msg);
+
+            $df = DesignFaktor::find($id);
+
+            if($request->filled('df_kode'))
+            {
+                $_check_kode_df = DesignFaktor::where('kode', $request->kode)
+                    ->where('id', '!=', $id)
+                    ->exists();
+
+                if ($_check_kode_df) {
+                    return $this->errorResponse('Kode sudah digunakan', 400);
+                }
+
+                $df->kode = $request->df_kode;
+            }
+
+            if ($request->filled('df_nama'))
+            {
+                $df->nama = $request->nama;
+            }
+
+            if ($request->filled('df_deskripsi'))
+            {
+                $df->deskripsi = $request->df_deskripsi;
+            }
+
+            if ($request->filled('df_kode') || $request->filled('df_nama') || $request->filled('df_deskripsi'))
+            {
+                $df->save();
+            }
+
+            if ($request->filled('df_komponen'))
+            {
+                foreach ($request->df_komponen as $_item_komponen) {
+                    $df_komponen = new DesignFaktorKomponen();
+
+                    if ($_item_komponen['id'] != null)
+                    {
+                        $df_komponen = DesignFaktorKomponen::find($_item_komponen['id']);
+                    }
+                    $df_komponen->nama = $_item_komponen['nama'];
+                    $df_komponen->baseline = $_item_komponen['baseline'];
+                    $df_komponen->save();
+                }
+            }
+
+            if ($request->filled('question'))
+            {
+                foreach ($request->question as $_item_question)
+                {
+                    $quesioner_pertanyaan = new QuisionerPertanyaan();
+                    if ($_item_question['id'] != null) {
+                        $quesioner_pertanyaan = QuisionerPertanyaan::find($_item_question['id']);
+                    }
+                    $quesioner_pertanyaan->quisioner_grup_jawaban_id = $_item_question['grup_id'];
+                    $quesioner_pertanyaan->pertanyaan = $_item_question['pertanyaan'];
+                    $quesioner_pertanyaan->save();
+                }
+            }
+
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
         }
-
-        return $this->successResponse();
     }
 }

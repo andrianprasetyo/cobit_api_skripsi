@@ -186,8 +186,9 @@ class DesignFaktorController extends Controller
     public function detailQuisioner($id)
     {
         $data = DesignFaktor::with(
-            ['komponen','quisioner.grup', 'quisioner.quisioner']
+            ['komponen','quisioner.grup','quisioner.quisioner']
         )->find($id);
+
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

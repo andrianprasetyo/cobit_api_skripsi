@@ -191,7 +191,7 @@ class DesignFaktorController extends Controller
     public function detailQuisioner($id)
     {
         $data = DesignFaktor::with(
-            ['komponen','quisioner.grup','quisioner.quisioner']
+            ['komponen','quisioner.grup.jawabans','quisioner.quisioner']
         )->find($id);
 
         if (!$data) {
@@ -314,7 +314,7 @@ class DesignFaktorController extends Controller
             return $this->successResponse($request->all());
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->errorResponse($e->getMessage());
+            return $this->errorResponse($e->getMessage(),$e->getCode());
         }
     }
 }

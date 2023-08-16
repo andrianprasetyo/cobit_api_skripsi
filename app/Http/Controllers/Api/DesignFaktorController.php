@@ -66,19 +66,20 @@ class DesignFaktorController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $request->validate(
-            [
-                'kode' => 'required',
-            ],
-            [
-                'kode.required' => 'kode harus di isi',
-            ]
-        );
+        // $request->validate(
+        //     [
+        //         'kode' => 'required',
+        //     ],
+        //     [
+        //         'kode.required' => 'kode harus di isi',
+        //     ]
+        // );
 
         $data = DesignFaktor::find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak di temukan', 404);
         }
+        $data->kode=$request->kode;
         $data->nama = $request->nama;
         $data->deskripsi = $request->deskripsi;
         $data->save();

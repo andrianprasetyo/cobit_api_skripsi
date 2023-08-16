@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Otp;
 use App\Models\RoleUsers;
 use App\Models\User;
+use App\Notifications\ResetPasswordNotif;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -99,14 +100,28 @@ class AuthController extends Controller
         $otp->expire_at = Carbon::now()->addMinute(1);
         $otp->aksi='reset-password';
         $otp->verify_by = 'email';
+        $otp->token=Str::random(50);
         $otp->save();
+
+        $user->notify(new ResetPasswordNotif());
 
         return $this->successResponse($otp,'Email reset password terkirim');
     }
 
-    public function detailByOtp($id)
+    public function detailVerifyByToken(Request $request)
     {
+        $token=$request->token;
+        $otp=Otp::where('token',$token)->first();
+        if(!$token)
+        {
+            return $this->errorResponse('Invalid token',400);
+        }
+        if(Carbon::now()->gte(Carbon::parse($otp->expire_at)))
+        {
+            return $this->errorResponse('Token Expired',400);
+        }
 
+        return $this->successResponse($otp);
     }
 
     public function verifyResetPassword(Request $request)

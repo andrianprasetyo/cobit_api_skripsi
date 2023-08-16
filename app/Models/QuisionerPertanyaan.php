@@ -18,4 +18,14 @@ class QuisionerPertanyaan extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function quisioner()
+    {
+        $this->belongsTo(Quisioner::class,'quisioner_id');
+    }
+
+    public function grup()
+    {
+        $this->belongsTo(QuisionerGrupJawaban::class, 'quisioner_grup_jawaban_id');
+    }
 }

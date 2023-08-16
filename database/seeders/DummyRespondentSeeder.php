@@ -72,6 +72,7 @@ class DummyRespondentSeeder extends Seeder
                     $hasil->quisioner_pertanyaan_id=$pert->id;
                     $hasil->jawaban_id=$jawabanRandom->id;
                     $hasil->assesment_users_id=$respondent->id;
+                    $hasil->design_faktor_komponen_id=$faktor->id;
                     $hasil->bobot=$jawabanRandom->bobot;
                     $hasil->save();
                 }

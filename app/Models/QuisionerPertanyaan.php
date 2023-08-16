@@ -27,11 +27,11 @@ class QuisionerPertanyaan extends Model
     }
     public function quisioner()
     {
-        $this->belongsTo(Quisioner::class,'quisioner_id');
+        return $this->belongsTo(Quisioner::class,'quisioner_id');
     }
 
     public function grup()
     {
-        $this->belongsTo(QuisionerGrupJawaban::class, 'quisioner_grup_jawaban_id');
+        return $this->belongsTo(QuisionerGrupJawaban::class, 'quisioner_grup_jawaban_id');
     }
 }

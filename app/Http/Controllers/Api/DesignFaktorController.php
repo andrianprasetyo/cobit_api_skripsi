@@ -106,9 +106,9 @@ class DesignFaktorController extends Controller
         $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
         // $validate_msg['df_kode.unique'] = 'Kode Design faktor sudah digunakan';
 
-        $validate['pertanyaan'] = 'required|unique:quisioner,title';
-        $validate_msg['pertanyaan.required'] = 'Nama pertanyaan harus di isi';
-        $validate_msg['pertanyaan.unique'] = 'Nama pertanyaan sudah tersedia';
+        // $validate['pertanyaan'] = 'required|unique:quisioner,title';
+        // $validate_msg['pertanyaan.required'] = 'Nama pertanyaan harus di isi';
+        // $validate_msg['pertanyaan.unique'] = 'Nama pertanyaan sudah tersedia';
 
         $validate['question']='required|array';
         $validate_msg['question.required'] = 'Question harus di isi';
@@ -149,8 +149,8 @@ class DesignFaktorController extends Controller
 
         $df = new DesignFaktor();
         $df->kode = $request->df_kode;
-        $df->nama = $request->nama;
-        $df->deskripsi = $request->deskripsi;
+        $df->nama = $request->df_nama;
+        $df->deskripsi = $request->df_deskripsi;
         $df->save();
 
         foreach ($request->df_komponen as $_item_komponen)

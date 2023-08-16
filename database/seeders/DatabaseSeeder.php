@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             RoleUsersSeeder::class,
             DomainSeeder::class,
             QuesionerPertanyaan::class,
-            Df10Seeder::class,
+            Df1Seeder::class,
             Df3Seeder::class,
             Df4Seeder::class,
             Df5Seeder::class,

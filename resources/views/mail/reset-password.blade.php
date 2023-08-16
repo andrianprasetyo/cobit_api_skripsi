@@ -9,7 +9,7 @@
             <p style="font-weight: 700; font-size: 20px; margin-top: 0; color: #ea7b0b;">{{$data->nama}}</p>
 
             <p class="sm-leading-32" style="font-weight: 600; font-size: 20px; margin: 0 0 16px; color: #263238;">
-                Ada Permintaan Atur Ulang Password 🔓
+                Permintaan Atur Ulang Password 🔓
             </p>
 
 

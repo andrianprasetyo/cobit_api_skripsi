@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\RoleUsers;
 use App\Models\User;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UsersController extends Controller
 {
@@ -57,6 +59,46 @@ class UsersController extends Controller
         }
 
         return $this->successResponse($data);
+    }
+
+    public function add(Request $request)
+    {
+        $validation['nama']='required';
+        $msg_val['nama.required'] = 'Nama harus di isi';
+        $validation['username'] = 'required';
+        $msg_val['username.required'] = 'Username harus di isi';
+
+        $validation['email'] = 'email|unique:users,email';
+        $msg_val['email.email'] = 'Email tidak valid';
+        $msg_val['email.unique'] = 'Email sudah digunakan';
+
+        $validation['role_id']='required|uuid|exists:roles,id';
+        $msg_val['role_id.required']='Role harus di isi';
+        $msg_val['role_id.uuid'] = 'Role ID tidak valid';
+        $msg_val['role_id.exists'] = 'Role tidak terdaftar';
+
+        $username=Str::slug($request->username,'.');
+        $_check_user=User::where('username',$username)->exists();
+        if($_check_user)
+        {
+            return $this->errorResponse('Username sudah digunakan',400);
+        }
+
+        $request->validate($validation,$msg_val);
+
+        $user = new User();
+        $user->nama = $request->nama;
+        $user->username = $username;
+        $user->email = $request->email;
+        $user->save();
+
+        $role_user=new RoleUsers();
+        $role_user->users_id=$user->id;
+        $role_user->roles_id=$request->role_id;
+        $role_user->default=true;
+        $role_user->save();
+
+        return $this->successResponse();
     }
 
     public function edit(Request $request,$id)

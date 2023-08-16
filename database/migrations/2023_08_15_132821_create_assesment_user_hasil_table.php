@@ -20,6 +20,7 @@ return new class extends Migration
             $table->float('baseline_score',5,3);
             $table->float('relative_importance',5,3);
             $table->timestamps();
+            $table->softDeletes();
         });
         DB::statement('ALTER TABLE assesment_users_hasil ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }

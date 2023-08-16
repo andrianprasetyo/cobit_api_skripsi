@@ -184,4 +184,15 @@ class DesignFaktorController extends Controller
         return $this->successResponse();
     }
 
+    public function detailQuisioner($id)
+    {
+        $data = DesignFaktor::with(
+            ['komponen','quisioner']
+        )->find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+        return $this->successResponse($data);
+    }
+
 }

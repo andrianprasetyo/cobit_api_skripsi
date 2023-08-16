@@ -7,4 +7,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::delete('/design-faktor/remove/{id}', 'DesignFaktorController@remove');
 
     Route::post('/design-faktor/quisioner/add', 'DesignFaktorController@addQuisioner');
+    Route::get('/design-faktor/quisioner/detail/{id}', 'DesignFaktorController@detailQuisioner');
 });

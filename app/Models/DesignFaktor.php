@@ -26,4 +26,14 @@ class DesignFaktor extends Model
     {
         return $this->hasMany(DesignFaktorMap::class, 'design_faktor_id','id');
     }
+
+    public function komponen()
+    {
+        return $this->hasMany(DesignFaktorKomponen::class, 'design_faktor_id', 'id');
+    }
+
+    public function quisioner()
+    {
+        return $this->hasMany(QuisionerPertanyaan::class, 'design_faktor_id', 'id');
+    }
 }

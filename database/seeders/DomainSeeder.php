@@ -153,9 +153,10 @@ class DomainSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $item) {
+        foreach ($data as $key=>$item) {
             Domain::create([
                 'kode' => $item['kode'],
+                'urutan'=>$key
             ]);
         }
     }

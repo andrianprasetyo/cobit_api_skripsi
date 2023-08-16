@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('kode', 30)->unique();
             // $table->string('nama', 75)->nullable();
             $table->text('ket')->nullable();
+            $table->integer('urutan')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

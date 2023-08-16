@@ -469,12 +469,13 @@ class DesainFaktorRefSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $item) {
+        foreach ($data as $key=>$item) {
             DesignFaktorKomponen::create([
                 'nama' => $item['nama'],
                 'deskripsi'=>$item['deskripsi'],
                 'baseline'=>$item['baseline'],
                 'design_faktor_id' => $item['design_faktor_id'],
+                'urutan'=>$key
             ]);
         }
     }

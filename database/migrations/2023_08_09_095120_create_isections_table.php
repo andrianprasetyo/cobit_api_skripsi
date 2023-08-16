@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('design_faktor_id')->nullable();
             $table->text('deskripsi')->nullable();
             $table->integer('baseline')->nullable();
+            $table->integer('urutan')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

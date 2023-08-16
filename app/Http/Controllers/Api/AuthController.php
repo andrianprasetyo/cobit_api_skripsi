@@ -93,19 +93,22 @@ class AuthController extends Controller
         );
 
         $user=User::where('email',$request->email)->first();
+
+        $exp=3;
         $kode = strtoupper(Str::random(6));
         $otp=new Otp();
         $otp->kode=$kode;
         $otp->users_id=$user->id;
-        $otp->expire_at = Carbon::now()->addMinute(1);
+        $otp->expire_at = Carbon::now()->addMinute($exp);
         $otp->aksi='reset-password';
         $otp->verify_by = 'email';
         $otp->token=Str::random(50);
         $otp->save();
 
+        $user->otp=$otp;
         $user->notify(new ResetPasswordNotif());
 
-        return $this->successResponse($otp,'Email reset password terkirim');
+        return $this->successResponse(null,'Email reset password terkirim, akan kadaluarsa dalam '.$exp.' menit');
     }
 
     public function detailVerifyByToken(Request $request)
@@ -121,7 +124,7 @@ class AuthController extends Controller
             return $this->errorResponse('Token Expired',400);
         }
 
-        return $this->successResponse($otp);
+        return $this->successResponse();
     }
 
     public function verifyResetPassword(Request $request)
@@ -129,17 +132,32 @@ class AuthController extends Controller
         $request->validate(
             [
                 'otp'=>'required',
+                'token' => 'required',
                 'password' => ['required', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
             ],
             [
                 'otp.required' => 'Kode OTP harus di isi',
+                'token.required' => 'Token harus di isi',
                 'password.required' => 'Password harus di isi',
                 'password.min' => 'Password minimal 8 karakter',
             ]
         );
 
-        $otp=Otp::where('kode',$request->otp)->first();
-        $user=User::with(['otp'])->find($otp->users_id);
-        return $this->successResponse($user);
+        $otp=Otp::where('token',$request->token)->first();
+        if(!$otp)
+        {
+            return $this->errorResponse('Token tidak valid/tersedia',400);
+        }
+
+        if($request->kode != $otp->kode)
+        {
+            return $this->errorResponse('Kode OTP salah',400);
+        }
+
+        $user=User::find($otp->users_id);
+        $user->password=$request->password;
+        $user->save();
+
+        return $this->successResponse(null,'Password berhasil diubah');
     }
 }

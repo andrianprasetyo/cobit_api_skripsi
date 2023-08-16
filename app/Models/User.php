@@ -103,6 +103,6 @@ class User extends Authenticatable implements JWTSubject
     public function otp()
     {
         $currentDatetime = Carbon::now();
-        return $this->belongsTo(Otp::class, 'id','users_id');
+        return $this->belongsTo(Otp::class,'users_id')->where('expire_at','>',$currentDatetime);
     }
 }

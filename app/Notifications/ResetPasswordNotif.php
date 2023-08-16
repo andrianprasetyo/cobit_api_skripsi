@@ -34,10 +34,12 @@ class ResetPasswordNotif extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $data['nama'] = $notifiable->email;
+        $data['kode']= $notifiable->otp->kode;
+        $data['url'] = config('app.url_fe').'/reset-password?token='. $notifiable->otp->token;
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject('Reset Password | '.config('app.name'))
+                    ->markdown('mail.reset-password', ['data' => (object)$data]);
     }
 
     /**

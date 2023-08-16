@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('design_faktor_map', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('domain_id');
+            $table->uuid('domain_id')->nullable();
             $table->uuid('design_faktor_id');
-            $table->uuid('design_faktor_komponen_id');
-            $table->uuid('design_faktor_map_additional_id');
+            $table->uuid('design_faktor_komponen_id')->nullable();
+            $table->uuid('design_faktor_map_additional_id')->nullable();
             $table->float('nilai')->nullable();
             $table->timestamps();
         });

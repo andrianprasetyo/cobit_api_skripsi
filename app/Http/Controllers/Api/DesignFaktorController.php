@@ -240,6 +240,16 @@ class DesignFaktorController extends Controller
 
             $df = DesignFaktor::find($id);
 
+            if(!$df)
+            {
+                return $this->errorResponse('DF tidak ditemukan',404);
+            }
+
+            $quesioner = Quisioner::where('aktif', true)->first();
+            if (!$quesioner) {
+                return $this->errorResponse('Quisioner aktif berlum tersedia', 404);
+            }
+
             if($request->filled('df_kode'))
             {
                 $_check_kode_df = DesignFaktor::where('kode', $request->kode)
@@ -277,6 +287,7 @@ class DesignFaktorController extends Controller
                     {
                         $df_komponen = DesignFaktorKomponen::find($_item_komponen['id']);
                     }
+                    $df_komponen->design_faktor_id = $id;
                     $df_komponen->nama = $_item_komponen['nama'];
                     $df_komponen->baseline = $_item_komponen['baseline'];
                     $df_komponen->save();
@@ -291,15 +302,16 @@ class DesignFaktorController extends Controller
                     if ($_item_question['id'] != null) {
                         $quesioner_pertanyaan = QuisionerPertanyaan::find($_item_question['id']);
                     }
+                    $quesioner_pertanyaan->design_faktor_id = $id;
+                    $quesioner_pertanyaan->quisioner_id = $quesioner->id;
                     $quesioner_pertanyaan->quisioner_grup_jawaban_id = $_item_question['grup_id'];
                     $quesioner_pertanyaan->pertanyaan = $_item_question['pertanyaan'];
                     $quesioner_pertanyaan->save();
                 }
             }
 
-
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($request->all());
         } catch (\Exception $e) {
             DB::rollback();
             return $this->errorResponse($e->getMessage());

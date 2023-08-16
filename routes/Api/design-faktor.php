@@ -5,4 +5,6 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/design-faktor/add', 'DesignFaktorController@add');
     Route::put('/design-faktor/edit/{id}', 'DesignFaktorController@edit');
     Route::delete('/design-faktor/remove/{id}', 'DesignFaktorController@remove');
+
+    Route::post('/design-faktor/quisioner/add', 'DesignFaktorController@addQuisioner');
 });

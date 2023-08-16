@@ -59,12 +59,18 @@ class QuisionerController extends Controller
             $df->save();
         }
 
-        $df_komponen=new DesignFaktorKomponen();
-        $df_komponen->nama = $request->df_komponen_nama;
-        $df_komponen->baseline = $request->df_komponen_baseline;
-        $df_komponen->design_faktor_id=$df->id;
-        $df_komponen->save();
+        foreach ($request->df_komponen as $_item_komponen)
+        {
+            $df_komponen=new DesignFaktorKomponen();
+            $df_komponen->nama = $_item_komponen['nama'];
+            $df_komponen->baseline = $_item_komponen['baseline'];
+            $df_komponen->design_faktor_id=$df->id;
+            $df_komponen->save();
+        }
 
+        foreach ($request as $key => $value) {
+            # code...
+        }
         $quesioner_pertanyaan=new QuisionerPertanyaan();
         $quesioner_pertanyaan->design_faktor_id=$df->id;
         $quesioner_pertanyaan->quisioner_id = $quesioner->id;

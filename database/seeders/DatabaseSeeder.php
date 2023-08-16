@@ -25,6 +25,16 @@ class DatabaseSeeder extends Seeder
             RoleUsersSeeder::class,
             DomainSeeder::class,
             QuesionerPertanyaan::class,
+            Df10Seeder::class,
+            Df3Seeder::class,
+            Df4Seeder::class,
+            Df5Seeder::class,
+            Df6Seeder::class,
+            Df7Seeder::class,
+            Df8Seeder::class,
+            Df9Seeder::class,
+            Df10Seeder::class,
+            DfAdditionalSeeder::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

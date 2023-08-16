@@ -19,6 +19,12 @@ class QuisionerPertanyaan extends Model
         'updated_at'
     ];
 
+    public function design_faktor(){
+        return $this->belongsTo(DesignFaktor::class,'design_faktor_id');
+    }
+    public function grup_jawaban(){
+        return $this->belongsTo(QuisionerGrupJawaban::class,'quisioner_grup_jawaban_id');
+    }
     public function quisioner()
     {
         $this->belongsTo(Quisioner::class,'quisioner_id');

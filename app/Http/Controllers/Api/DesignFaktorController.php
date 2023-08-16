@@ -172,7 +172,6 @@ class DesignFaktorController extends Controller
 
         foreach ($request->question as $_item_question)
         {
-            # code...
             $quesioner_pertanyaan = new QuisionerPertanyaan();
             $quesioner_pertanyaan->design_faktor_id = $df->id;
             $quesioner_pertanyaan->quisioner_id = $quesioner->id;
@@ -187,7 +186,7 @@ class DesignFaktorController extends Controller
     public function detailQuisioner($id)
     {
         $data = DesignFaktor::with(
-            ['komponen','quisioner']
+            ['komponen','quisioner.grup', 'quisioner.quisioner']
         )->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
@@ -195,4 +194,32 @@ class DesignFaktorController extends Controller
         return $this->successResponse($data);
     }
 
+    public function editQuisioner(Request $request,$id)
+    {
+        $validate['df_id'] = 'required|uuid';
+        $validate['df_kode'] = 'required';
+        $validate['df_nama'] = 'required';
+        $validate_msg['df_kode.required'] = 'Kode Design faktor harus di isi';
+        $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
+
+        $validate['question'] = 'required|array';
+        $validate_msg['question.required'] = 'Question harus di isi';
+        $validate_msg['question.array'] = 'Question harus dalam bentuk array';
+
+        $validate['question.*.grup_id']='required|uuid|exists:quisioner_grup_jawaban,id';
+        $validate['question.*.pertanyaan']='required';
+
+        $request->validate($validate,$validate_msg);
+
+        $_check_kode_df=DesignFaktor::where('kode',$request->kode)
+            ->where('id','!=',$id)
+            ->exists();
+
+        if($_check_kode_df)
+        {
+            return $this->errorResponse('Kode sudah digunakan',400);
+        }
+
+        return $this->successResponse();
+    }
 }

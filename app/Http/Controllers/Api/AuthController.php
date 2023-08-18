@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
@@ -106,7 +107,8 @@ class AuthController extends Controller
         $otp->save();
 
         $user->otp=$otp;
-        $user->notify(new ResetPasswordNotif());
+        // $user->notify(new ResetPasswordNotif($otp));
+        Notification::send($user, new ResetPasswordNotif($otp));
 
         return $this->successResponse(null,'Email reset password terkirim, akan kadaluarsa dalam '.$exp.' menit');
     }
@@ -146,6 +148,7 @@ class AuthController extends Controller
             return $this->errorResponse('Kode OTP yang anda masukan salah',400);
         }
 
+
         return $this->successResponse();
     }
 
@@ -153,13 +156,13 @@ class AuthController extends Controller
     {
         $request->validate(
             [
-                'otp'=>'required',
+                // 'otp'=>'required',
                 'token' => 'required',
                 'password' => ['required', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
                 'password_confirmation' => ['required'],
             ],
             [
-                'otp.required' => 'Kode OTP harus di isi',
+                // 'otp.required' => 'Kode OTP harus di isi',
                 'token.required' => 'Token harus di isi',
                 'password.required' => 'Password harus di isi',
                 'password.min' => 'Password minimal 8 karakter',
@@ -172,11 +175,6 @@ class AuthController extends Controller
         if(!$otp)
         {
             return $this->errorResponse('Token tidak valid/tersedia',400);
-        }
-
-        if($request->kode != $otp->kode)
-        {
-            return $this->errorResponse('Kode OTP salah',400);
         }
 
         $user=User::find($otp->users_id);

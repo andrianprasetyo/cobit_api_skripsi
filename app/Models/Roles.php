@@ -15,7 +15,7 @@ class Roles extends Model
     public $incrementing = false;
     protected $table = 'roles';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'code','deskripsi','aktif','status'];
+    protected $fillable = ['nama', 'code','deskripsi','aktif'];
 
     protected $hidden = [
         'deleted_at',

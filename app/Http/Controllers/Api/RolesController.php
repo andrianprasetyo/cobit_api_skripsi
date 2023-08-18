@@ -50,9 +50,37 @@ class RolesController extends Controller
         $role=new Roles();
         $role->nama=$request->nama;
         $role->code=Str::slug($request->nama, '.');
-        $role->status=true;
+        $role->aktif=true;
         $role->save();
 
+        return $this->successResponse();
+    }
+
+    public function editRole(Request $request,$id)
+    {
+        $role=Roles::find($id);
+        if(!$role)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        if($request->filled('aktif'))
+        {
+            $role->aktif=$request->aktif;
+        }
+        $role->nama = $request->nama;
+        $role->save();
+        return $this->successResponse();
+    }
+
+    public function deleteRole($id)
+    {
+        $role = Roles::find($id);
+        if (!$role) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        $role->delete();
         return $this->successResponse();
     }
 }

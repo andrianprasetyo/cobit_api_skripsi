@@ -11,12 +11,14 @@ class InviteUserNotif extends Notification
 {
     use Queueable;
 
+    private $data=null;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($data=null)
     {
-        //
+        $this->data=$data;
     }
 
     /**
@@ -35,7 +37,8 @@ class InviteUserNotif extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $data['nama'] = $notifiable->nama;
-        $data['kode'] = $notifiable->assesment->code;
+        // $data['kode'] = $notifiable->assesment->code;
+        $data['kode'] = $this->data->code;
         $data['url'] = config('app.url_fe') . '/auth/verify?token=' . $data['kode'];
 
         return (new MailMessage)

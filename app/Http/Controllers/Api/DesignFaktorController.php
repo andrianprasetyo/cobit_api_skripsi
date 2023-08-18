@@ -168,6 +168,7 @@ class DesignFaktorController extends Controller
                 $df_komponen->nama = $_item_komponen['nama'];
                 $df_komponen->baseline = $_item_komponen['baseline'];
                 $df_komponen->design_faktor_id = $df->id;
+                $df_komponen->deskripsi = $_item_komponen['deskripsi'];
                 $df_komponen->save();
             }
 

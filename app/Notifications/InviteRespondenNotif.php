@@ -7,11 +7,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ResetPasswordNotif extends Notification
+class InviteRespondenNotif extends Notification implements ShouldQueue
 {
     use Queueable;
 
     private $data=null;
+
     /**
      * Create a new notification instance.
      */
@@ -35,12 +36,13 @@ class ResetPasswordNotif extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $data['nama'] = $notifiable->email;
-        $data['kode']= $notifiable->otp->kode;
-        $data['url'] = config('app.url_fe').'/auth/forgot-password/verify?token='. $notifiable->otp->token;
+        $data['nama'] = $notifiable->nama;
+        $data['organisasi']= $this->data->nama;
+        // $data['organisasi']=json_encode($this->data);
+        $data['url'] = config('app.url_fe') . '/quisioner';
         return (new MailMessage)
-                    ->subject('Reset Password | '.config('app.name'))
-                    ->markdown('mail.reset-password', ['data' => (object)$data]);
+            ->subject('Undangan Kuisioner Responden | ' . config('app.name'))
+            ->markdown('mail.invited-responden', ['data' => (object) $data]);
     }
 
     /**

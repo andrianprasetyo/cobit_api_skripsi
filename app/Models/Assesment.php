@@ -21,4 +21,9 @@ class Assesment extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function organisasi()
+    {
+        return $this->belongsTo(Organisasi::class, 'organisasi_id');
+    }
 }

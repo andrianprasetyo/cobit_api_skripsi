@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Assesment;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
+use App\Models\Responden;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
+use App\Notifications\InviteRespondenNotif;
 use App\Notifications\InviteUserNotif;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 
 class AsessmentController extends Controller
@@ -42,7 +46,7 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function detail($id)
+    public function detailByID($id)
     {
         $data=Assesment::find($id);
         if(!$data)
@@ -75,36 +79,22 @@ class AsessmentController extends Controller
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
             $validate_msg['organisasi_id.uuid']='Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
+        }else{
+            $validate['organisasi_nama']='required|unique:organisasi,nama';
+            $validate_msg['organisasi_nama.required']='Nama organisasi harus di isi';
+            $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
         }
 
         $request->validate($validate, $validate_msg);
 
         DB::beginTransaction();
         try {
-            // $request->validate(
-            //     [
-            //         'asessment' => 'required',
-            //         'start_date' => 'required|date_format:Y-m-d',
-            //         'end_date' => 'required|date_format:Y-m|after:start_date',
-            //         'organisasi' => 'required|unique:organisasi,nama',
-            //     ],
-            //     [
-            //         'asessment.required' => 'Nama assesment harus di isi',
-            //         'start_date.required' => 'Waktu awal assesment harus di isi',
-            //         'start_date.date_format' => 'Waktu awal tidak valid',
-            //         'end_date.required' => 'Waktu selesai assesment harus di isi',
-            //         'end_date.date_format' => 'Waktu selesai tidak valid',
-            //         'end_date.after' => 'Waktu selesai harus setelah waktu mulai',
-            //         'organisasi.required' => 'Harap pilih organisasi',
-            //         'organisasi.unique' => 'Organisasi sudah digunakan',
-            //     ]
-            // );
 
             $organisasi_id = $request->organisasi_id;
             if ($request->filled('organisasi_id'))
             {
                 $organisasi = new Organisasi();
-                $organisasi->nama = $request->organisasi;
+                $organisasi->nama = $request->organisasi_nama;
                 $organisasi->deskripsi = $request->organisasi_deskripsi;
                 $organisasi->save();
 
@@ -112,10 +102,10 @@ class AsessmentController extends Controller
             }
 
             $assesment = new Assesment();
-            $assesment->nama = $request->asessment;
-            $assesment->deskripsi = $request->asessment_deskripsi;
-            $assesment->organisasi_id = $organisasi_id;
+            $assesment->nama = $request->asessment_nama;
+            $assesment->deskripsi = $request->deskripsi;
             $assesment->tahun = $request->tahun;
+            $assesment->organisasi_id = $organisasi_id;
             // $assesment->end_date = $request->end_date;
             $assesment->status = 'ongoing';
             $assesment->save();
@@ -124,9 +114,9 @@ class AsessmentController extends Controller
             $user_ass=new AssessmentUsers();
             $user_ass->assesment_id=$assesment->id;
             $user_ass->nama=$request->pic_nama;
+            $user_ass->email = $request->pic_email;
             $user_ass->divisi = $request->pic_divisi;
             $user_ass->jabatan = $request->pic_jabatan;
-            $user_ass->email = $request->pic_email;
             $user_ass->code=$verify_code;
             $user_ass->status='invited';
             $user_ass->save();
@@ -154,7 +144,8 @@ class AsessmentController extends Controller
             $role_user->save();
 
             $user->assesment=$user_ass;
-            $user->notify(new InviteUserNotif());
+            // $user->notify(new InviteUserNotif());
+            Notification::send($user, new InviteUserNotif());
 
             DB::commit();
             return $this->successResponse();
@@ -183,5 +174,58 @@ class AsessmentController extends Controller
         }
 
         $data->delete();
+    }
+
+    public function inviteRespondent(Request $request)
+    {
+
+        try {
+
+            $validate['id'] = 'required|exists:assesment,id';
+            $validate_msg['id.required'] = 'assesment ID harus di isi';
+            $validate_msg['id.exists'] = 'assesment ID tidak terdaftar';
+
+            $validate['responden'] = 'required|array';
+            $validate['responden.required'] = 'Responden harus di isi';
+            $validate['responden.array'] = 'Responden harus dalam bentuk dalam array';
+
+            $validate['responden.*.nama'] = 'required';
+            $validate['responden.*.email'] = 'required|email|unique:responden,email';
+
+            $validate_msg['responden.*.nama.required'] = 'Nama responden harus di isi';
+            $validate_msg['responden.*.email.required'] = 'Email responden harus di isi';
+            $validate_msg['responden.*.email.email'] = 'Email tidak valid';
+            $validate_msg['responden.*.email.unique'] = 'Email sudah digunakan';
+
+            $request->validate($validate, $validate_msg);
+
+            $assesment = Assesment::with('organisasi')->find($request->id);
+            if (!$assesment) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+            $organisasi=$assesment->organisasi;
+
+            foreach ($request->responden as $_item_responden)
+            {
+                $responden=new Responden();
+                $responden->nama=$_item_responden['nama'];
+                $responden->email = $_item_responden['email'];
+                $responden->divisi = $_item_responden['divisi'];
+                $responden->posisi = $_item_responden['posisi'];
+                $responden->assesment_id = $assesment->id;
+                $responden->status = 'active';
+                $responden->save();
+
+                // $responden->notify(new InviteRespondenNotif($assesment));
+                // Queue::push(new InviteRespondenNotif($assesment));
+                Notification::send($responden,new InviteRespondenNotif($organisasi));
+
+            }
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

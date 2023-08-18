@@ -14,14 +14,15 @@
     </style>
   <![endif]-->
     <title>{{ $subject }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" media="screen" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
     <style>
         .hover-underline:hover {
             text-decoration: underline !important;
         }
 
         .font-text {
-            font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI;
+            font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;
         }
 
         @keyframes spin {
@@ -83,15 +84,14 @@
 </head>
 
 <body style="margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased; background-color: #eceff1;">
-    <div style="display: none;">Lupa Password Akun Anda</div>
-    <div role="article" aria-roledescription="email" aria-label="Forgot Password">
-        <table style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 100%;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <div role="article" aria-roledescription="email" aria-label="Email Content">
+        <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 100%;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
 
             <tr>
-                <td align="center" style="background-color: #eceff1; font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
-                    <table class="sm-w-full" style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 600px;" width="600" cellpadding="0" cellspacing="0" role="presentation">
+                <td align="center" style="background-color: #eceff1; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
+                    <table class="sm-w-full" style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 600px;" width="600" cellpadding="0" cellspacing="0" role="presentation">
                         <tr class="sm-py-32">
-                            <td align="center" class="sm-px-24" style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
+                            <td align="center" class="sm-px-24" style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
                                 @yield('content')
                             </td>
                         </tr>

@@ -127,6 +127,28 @@ class AuthController extends Controller
         return $this->successResponse();
     }
 
+    public function _checkKodeByToken(Request $request)
+    {
+        $request->validate(
+            [
+                'kode' => 'required',
+                'token'=>'required',
+            ],
+            [
+                'kode.required'=>'Kode OTP harus di isi',
+                'token.required'=>'Token harus di isi',
+            ]
+        );
+
+        $otp=Otp::where('token',$request->token)->first();
+        if($request->kode != $otp->kode)
+        {
+            return $this->errorResponse('Kode OTP yang anda masukan salah',400);
+        }
+
+        return $this->successResponse();
+    }
+
     public function verifyResetPassword(Request $request)
     {
         $request->validate(
@@ -134,12 +156,15 @@ class AuthController extends Controller
                 'otp'=>'required',
                 'token' => 'required',
                 'password' => ['required', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
+                'password_confirmation' => ['required'],
             ],
             [
                 'otp.required' => 'Kode OTP harus di isi',
                 'token.required' => 'Token harus di isi',
                 'password.required' => 'Password harus di isi',
                 'password.min' => 'Password minimal 8 karakter',
+                'password.confirmed' => 'Password tidak sama',
+                'password_confirmation' => 'Konfirmasi password harus di isi',
             ]
         );
 

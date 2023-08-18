@@ -12,7 +12,6 @@
                 Permintaan Atur Ulang Password 🔓
             </p>
 
-
             <p style="margin: 0 0 12px;">
                 Berikut Kode untuk mengatur ulang password akun anda :
             </p>
@@ -57,13 +56,13 @@
                 Jika Anda tidak merasa mengatur ulang password, harap hubungi kami di
                 <a href="mailto:admin@jiep.co.id" class="hover-underline" style="color: #ea7b0b; text-decoration: none;">admin@jiep.co.id</a>
             </p>
-            <p style="margin: 0 0 16px;">Terima Kasih, <br>JIEP Record Center Team</p>
+            <p style="margin: 0 0 16px;">Terima Kasih, <br>Cobit 19</p>
             </td>
         </tr>
         <tr>
             <td style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI; height: 20px;" height="20"></td>
         </tr>
-        <tr>
+        {{-- <tr>
             <td style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI; font-size: 12px; padding-left: 48px; padding-right: 48px; color: #eceff1;">
 
             <p style="color: #263238;">
@@ -72,7 +71,7 @@
                 , All rights Reserved
             </p>
             </td>
-        </tr>
+        </tr> --}}
         <tr>
             <td style="font-family: Public Sans, -apple-system, BlinkMacSystemFont, Segoe UI; height: 16px;" height="16"></td>
         </tr>

@@ -185,7 +185,7 @@ class DesignFaktorController extends Controller
             return $this->successResponse();
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->errorResponse($e->getMessage());
+            return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
 
@@ -291,6 +291,7 @@ class DesignFaktorController extends Controller
                     $df_komponen->design_faktor_id = $id;
                     $df_komponen->nama = $_item_komponen['nama'];
                     $df_komponen->baseline = $_item_komponen['baseline'];
+                    $df_komponen->deskripsi = $_item_komponen['deskripsi'];
                     $df_komponen->save();
                 }
             }
@@ -317,5 +318,27 @@ class DesignFaktorController extends Controller
             DB::rollback();
             return $this->errorResponse($e->getMessage(),$e->getCode());
         }
+    }
+
+    public function removeKomponen($id)
+    {
+        $data = DesignFaktorKomponen::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
+    }
+
+    public function removeQuestion($id)
+    {
+        $data = QuisionerPertanyaan::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak di temukan', 404);
+        }
+        $data->delete();
+
+        return $this->successResponse();
     }
 }

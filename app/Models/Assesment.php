@@ -15,19 +15,10 @@ class Assesment extends Model
     public $incrementing = false;
     protected $table = 'assesment';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'deskripsi'];
+    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','tahun'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->id = Str::uuid();
-        });
-    }
 }

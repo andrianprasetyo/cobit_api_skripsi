@@ -35,6 +35,15 @@ class RolesController extends Controller
         return $this->successResponse($data);
     }
 
+    public function detail($id)
+    {
+        $role = Roles::find($id);
+        if (!$role) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+        return $this->successResponse($role);
+    }
+
     public function addRole(Request $request)
     {
         $request->validate(
@@ -51,6 +60,7 @@ class RolesController extends Controller
         $role->nama=$request->nama;
         $role->code=Str::slug($request->nama, '.');
         $role->aktif=true;
+        $role->deskripsi = $request->deskripsi;
         $role->save();
 
         return $this->successResponse();
@@ -68,16 +78,25 @@ class RolesController extends Controller
         {
             $role->aktif=$request->aktif;
         }
-        $role->nama = $request->nama;
+        if($request->filled('nama'))
+        {
+            $role->nama = $request->nama;
+        }
+        $role->deskripsi = $request->deskripsi;
         $role->save();
         return $this->successResponse();
     }
 
     public function deleteRole($id)
     {
-        $role = Roles::find($id);
+        $role = Roles::withCount(['usersrole as total_user'])->find($id);
         if (!$role) {
             return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        if($role->total_user > 0)
+        {
+            return $this->errorResponse('Role '.$role->nama.' sedang digunakan',400);
         }
 
         $role->delete();

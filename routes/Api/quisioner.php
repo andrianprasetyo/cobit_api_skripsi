@@ -1,4 +1,5 @@
 <?php
-Route::group(['middleware' => ['jwt.auth']], function ($router) {
-    Route::post('/quisioner/add', 'QuisionerController@add');
+Route::group([], function ($router) {
+    Route::get('/quisioner/responden/detail', 'QuisionerController@detailRespondenByEmail');
+    Route::post('/quisioner/responden/save', 'QuisionerController@start');
 });

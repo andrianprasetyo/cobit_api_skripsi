@@ -39,4 +39,9 @@ class DesignFaktor extends Model
     {
         return $this->hasMany(QuisionerPertanyaan::class, 'design_faktor_id', 'id');
     }
+
+    public function pertanyaan()
+    {
+        return $this->hasOne(QuisionerPertanyaan::class, 'design_faktor_id', 'id');
+    }
 }

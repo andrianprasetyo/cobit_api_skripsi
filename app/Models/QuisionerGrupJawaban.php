@@ -14,7 +14,7 @@ class QuisionerGrupJawaban extends Model
     public $incrementing = false;
     protected $table = 'quisioner_grup_jawaban';
     protected $keyType = 'string';
-    protected $fillable = ['id','nama','jenis'];
+    protected $fillable = ['id','nama','jenis','deskripsi'];
 
     protected $hidden = [
         'deleted_at',

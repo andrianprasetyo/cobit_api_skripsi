@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
 use App\Models\Quisioner;
+use App\Models\QuisionerHasil;
+use App\Models\QuisionerJawaban;
 use App\Models\QuisionerPertanyaan;
 use App\Models\Responden;
 use App\Traits\JsonResponse;
@@ -47,6 +49,66 @@ class QuisionerController extends Controller
         $responden->save();
 
         return $this->successResponse($responden);
+    }
+
+    public function listquestion(Request $request)
+    {
+        $page = $request->get('question', 1);
+        $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner']);
+
+        $list->orderBy('sorting','ASC');
+        $data = $this->paging($list, 1, $page);
+        return $this->successResponse($data);
+    }
+
+    public function saveJawaban(Request $request)
+    {
+        $validate['quisioner_id'] = 'required|uuid|exists:quisioner,id';
+        $validate_msg['quisioner_id.required']='Quisioner ID harus di isi';
+        $validate_msg['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
+        $validate_msg['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
+
+        $validate['quisioner_pertanyaan_id'] = 'required|uuid|exists:quisioner_pertanyaan,id';
+        $validate_msg['quisioner_pertanyaan_id.required'] = 'Quisioner Pertanyaan ID harus di isi';
+        $validate_msg['quisioner_pertanyaan_id.uuid'] = 'Quisioner Pertanyaan ID tidak valid';
+        $validate_msg['quisioner_pertanyaan_id.exists'] = 'Quisioner Pertanyaan ID tidak terdaftar';
+
+        $validate['quisioner_jawaban_id'] = 'required|uuid|exists:quisioner_jawaban,id';
+        $validate_msg['quisioner_jawaban_id.required'] = 'Quisioner jawaban ID harus di isi';
+        $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
+        $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
+
+        $validate['assesment_user_id'] = 'required|uuid|exists:assesment,id';
+        $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
+        $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
+        $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
+
+        $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
+        $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
+        $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
+        $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
+
+        // $validate['bobot']= 'required|number';
+        // $validate['bobot.required'] ='Bobot harus di isi';
+        // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
+
+        $request->validate($validate,$validate_msg);
+
+        try {
+            $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
+            $data = new QuisionerHasil();
+            $data->quisioner_id = $request->quisioner_id;
+            $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
+            $data->quisioner_jawaban_id = $request->quisioner_jawaban_id;
+            $data->assesment_user_id = $request->assesment_user_id;
+            $data->design_faktor_komponen_id = $request->design_faktor_komponen_id;
+            $data->bobot = $bobot->bobot;
+            $data->save();
+
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
     // public function add(Request $request)
     // {

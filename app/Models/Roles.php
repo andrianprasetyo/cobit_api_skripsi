@@ -23,12 +23,8 @@ class Roles extends Model
         'created_at'
     ];
 
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($model) {
-    //         $model->id = Str::uuid();
-    //     });
-    // }
+    public function usersrole()
+    {
+        return $this->hasMany(RoleUsers::class,'roles_id','id');
+    }
 }

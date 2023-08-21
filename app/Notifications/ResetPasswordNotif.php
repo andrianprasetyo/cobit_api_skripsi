@@ -36,7 +36,8 @@ class ResetPasswordNotif extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $data['nama'] = $notifiable->email;
-        $data['kode']= $notifiable->otp->kode;
+        $data['kode'] = $notifiable->otp->kode;
+        // $data['kode']= $this->data->kode;
         $data['url'] = config('app.url_fe').'/auth/forgot-password/verify?token='. $notifiable->otp->token;
         return (new MailMessage)
                     ->subject('Reset Password | '.config('app.name'))

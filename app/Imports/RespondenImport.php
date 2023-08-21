@@ -63,10 +63,17 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
         // ]);
 
         $responden = new Responden();
-        $responden->nama = $row['nama'];
         $responden->email = $row['email'];
-        $responden->divisi = $row['divisi'];
-        $responden->posisi = $row['posisi'];
+        if(isset($row['nama']) && $row['nama'] !='')
+        {
+            $responden->nama = $row['nama'];
+        }
+        if (isset($row['divisi']) && $row['divisi'] != '') {
+            $responden->divisi = $row['divisi'];
+        }
+        if (isset($row['posisi']) && $row['posisi'] != '') {
+            $responden->posisi = $row['posisi'];
+        }
         $responden->assesment_id = $this->assesment_id;
         $responden->status = 'active';
         $responden->save();

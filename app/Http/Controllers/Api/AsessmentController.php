@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Imports\RespondenImport;
 use App\Models\Assesment;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AsessmentController extends Controller
 {
@@ -145,7 +147,7 @@ class AsessmentController extends Controller
 
             $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
-            Notification::send($user, new InviteUserNotif());
+            Notification::send($user, new InviteUserNotif($user_ass));
 
             DB::commit();
             return $this->successResponse();
@@ -162,7 +164,9 @@ class AsessmentController extends Controller
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $data->delete();
+        $data->save();
+
+        $this->successResponse();
     }
 
     public function remove($id)
@@ -179,6 +183,7 @@ class AsessmentController extends Controller
     public function inviteRespondent(Request $request)
     {
 
+        DB::beginTransaction();
         try {
 
             $validate['id'] = 'required|exists:assesment,id';
@@ -225,6 +230,36 @@ class AsessmentController extends Controller
             return $this->successResponse();
         } catch (\Exception $e) {
             DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function inviteRespondentByExcel(Request $request)
+    {
+
+        $request->validate(
+            [
+                'id'=>'required|uuid|exists:assesment,id',
+                'file'=> 'required|mimes:'.config('filesystems.validation.docs.excel.mimes').'|max:'. config('filesystems.validation.docs.excel.size')
+            ],
+            [
+                'id.required' => 'Assesment ID harus di isi',
+                'id.uuid' => 'Assesment ID tidak valid',
+                'id.exists' => 'Assesment ID tidak terdaftar',
+                'file.required'=>'File harus di isi',
+                'file.mimes' => 'File tidak valid ('. config('filesystems.validation.docs.excel.mimes').')',
+                'file.max'=>'Maksimal file (' . config('filesystems.validation.docs.excel.size') . ')',
+            ]
+        );
+
+        $file = $request->file('file');
+
+        try {
+
+            Excel::import(new RespondenImport($request->id), $file);
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            // DB::rollback();
             return $this->errorResponse($e->getMessage());
         }
     }

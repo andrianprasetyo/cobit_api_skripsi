@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         $user->otp=$otp;
         // $user->notify(new ResetPasswordNotif($otp));
-        Notification::send($user, new ResetPasswordNotif($otp));
+        Notification::send($user, new ResetPasswordNotif());
 
         return $this->successResponse(null,'Email reset password terkirim, akan kadaluarsa dalam '.$exp.' menit');
     }

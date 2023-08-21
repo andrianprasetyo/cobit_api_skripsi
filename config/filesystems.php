@@ -78,6 +78,12 @@ return [
             'mimes'=>'jpg,png,jpeg',
             'size'=>500
         ],
+        'docs'=>[
+            'excel'=>[
+                'mimes'=>'xls,xlsx',
+                'size'=>1000
+            ]
+        ]
     ],
     'path'=>[
         'avatar'=>'media/avatar/'

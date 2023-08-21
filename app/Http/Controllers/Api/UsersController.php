@@ -93,6 +93,7 @@ class UsersController extends Controller
         $user->divisi = $request->divisi;
         $user->posisi = $request->posisi;
         $user->status='pending';
+        $user->password='admin';
         $user->save();
 
         $role_user=new RoleUsers();

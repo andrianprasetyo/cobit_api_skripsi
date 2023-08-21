@@ -78,10 +78,20 @@ class QuisionerController extends Controller
         $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
         $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
 
-        $validate['assesment_user_id'] = 'required|uuid|exists:assesment,id';
-        $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
-        $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
-        $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
+        // $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
+        // $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
+        // $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
+        // $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
+
+        $validate['responden_id'] = 'required|uuid|exists:responden,id';
+        $validate_msg['responden_id.required'] = 'Responden user ID harus di isi';
+        $validate_msg['responden_id.uuid'] = 'Responden ID tidak valid';
+        $validate_msg['responden_id.exists'] = 'Responden ID tidak terdaftar';
+
+        $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
+        $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
+        $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
+        $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
 
         $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
         $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
@@ -93,21 +103,35 @@ class QuisionerController extends Controller
         // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
 
         $request->validate($validate,$validate_msg);
+        $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
+            ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
+            ->where('jawaban_id', $request->quisioner_jawaban_id)
+            ->where('responden_id', $request->responden_id)
+            // ->where('assesment_user_id', $request->assesment_user_id)
+            ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
+            ->exists();
+
+        if($_check_jawaban)
+        {
+            return $this->errorResponse('Anda sudah mengisi jawaban ini',400);
+        }
 
         try {
             $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
             $data = new QuisionerHasil();
             $data->quisioner_id = $request->quisioner_id;
             $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
-            $data->quisioner_jawaban_id = $request->quisioner_jawaban_id;
-            $data->assesment_user_id = $request->assesment_user_id;
+            $data->jawaban_id = $request->quisioner_jawaban_id;
+            // $data->assesment_user_id = $request->assesment_user_id;
+            $data->responden_id = $request->responden_id;
             $data->design_faktor_komponen_id = $request->design_faktor_komponen_id;
             $data->bobot = $bobot->bobot;
             $data->save();
 
             return $this->successResponse();
-        } catch (\Throwable $th) {
-            //throw $th;
+        } catch (\Exception $e) {
+            // DB::rollback();
+            return $this->errorResponse($e->getMessage());
         }
     }
     // public function add(Request $request)

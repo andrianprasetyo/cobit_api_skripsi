@@ -15,7 +15,7 @@ class QuisionerHasil extends Model
     protected $table = 'quisioner_hasil';
     protected $keyType = 'string';
 
-    protected $fillable = ['quisioner_id', 'quisioner_pertanyaan_id','jawaban_id','assesment_users_id','bobot','design_faktor_komponen_id'];
+    protected $fillable = ['quisioner_id', 'quisioner_pertanyaan_id','jawaban_id','assesment_users_id','bobot','design_faktor_komponen_id','responden_id'];
 
     protected $hidden = [
         'deleted_at',

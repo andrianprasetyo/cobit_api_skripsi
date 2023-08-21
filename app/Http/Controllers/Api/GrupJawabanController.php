@@ -62,6 +62,7 @@ class GrupJawabanController extends Controller
             $grup = new QuisionerGrupJawaban();
             $grup->nama = $request->nama;
             $grup->jenis = $request->jenis;
+            $grup->deskripsi = $request->deskripsi;
             $grup->save();
 
             $_jawaban = [];
@@ -139,6 +140,7 @@ class GrupJawabanController extends Controller
 
         $grup->nama=$request->nama;
         $grup->jenis = $request->jenis;
+        $grup->deskripsi = $request->deskripsi;
         $grup->save();
 
         foreach ($jawabans as $_item_jawaban)

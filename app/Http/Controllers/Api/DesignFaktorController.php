@@ -56,9 +56,11 @@ class DesignFaktorController extends Controller
             ]
         );
 
+        $max_sorting=DesignFaktor::max('sorting')+1;
         $data = new DesignFaktor();
         $data->kode = $request->kode;
         $data->nama = $request->nama;
+        $data->sorting = $max_sorting;
         $data->deskripsi = $request->deskripsi;
         $data->save();
 
@@ -105,7 +107,6 @@ class DesignFaktorController extends Controller
 
         return $this->successResponse();
     }
-
 
     public function addQuisioner(Request $request)
     {
@@ -157,9 +158,11 @@ class DesignFaktorController extends Controller
                 return $this->errorResponse('Kode ' . $request->df_kode . ' sudah digunakan', 400);
             }
 
+            $max_sorting = DesignFaktor::max('sorting') + 1;
             $df = new DesignFaktor();
             $df->kode = $request->df_kode;
             $df->nama = $request->df_nama;
+            $df->sorting = $max_sorting;
             $df->deskripsi = $request->df_deskripsi;
             $df->save();
 

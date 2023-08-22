@@ -127,21 +127,30 @@ class QuisionerController extends Controller
         // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
 
         $request->validate($validate,$validate_msg);
-        $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
-            ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
-            ->where('jawaban_id', $request->quisioner_jawaban_id)
-            ->where('assesment_users_id', $request->assesment_user_id)
-            ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
-            ->exists();
+        // $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
+        //     ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
+        //     ->where('jawaban_id', $request->quisioner_jawaban_id)
+        //     ->where('assesment_users_id', $request->assesment_user_id)
+        //     ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
+        //     ->exists();
 
-        if($_check_jawaban)
-        {
-            return $this->errorResponse('Anda sudah mengisi quisioner jawaban ini',400);
-        }
+        // if($_check_jawaban)
+        // {
+        //     return $this->errorResponse('Anda sudah mengisi quisioner jawaban ini',400);
+        // }
 
         try {
             $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
-            $data = new QuisionerHasil();
+
+            // $data = new QuisionerHasil();
+
+            $data=QuisionerHasil::firstOrNew([
+                'quisioner_id'=> $request->quisioner_id,
+                'quisioner_pertanyaan_id'=> $request->quisioner_pertanyaan_id,
+                'assesment_users_id'=> $request->assesment_user_id,
+                'design_faktor_komponen_id'=> $request->design_faktor_komponen_id,
+            ]);
+
             $data->quisioner_id = $request->quisioner_id;
             $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
             $data->jawaban_id = $request->quisioner_jawaban_id;

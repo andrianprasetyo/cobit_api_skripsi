@@ -15,6 +15,9 @@ class AssessmentQuisioner extends Model
     protected $table = 'assesment_quisioner';
     protected $keyType = 'string';
 
+    protected $fillable = ['assesment_id', 'quisioner_id', 'organisasi_id', 'allow'];
+
+
     protected $hidden = [
         'deleted_at',
         'updated_at'

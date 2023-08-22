@@ -15,6 +15,8 @@ class AssessmentUsersHasil extends Model
     protected $table = 'assesment_users_hasil';
     protected $keyType = 'string';
 
+    protected $fillable = ['design_faktor_id', 'assesment_user_id', 'domain_id', 'score', 'baseline_score', 'relative_importance'];
+
     protected $hidden = [
         'deleted_at',
         'updated_at'

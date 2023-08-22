@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
 use App\Models\Quisioner;
@@ -16,8 +17,6 @@ use Illuminate\Http\Request;
 class QuisionerController extends Controller
 {
     use JsonResponse;
-
-
     public function detailRespondenByCode(Request $request)
     {
         $responden = AssessmentUsers::with(['assesment.organisasi'])->where('code',$request->get('code'))->first();
@@ -36,10 +35,17 @@ class QuisionerController extends Controller
         $validate_msg['id.uuid'] = 'Responden ID tidak valid';
         $validate_msg['id.exists'] = 'Responden ID tidak terdaftar';
 
+        // $validate['assesment_id'] = 'required|uuid|exists:assesment,id';
+        // $validate_msg['assesment_id.required'] = 'Assesment ID harus di isi';
+        // $validate_msg['assesment_id.uuid'] = 'Assesment ID tidak valid';
+        // $validate_msg['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
+
         $validate['nama']='required';
         $validate_msg['nama.required'] = 'Nama responden harus di isi';
 
         $request->validate($validate,$validate_msg);
+
+        $quisioner = Quisioner::where('aktif', true)->first();
 
         $id=$request->id;
         $responden= AssessmentUsers::with(['assesment.organisasi'])->find($id);
@@ -47,6 +53,13 @@ class QuisionerController extends Controller
         $responden->divisi = $request->divisi;
         $responden->jabatan = $request->jabatan;
         $responden->save();
+
+        $quisioner_responden = new AssessmentQuisioner();
+        $quisioner_responden->assesment_id = $responden->assesment->id;
+        $quisioner_responden->quisioner_id = $quisioner->id;
+        $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
+        $quisioner_responden->allow = true;
+        $quisioner_responden->save();
 
         return $this->successResponse($responden);
     }
@@ -112,7 +125,7 @@ class QuisionerController extends Controller
 
         if($_check_jawaban)
         {
-            return $this->errorResponse('Anda sudah mengisi jawaban ini',400);
+            return $this->errorResponse('Anda sudah mengisi quisioner jawaban ini',400);
         }
 
         try {

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
+use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
+use App\Models\Quisioner;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
@@ -211,7 +213,7 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
             $organisasi=$assesment->organisasi;
-
+            // $quisioner=Quisioner::where('aktif',true)->first();
             foreach ($request->responden as $_item_responden)
             {
                 $responden=new AssessmentUsers();
@@ -224,6 +226,12 @@ class AsessmentController extends Controller
                 $responden->code = Str::random(50);
                 $responden->save();
 
+                // $quisioner_responden=new AssessmentQuisioner();
+                // $quisioner_responden->assesment_id=$assesment->id;
+                // $quisioner_responden->quisioner_id = $quisioner->id;
+                // $quisioner_responden->organisasi_id = $quisioner->organisasi->id;
+                // $quisioner_responden->allow=true;
+                // $quisioner_responden->save();
                 // $responden->notify(new InviteRespondenNotif($assesment));
                 // Queue::push(new InviteRespondenNotif($assesment));
                 Notification::send($responden,new InviteRespondenNotif($organisasi));

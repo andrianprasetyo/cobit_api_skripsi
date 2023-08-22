@@ -24,21 +24,24 @@ class CobitHelper
         return $mime;
     }
     public static function getQuisionerHasil($assesment_user_id){
-        $designFaktor=DesignFaktor::get();
-        AssessmentUsersHasil::where('assesment_user_id',$assesment_user_id)->delete();
-        $u=AssessmentUsers::where('id',$assesment_user_id)->first();
-        $u->is_proses='running';
-        $u->save();
-        foreach($designFaktor as $df){
-            $straightProsesDF=['DF1','DF3','DF4','DF5','DF6','DF7','DF8','DF9','DF10'];
-            if(in_array($df->kode,$straightProsesDF)){
-                CobitHelper::prosesHasilStraight($assesment_user_id,$df->id);
-            }else if($df->kode=='DF2'){
-                CobitHelper::prosesHasilDF2($assesment_user_id,$df->id);
+        $checkQuesionerDone=AssessmentUsers::where('status','done')->where('id',$assesment_user_id)->first();
+        if($checkQuesionerDone){
+            $designFaktor=DesignFaktor::get();
+            AssessmentUsersHasil::where('assesment_user_id',$assesment_user_id)->delete();
+            $u=AssessmentUsers::where('id',$assesment_user_id)->first();
+            $u->is_proses='running';
+            $u->save();
+            foreach($designFaktor as $df){
+                $straightProsesDF=['DF1','DF3','DF4','DF5','DF6','DF7','DF8','DF9','DF10'];
+                if(in_array($df->kode,$straightProsesDF)){
+                    CobitHelper::prosesHasilStraight($assesment_user_id,$df->id);
+                }else if($df->kode=='DF2'){
+                    CobitHelper::prosesHasilDF2($assesment_user_id,$df->id);
+                }
             }
+            $u->is_proses='done';
+            $u->save();
         }
-        $u->is_proses='done';
-        $u->save();
     }
 
     public static function prosesHasilDF2($assesment_user_id,$designFaktorId){

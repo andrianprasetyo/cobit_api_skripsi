@@ -42,6 +42,10 @@ class AsessmentController extends Controller
             $list->where('status',$request->status);
         }
 
+        if ($request->filled('organisasi_id')) {
+            $list->where('organisasi_id', $request->organisasi_id);
+        }
+
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page);
         return $this->successResponse($data);

@@ -18,9 +18,9 @@ class QuisionerController extends Controller
     use JsonResponse;
 
 
-    public function detailRespondenByEmail(Request $request)
+    public function detailRespondenByCode(Request $request)
     {
-        $responden = AssessmentUsers::with(['assesment.organisasi'])->where('email',$request->get('email'))->first();
+        $responden = AssessmentUsers::with(['assesment.organisasi'])->where('code',$request->get('code'))->first();
         if(!$responden)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -31,7 +31,7 @@ class QuisionerController extends Controller
 
     public function start(Request $request)
     {
-        $validate['id']='required|uuid|exists:responden,id';
+        $validate['id']='required|uuid|exists:assesment_users,id';
         $validate_msg['id.required']='Responden ID harus di isi';
         $validate_msg['id.uuid'] = 'Responden ID tidak valid';
         $validate_msg['id.exists'] = 'Responden ID tidak terdaftar';
@@ -45,7 +45,7 @@ class QuisionerController extends Controller
         $responden= AssessmentUsers::with(['assesment.organisasi'])->find($id);
         $responden->nama = $request->nama;
         $responden->divisi = $request->divisi;
-        $responden->posisi = $request->posisi;
+        $responden->jabatan = $request->jabatan;
         $responden->save();
 
         return $this->successResponse($responden);
@@ -78,15 +78,15 @@ class QuisionerController extends Controller
         $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
         $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
 
-        // $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
-        // $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
-        // $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
-        // $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
+        $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
+        $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
+        $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
+        $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
 
-        $validate['responden_id'] = 'required|uuid|exists:responden,id';
-        $validate_msg['responden_id.required'] = 'Responden user ID harus di isi';
-        $validate_msg['responden_id.uuid'] = 'Responden ID tidak valid';
-        $validate_msg['responden_id.exists'] = 'Responden ID tidak terdaftar';
+        // $validate['responden_id'] = 'required|uuid|exists:assesment_users,id';
+        // $validate_msg['responden_id.required'] = 'Responden user ID harus di isi';
+        // $validate_msg['responden_id.uuid'] = 'Responden ID tidak valid';
+        // $validate_msg['responden_id.exists'] = 'Responden ID tidak terdaftar';
 
         $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
         $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
@@ -106,8 +106,7 @@ class QuisionerController extends Controller
         $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
             ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
             ->where('jawaban_id', $request->quisioner_jawaban_id)
-            ->where('responden_id', $request->responden_id)
-            // ->where('assesment_user_id', $request->assesment_user_id)
+            ->where('assesment_user_id', $request->assesment_user_id)
             ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
             ->exists();
 
@@ -122,8 +121,7 @@ class QuisionerController extends Controller
             $data->quisioner_id = $request->quisioner_id;
             $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
             $data->jawaban_id = $request->quisioner_jawaban_id;
-            // $data->assesment_user_id = $request->assesment_user_id;
-            $data->responden_id = $request->responden_id;
+            $data->assesment_user_id = $request->assesment_user_id;
             $data->design_faktor_komponen_id = $request->design_faktor_komponen_id;
             $data->bobot = $bobot->bobot;
             $data->save();

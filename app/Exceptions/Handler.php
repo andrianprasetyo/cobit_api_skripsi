@@ -65,13 +65,19 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (QueryException $e, $request) {
             if ($request->is('api/*')) {
-                $error = array(
-                    'exception' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTrace()
-                );
-                return $this->errorResponse($e->getMessage(), 500, $error);
+
+                if(config('app.debug'))
+                {
+                    $error = array(
+                        'exception' => get_class($e),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTrace()
+                    );
+                    return $this->errorResponse($e->getMessage(), 500, $error);
+                }
+
+                return $this->errorResponse('Terjadi kesalahan pada server', 500);
             }
         });
 
@@ -83,13 +89,19 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (ConnectionException $e, $request) {
             if ($request->is('api/*')) {
-                $error = array(
-                    'exception' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTrace()
-                );
-                return $this->errorResponse($e->getMessage(), 408, $error);
+
+                if (config('app.debug'))
+                {
+                    $error = array(
+                        'exception' => get_class($e),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTrace()
+                    );
+                    return $this->errorResponse($e->getMessage(), 408, $error);
+                }
+
+                return $this->errorResponse('Terjadi kesalahan pada server', 500);
             }
         });
     }

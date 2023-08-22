@@ -3,13 +3,14 @@
 namespace App\Imports;
 
 use App\Models\Assesment;
-use App\Models\Responden;
+use App\Models\AssessmentUsers;
 use App\Notifications\InviteRespondenNotif;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithStartRow
 {
@@ -25,7 +26,7 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
     {
         return [
             'nama' => 'required',
-            'email' => 'required|email|unique:responden,email',
+            'email' => 'required|email|unique:assesment_users,email',
         ];
     }
 
@@ -52,17 +53,8 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
     */
     public function model(array $row)
     {
-        // dd($row);
-        // return new Responden([
-        //     'nama'=>$row['nama'],
-        //     'email' => $row['email'],
-        //     'divisi' => $row['divisi'],
-        //     'posisi' => $row['posisi'],
-        //     'assesment_id'=>$this->assesment_id,
-        //     'status'=>'active'
-        // ]);
 
-        $responden = new Responden();
+        $responden = new AssessmentUsers();
         $responden->email = $row['email'];
         if(isset($row['nama']) && $row['nama'] !='')
         {
@@ -71,11 +63,12 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
         if (isset($row['divisi']) && $row['divisi'] != '') {
             $responden->divisi = $row['divisi'];
         }
-        if (isset($row['posisi']) && $row['posisi'] != '') {
-            $responden->posisi = $row['posisi'];
+        if (isset($row['jabatan']) && $row['jabatan'] != '') {
+            $responden->jabatan = $row['jabatan'];
         }
         $responden->assesment_id = $this->assesment_id;
         $responden->status = 'active';
+        $responden->code = Str::random(50);
         $responden->save();
 
         $assesment = Assesment::with('organisasi')->find($this->assesment_id);

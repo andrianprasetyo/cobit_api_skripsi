@@ -7,7 +7,6 @@ use App\Imports\RespondenImport;
 use App\Models\Assesment;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
-use App\Models\Responden;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
@@ -194,7 +193,7 @@ class AsessmentController extends Controller
             $validate['responden.array'] = 'Responden harus dalam bentuk dalam array';
 
             $validate['responden.*.nama'] = 'required';
-            $validate['responden.*.email'] = 'required|email|unique:responden,email';
+            $validate['responden.*.email'] = 'required|email|unique:assesment_users,email';
 
             $validate_msg['responden.*.nama.required'] = 'Nama responden harus di isi';
             $validate_msg['responden.*.email.required'] = 'Email responden harus di isi';
@@ -211,13 +210,14 @@ class AsessmentController extends Controller
 
             foreach ($request->responden as $_item_responden)
             {
-                $responden=new Responden();
+                $responden=new AssessmentUsers();
                 $responden->nama=$_item_responden['nama'];
                 $responden->email = $_item_responden['email'];
                 $responden->divisi = $_item_responden['divisi'];
-                $responden->posisi = $_item_responden['posisi'];
+                $responden->jabatan = $_item_responden['jabatan'];
                 $responden->assesment_id = $assesment->id;
                 $responden->status = 'active';
+                $responden->code = Str::random(50);
                 $responden->save();
 
                 // $responden->notify(new InviteRespondenNotif($assesment));

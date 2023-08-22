@@ -194,19 +194,30 @@ class AsessmentController extends Controller
             $validate_msg['id.required'] = 'assesment ID harus di isi';
             $validate_msg['id.exists'] = 'assesment ID tidak terdaftar';
 
-            $validate['responden'] = 'required|array';
-            $validate['responden.required'] = 'Responden harus di isi';
-            $validate['responden.array'] = 'Responden harus dalam bentuk dalam array';
+            $validate['email'] = 'required|array';
+            $validate['email.*'] = 'required|email|unique:assesment_users,email';
 
-            $validate['responden.*.nama'] = 'required';
-            $validate['responden.*.email'] = 'required|email|unique:assesment_users,email';
+            $validate_msg['email.required'] = 'Email harus di isi';
+            $validate_msg['email.array'] = 'Email harus dalam bentuk array';
+            $validate_msg['email.*.required'] = 'Email harus di isi';
+            $validate_msg['email.*.email'] = 'Email tidak valid';
+            $validate_msg['email.*.unique'] = 'Email sudah digunakan';
 
-            $validate_msg['responden.*.nama.required'] = 'Nama responden harus di isi';
-            $validate_msg['responden.*.email.required'] = 'Email responden harus di isi';
-            $validate_msg['responden.*.email.email'] = 'Email tidak valid';
-            $validate_msg['responden.*.email.unique'] = 'Email sudah digunakan';
+            // $validate['responden'] = 'required|array';
+            // $validate['responden.required'] = 'Responden harus di isi';
+            // $validate['responden.array'] = 'Responden harus dalam bentuk dalam array';
+
+            // $validate['responden.*.nama'] = 'required';
+            // $validate['responden.*.email'] = 'required|email|unique:assesment_users,email';
+
+            // $validate_msg['responden.*.nama.required'] = 'Nama responden harus di isi';
+            // $validate_msg['responden.*.email.required'] = 'Email responden harus di isi';
+            // $validate_msg['responden.*.email.email'] = 'Email tidak valid';
+            // $validate_msg['responden.*.email.unique'] = 'Email sudah digunakan';
 
             $request->validate($validate, $validate_msg);
+
+            // return $this->successResponse();
 
             $assesment = Assesment::with('organisasi')->find($request->id);
             if (!$assesment) {
@@ -214,28 +225,39 @@ class AsessmentController extends Controller
             }
             $organisasi=$assesment->organisasi;
             // $quisioner=Quisioner::where('aktif',true)->first();
-            foreach ($request->responden as $_item_responden)
+            // foreach ($request->responden as $_item_responden)
+            // {
+            //     $responden=new AssessmentUsers();
+            //     // $responden->nama=$_item_responden['nama'];
+            //     $responden->email = $_item_responden['email'];
+            //     // $responden->divisi = $_item_responden['divisi'];
+            //     // $responden->jabatan = $_item_responden['jabatan'];
+            //     // $responden->assesment_id = $assesment->id;
+            //     // $responden->status = 'active';
+            //     $responden->code = Str::random(50);
+            //     $responden->save();
+
+            //     // $quisioner_responden=new AssessmentQuisioner();
+            //     // $quisioner_responden->assesment_id=$assesment->id;
+            //     // $quisioner_responden->quisioner_id = $quisioner->id;
+            //     // $quisioner_responden->organisasi_id = $quisioner->organisasi->id;
+            //     // $quisioner_responden->allow=true;
+            //     // $quisioner_responden->save();
+            //     // $responden->notify(new InviteRespondenNotif($assesment));
+            //     // Queue::push(new InviteRespondenNotif($assesment));
+            //     Notification::send($responden,new InviteRespondenNotif($organisasi));
+            //     // Notification::route('mail', $responden->email)->notify(new InviteRespondenNotif($organisasi));
+            // }
+
+            foreach ($request->email as $_item_email)
             {
-                $responden=new AssessmentUsers();
-                $responden->nama=$_item_responden['nama'];
-                $responden->email = $_item_responden['email'];
-                $responden->divisi = $_item_responden['divisi'];
-                $responden->jabatan = $_item_responden['jabatan'];
+                $responden = new AssessmentUsers();
+                $responden->email = $_item_email;
                 $responden->assesment_id = $assesment->id;
-                $responden->status = 'active';
+                $responden->status = 'pending';
                 $responden->code = Str::random(50);
                 $responden->save();
-
-                // $quisioner_responden=new AssessmentQuisioner();
-                // $quisioner_responden->assesment_id=$assesment->id;
-                // $quisioner_responden->quisioner_id = $quisioner->id;
-                // $quisioner_responden->organisasi_id = $quisioner->organisasi->id;
-                // $quisioner_responden->allow=true;
-                // $quisioner_responden->save();
-                // $responden->notify(new InviteRespondenNotif($assesment));
-                // Queue::push(new InviteRespondenNotif($assesment));
-                Notification::send($responden,new InviteRespondenNotif($organisasi));
-
+                Notification::send($responden, new InviteRespondenNotif($organisasi));
             }
             DB::commit();
             return $this->successResponse();

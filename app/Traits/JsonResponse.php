@@ -1,6 +1,8 @@
 <?php
 namespace App\Traits;
 
+use Illuminate\Http\Request;
+
 trait JsonResponse
 {
     protected function successResponse($data=null, $message = 'Ok', $code = 200)
@@ -35,7 +37,8 @@ trait JsonResponse
 
             $meta['per_page'] = (int) $limit;
             $meta['total_page'] = ceil($total / $limit);
-            $meta['current_page'] = ceil($offset / $limit) + 1;
+            // $meta['current_page'] = ceil($offset / $limit) + 1;
+            $meta['current_page'] = (int)$offset;
         }
 
         $data['list'] = $list->get();

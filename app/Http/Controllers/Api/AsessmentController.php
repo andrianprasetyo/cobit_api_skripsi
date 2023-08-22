@@ -33,7 +33,7 @@ class AsessmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = Assesment::query();
+        $list = Assesment::with(['organisasi']);
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }

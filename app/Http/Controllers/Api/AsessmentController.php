@@ -50,7 +50,7 @@ class AsessmentController extends Controller
 
     public function detailByID($id)
     {
-        $data=Assesment::find($id);
+        $data=Assesment::with(['organisasi'])->find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -158,7 +158,7 @@ class AsessmentController extends Controller
 
     public function edit(Request $request,$id)
     {
-        $data = Assesment::find($id);
+        $data = Assesment::with(['organisasi'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

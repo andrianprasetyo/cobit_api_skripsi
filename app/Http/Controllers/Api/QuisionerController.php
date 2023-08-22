@@ -9,7 +9,7 @@ use App\Models\Quisioner;
 use App\Models\QuisionerHasil;
 use App\Models\QuisionerJawaban;
 use App\Models\QuisionerPertanyaan;
-use App\Models\Responden;
+use App\Models\AssessmentUsers;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +20,7 @@ class QuisionerController extends Controller
 
     public function detailRespondenByEmail(Request $request)
     {
-        $responden = Responden::with(['assesment.organisasi'])->where('email',$request->get('email'))->first();
+        $responden = AssessmentUsers::with(['assesment.organisasi'])->where('email',$request->get('email'))->first();
         if(!$responden)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -42,7 +42,7 @@ class QuisionerController extends Controller
         $request->validate($validate,$validate_msg);
 
         $id=$request->id;
-        $responden=Responden::with(['assesment.organisasi'])->find($id);
+        $responden= AssessmentUsers::with(['assesment.organisasi'])->find($id);
         $responden->nama = $request->nama;
         $responden->divisi = $request->divisi;
         $responden->posisi = $request->posisi;

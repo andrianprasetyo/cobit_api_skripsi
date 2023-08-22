@@ -244,7 +244,8 @@ class CobitHelper
         // get data kuesioner respondent by df
         $dataQuesioner=DB::select("
             SELECT
-                qj.bobot as jawaban_bobot,
+                qh.bobot as jawaban_bobot,
+                -- qj.bobot as jawaban_bobot,
                 dfk.baseline,
                 dfk.design_faktor_id,
                 dfk.nama,

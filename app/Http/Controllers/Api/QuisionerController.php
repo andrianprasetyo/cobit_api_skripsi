@@ -52,6 +52,8 @@ class QuisionerController extends Controller
         $responden->nama = $request->nama;
         $responden->divisi = $request->divisi;
         $responden->jabatan = $request->jabatan;
+        $responden->jabatan = $request->jabatan;
+        $responden->status = 'active';
         $responden->save();
 
         $quisioner_responden = new AssessmentQuisioner();
@@ -64,10 +66,19 @@ class QuisionerController extends Controller
         return $this->successResponse($responden);
     }
 
-    public function listquestion(Request $request)
+    public function listquestion(Request $request,$id)
     {
         $page = $request->get('question', 1);
-        $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner']);
+
+        $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($id);
+        if(!$user_assesment)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        // $user_quisioner=AssessmentQuisioner::where('')
+        $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner'])
+            ->whereRelation('pertanyaan','quisioner_id',$user_assesment->assesmentquisioner->quisioner_id);
 
         $list->orderBy('sorting','ASC');
         $data = $this->paging($list, 1, $page);
@@ -119,7 +130,7 @@ class QuisionerController extends Controller
         $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
             ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
             ->where('jawaban_id', $request->quisioner_jawaban_id)
-            ->where('assesment_user_id', $request->assesment_user_id)
+            ->where('assesment_users_id', $request->assesment_user_id)
             ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
             ->exists();
 
@@ -134,7 +145,7 @@ class QuisionerController extends Controller
             $data->quisioner_id = $request->quisioner_id;
             $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
             $data->jawaban_id = $request->quisioner_jawaban_id;
-            $data->assesment_user_id = $request->assesment_user_id;
+            $data->assesment_users_id = $request->assesment_user_id;
             $data->design_faktor_komponen_id = $request->design_faktor_komponen_id;
             $data->bobot = $bobot->bobot;
             $data->save();

@@ -27,4 +27,9 @@ class AssessmentUsers extends Model
     {
         return $this->belongsTo(Assesment::class, 'assesment_id');
     }
+
+    public function assesmentquisioner()
+    {
+        return $this->hasOne(AssessmentQuisioner::class, 'assesment_id','assesment_id');
+    }
 }

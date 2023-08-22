@@ -12,7 +12,7 @@
     <tr>
         <td align="left" class="sm-px-24" style="background-color: #ffffff; border-radius: 4px; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; color: #626262;">
         <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Halo</p>
-        <p style="font-weight: 700; font-size: 20px; margin-top: 0; color: #203058;">{{$data->nama}}</p>
+        <p style="font-weight: 700; font-size: 20px; margin-top: 0; color: #203058;">{{$data->nama ?: $data->email}}</p>
         <p style="margin: 20px 0 10px 0;">
             Sehubungan dengan adanya Assesment Cobit 19 pada <b>{{$data->organisasi}}</b>,
             <br/>
@@ -21,7 +21,7 @@
 
         <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
-            <td style="mso-padding-alt: 16px 24px; background-color: #203058; border-radius: 4px; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
+            <td style="mso-padding-alt: 16px 24px; background-color: #0e45ce; border-radius: 4px; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
                 <a href="{{$data->url}}" target="_blank" style="display: block; font-weight: 600; font-size: 14px; line-height: 100%; padding: 16px 24px; color: #ffffff; text-decoration: none;">Isi Kuisioner &rarr;</a>
             </td>
             </tr>

@@ -37,7 +37,9 @@ class InviteRespondenNotif extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $data['nama'] = $notifiable->nama;
-        $data['organisasi']= $this->data->nama;
+        $data['email'] = $notifiable->email;
+        $data['organisasi'] = $this->data->nama;
+        $data['kode']= $notifiable->code;
         // $data['organisasi']=json_encode($this->data);
         $data['url'] = config('app.url_fe') . '/quisioner';
         return (new MailMessage)

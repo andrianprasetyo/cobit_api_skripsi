@@ -22,4 +22,19 @@ class AssessmentQuisioner extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function assesment()
+    {
+        return $this->belongsTo(Assesment::class, 'assesment_id');
+    }
+
+    public function organisasi()
+    {
+        return $this->belongsTo(Organisasi::class, 'organisasi_id');
+    }
+
+    public function auisioner()
+    {
+        return $this->belongsTo(Quisioner::class, 'quisioner_id');
+    }
 }

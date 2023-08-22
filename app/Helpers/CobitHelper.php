@@ -169,6 +169,8 @@ class CobitHelper
         // End Matrix 1
 
         //Matrix 2
+
+        $result=[];
         $domain=Domain::orderBy('urutan','ASC')->get();
         foreach($domain as $dom){
 
@@ -209,17 +211,20 @@ class CobitHelper
             foreach($pureImportance as $imp){
                 $totalImportance+=$imp;
             }
-            $avgImportance=$totalImportance/$totalData;
+            // $avgImportance=$totalImportance / $totalData;
+            $avgImportance = $totalData !=0?$totalImportance/$totalData:0;
 
             //2. rata-rata baseline / rata-rata importance
             $totalBaseline=0;
             foreach($pureBaseLine as $bs){
                 $totalBaseline+=$bs;
             }
-            $avgBaseLine=($totalBaseline/$totalData)/$avgImportance;
+            // $avgBaseLine = ($totalBaseline / $totalData) / $avgImportance;
+            $avgBaseLine= $avgImportance !=0?($totalBaseline/$totalData)/$avgImportance:0;
 
             //3. mencari relative importance
-            $nilaiAwal=$avgBaseLine*100*$hasilScore/$hasilBaseLine;
+            // $nilaiAwal=$avgBaseLine*100*$hasilScore/$hasilBaseLine;
+            $nilaiAwal = $hasilBaseLine !=0?$avgBaseLine * 100 * $hasilScore / $hasilBaseLine:0;
             $nilaiAwal=5 * round($nilaiAwal / 5); // pembulatan kelipatan 5
             $relativeImportance=$nilaiAwal-100;
 
@@ -229,15 +234,27 @@ class CobitHelper
             }else{
                 $save=$cekExistData;
             }*/
-            $save=new AssessmentUsersHasil();
-            $save->design_faktor_id=$designFaktorId;
-            $save->assesment_user_id=$assesment_user_id;
-            $save->domain_id=$dom->id;
-            $save->score=$hasilScore;
-            $save->baseline_score=$hasilBaseLine;
-            $save->relative_importance=$relativeImportance;
-            $save->save();
+
+            $result []=array(
+                'design_faktor_id'=> $designFaktorId,
+                'assesment_user_id'=> $assesment_user_id,
+                'domain_id'=> $dom->id,
+                'score'=> $hasilScore,
+                'baseline_score'=> $hasilBaseLine,
+                'relative_importance'=> $relativeImportance,
+            );
+
+            // $save=new AssessmentUsersHasil();
+            // $save->design_faktor_id=$designFaktorId;
+            // $save->assesment_user_id=$assesment_user_id;
+            // $save->domain_id=$dom->id;
+            // $save->score=$hasilScore;
+            // $save->baseline_score=$hasilBaseLine;
+            // $save->relative_importance=$relativeImportance;
+            // $save->save();
         }
+
+        AssessmentUsersHasil::create($result);
         return true;
     }
     public static function prosesHasilStraight($assesment_user_id,$designFaktorId){
@@ -322,6 +339,7 @@ class CobitHelper
             $baseLine[]=$val->baseline;
         }
 
+        $result=[];
         $domain=Domain::orderBy('urutan','ASC')->get();
         foreach($domain as $dom){
             // get nilai map berdasarkan df dan domain
@@ -360,17 +378,20 @@ class CobitHelper
             foreach($importance as $imp){
                 $totalImportance+=$imp;
             }
-            $avgImportance=$totalImportance/$totalData;
+            // $avgImportance=$totalImportance / $totalData;
+            $avgImportance = $totalData !=0?$totalImportance/$totalData:0;
 
             //2. rata-rata baseline / rata-rata importance
             $totalBaseline=0;
             foreach($baseLine as $bs){
                 $totalBaseline+=$bs;
             }
-            $avgBaseLine=($totalBaseline/$totalData)/$avgImportance;
+            // $avgBaseLine = ($totalBaseline / $totalData) / $avgImportance;
+            $avgBaseLine= $avgImportance !=0?($totalBaseline/$totalData)/$avgImportance:0;
+
 
             //3. mencari relative importance
-            $nilaiAwal=$avgBaseLine*100*$hasilScore/$hasilBaseLine;
+            $nilaiAwal=$hasilBaseLine !=0?$avgBaseLine*100*$hasilScore/$hasilBaseLine:0;
             $nilaiAwal=5 * round($nilaiAwal / 5); // pembulatan kelipatan 5
             $relativeImportance=$nilaiAwal-100;
 
@@ -380,15 +401,28 @@ class CobitHelper
             }else{
                 $save=$cekExistData;
             }*/
-            $save=new AssessmentUsersHasil();
-            $save->design_faktor_id=$designFaktorId;
-            $save->assesment_user_id=$assesment_user_id;
-            $save->domain_id=$dom->id;
-            $save->score=$hasilScore;
-            $save->baseline_score=$hasilBaseLine;
-            $save->relative_importance=$relativeImportance;
-            $save->save();
+
+
+            // $save=new AssessmentUsersHasil();
+            // $save->design_faktor_id=$designFaktorId;
+            // $save->assesment_user_id=$assesment_user_id;
+            // $save->domain_id=$dom->id;
+            // $save->score=$hasilScore;
+            // $save->baseline_score=$hasilBaseLine;
+            // $save->relative_importance=$relativeImportance;
+            // $save->save();
+
+            $result[]=array(
+                'design_faktor_id'=> $designFaktorId,
+                'assesment_user_id'=> $assesment_user_id,
+                'domain_id'=> $dom->id,
+                'score'=> $hasilScore,
+                'baseline_score'=> $hasilBaseLine,
+                'relative_importance' => $relativeImportance,
+            );
         }
+
+        AssessmentUsersHasil::create($result);
         return true;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
 use App\Models\AssessmentQuisioner;
@@ -49,19 +50,19 @@ class AsessmentController extends Controller
         }
 
         $list->orderBy($sortBy, $sortType);
-        $data = $this->paging($list, $limit, $page);
+        $data = $this->paging($list, $limit, $page,AssesmentResource::class);
         return $this->successResponse($data);
     }
 
     public function detailByID($id)
     {
-        $data=Assesment::with(['organisasi','pic'])->find($id);
+        $data=Assesment::find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        return $this->successResponse($data);
+        return $this->successResponse(new AssesmentResource($data));
     }
 
     public function add(Request $request)
@@ -191,6 +192,8 @@ class AsessmentController extends Controller
         }
 
         $data->delete();
+
+        return $this->successResponse();
     }
 
     public function inviteRespondent(Request $request)

@@ -170,11 +170,13 @@ class AsessmentController extends Controller
     }
     public function edit(Request $request,$id)
     {
-        $data = Assesment::with(['organisasi'])->find($id);
+        $data = Assesment::with(['organisasi','pic'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
+        $data->nama=$request->nama;
+        $data->deskripsi = $request->deskripsi;
         $data->save();
 
         $this->successResponse();

@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AssesmentResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        $start_date=Carbon::parse($this->start_date);
+        return [
+            'id'=>$this->id,
+            'nama'=>$this->nama,
+            'organisasi_id'=>$this->organisasi_id,
+            'status'=>$this->status,
+            'deskripsi'=>$this->deskripsi,
+            'created_at'=>$this->created_at,
+            'start_date'=>$start_date->format('Y-m'),
+            'users_id' => $this->users_id,
+            'organisasi'=>$this->organisasi,
+            'pic' => $this->pic,
+        ];
+    }
+}

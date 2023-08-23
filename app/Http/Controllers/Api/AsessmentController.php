@@ -12,6 +12,7 @@ use App\Models\Quisioner;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
+use App\Models\UsersAssesment;
 use App\Notifications\InviteRespondenNotif;
 use App\Notifications\InviteUserNotif;
 use App\Traits\JsonResponse;
@@ -116,16 +117,16 @@ class AsessmentController extends Controller
             $assesment->status = 'ongoing';
             $assesment->save();
 
-            $verify_code=Str::random(50);
-            $user_ass=new AssessmentUsers();
-            $user_ass->assesment_id=$assesment->id;
-            $user_ass->nama=$request->pic_nama;
-            $user_ass->email = $request->pic_email;
-            $user_ass->divisi = $request->pic_divisi;
-            $user_ass->jabatan = $request->pic_jabatan;
-            $user_ass->code=$verify_code;
-            $user_ass->status='invited';
-            $user_ass->save();
+            // $verify_code=Str::random(50);
+            // $user_ass=new AssessmentUsers();
+            // $user_ass->assesment_id=$assesment->id;
+            // $user_ass->nama=$request->pic_nama;
+            // $user_ass->email = $request->pic_email;
+            // $user_ass->divisi = $request->pic_divisi;
+            // $user_ass->jabatan = $request->pic_jabatan;
+            // $user_ass->code=$verify_code;
+            // $user_ass->status='invited';
+            // $user_ass->save();
 
             $role=Roles::where('code','external')->first();
             if(!$role)
@@ -134,13 +135,14 @@ class AsessmentController extends Controller
             }
 
             $user=new User();
-            $user->nama=$user_ass->nama;
-            $user->divisi = $user_ass->divisi;
-            $user->jabatan = $user_ass->jabatan;
+            $user->nama=$request->pic_nama;
+            $user->divisi = $request->pic_divisi;
+            $user->jabatan = $request->pic_jabatan;
+            $user->email = $request->pic_email;
             $user->status='pending';
             $user->internal=false;
             $user->organisasi_id=$organisasi_id;
-            $user->password= $user_ass->code;
+            $user->password= $request->code;
             $user->save();
 
             $role_user=new RoleUsers();
@@ -149,9 +151,14 @@ class AsessmentController extends Controller
             $role_user->default=true;
             $role_user->save();
 
-            $user->assesment=$user_ass;
+            $user_ass=new UsersAssesment();
+            $user_ass->users_id=$user->id;
+            $user_ass->assesment_id=$assesment->id;
+            $user_ass->save();
+
+            // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
-            Notification::send($user, new InviteUserNotif($user_ass));
+            Notification::send($user, new InviteUserNotif($user));
 
             DB::commit();
             return $this->successResponse();

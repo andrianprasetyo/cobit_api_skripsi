@@ -41,7 +41,7 @@ class InviteRespondenNotif extends Notification implements ShouldQueue
         $data['organisasi'] = $this->data->nama;
         $data['kode']= $notifiable->code;
         // $data['organisasi']=json_encode($this->data);
-        $data['url'] = config('app.url_fe') . '/quisioner';
+        $data['url'] = config('app.url_fe') . '/quisioner/responden?code='. $notifiable->code;
         return (new MailMessage)
             ->subject('Undangan Kuisioner Responden | ' . config('app.name'))
             ->markdown('mail.invited-responden', ['data' => (object) $data]);

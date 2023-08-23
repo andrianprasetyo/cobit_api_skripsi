@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users_assesments', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('users_id');
-            $table->foreignUuid('assesment_id');
-            $table->timestamps();
-            $table->softDeletes();
-        });
-        DB::statement('ALTER TABLE users_assesments ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        // Schema::create('users_assesments', function (Blueprint $table) {
+        //     $table->uuid('id')->primary();
+        //     $table->foreignUuid('users_id');
+        //     $table->foreignUuid('assesment_id');
+        //     $table->timestamps();
+        //     $table->softDeletes();
+        // });
+        // DB::statement('ALTER TABLE users_assesments ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users_assesments');
+        // Schema::dropIfExists('users_assesments');
     }
 };

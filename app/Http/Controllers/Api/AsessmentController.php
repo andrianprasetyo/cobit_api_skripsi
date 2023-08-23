@@ -12,7 +12,6 @@ use App\Models\Quisioner;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
-use App\Models\UsersAssesment;
 use App\Notifications\InviteRespondenNotif;
 use App\Notifications\InviteUserNotif;
 use App\Traits\JsonResponse;
@@ -56,7 +55,7 @@ class AsessmentController extends Controller
 
     public function detailByID($id)
     {
-        $data=Assesment::with(['organisasi','user'])->find($id);
+        $data=Assesment::with(['organisasi','pic'])->find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -108,15 +107,6 @@ class AsessmentController extends Controller
                 $organisasi_id=$organisasi->id;
             }
 
-            $assesment = new Assesment();
-            $assesment->nama = $request->asessment;
-            $assesment->deskripsi = $request->deskripsi;
-            // $assesment->tahun = $request->tahun;
-            $assesment->organisasi_id = $organisasi_id;
-            $assesment->start_date = $request->tahun.'-'.date('d');
-            $assesment->status = 'ongoing';
-            $assesment->save();
-
             // $verify_code=Str::random(50);
             // $user_ass=new AssessmentUsers();
             // $user_ass->assesment_id=$assesment->id;
@@ -152,10 +142,20 @@ class AsessmentController extends Controller
             $role_user->default=true;
             $role_user->save();
 
-            $user_ass=new UsersAssesment();
-            $user_ass->users_id=$user->id;
-            $user_ass->assesment_id=$assesment->id;
-            $user_ass->save();
+            $assesment = new Assesment();
+            $assesment->nama = $request->asessment;
+            $assesment->deskripsi = $request->deskripsi;
+            // $assesment->tahun = $request->tahun;
+            $assesment->organisasi_id = $organisasi_id;
+            $assesment->start_date = $request->tahun . '-' . date('d');
+            $assesment->status = 'ongoing';
+            $assesment->users_id=$user->id;
+            $assesment->save();
+
+            // $user_ass=new UsersAssesment();
+            // $user_ass->users_id=$user->id;
+            // $user_ass->assesment_id=$assesment->id;
+            // $user_ass->save();
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());

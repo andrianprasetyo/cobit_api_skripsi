@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\RoleUsers;
 use App\Models\User;
 use App\Traits\JsonResponse;
@@ -46,7 +47,7 @@ class UsersController extends Controller
 
         $list->orderBy($sortBy, $sortType);
 
-        $data=$this->paging($list,$limit,$page);
+        $data=$this->paging($list,$limit,$page,UserResource::class);
         return $this->successResponse($data);
     }
 

@@ -160,7 +160,6 @@ class AsessmentController extends Controller
             return $this->errorResponse($e->getMessage(),$e->getCode());
         }
     }
-
     public function edit(Request $request,$id)
     {
         $data = Assesment::with(['organisasi'])->find($id);

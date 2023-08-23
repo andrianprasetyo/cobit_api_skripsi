@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RoleResource;
 use App\Models\Roles;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,8 +31,7 @@ class RolesController extends Controller
             $list->where('nama', 'ilike', '%' . $search . '%');
         }
 
-
-        $data = $this->paging($list,$limit,$page);
+        $data = $this->paging($list,$limit,$page, RoleResource::class);
         return $this->successResponse($data);
     }
 
@@ -41,7 +41,8 @@ class RolesController extends Controller
         if (!$role) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
-        return $this->successResponse($role);
+        $data=new RoleResource($role);
+        return $this->successResponse($data);
     }
 
     public function addRole(Request $request)

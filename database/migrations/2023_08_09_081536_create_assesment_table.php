@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignUuid('organisasi_id');
             $table->char('status')->default('ongoing')->comment('ongoing, completed');// ongoing, completed
             $table->text('deskripsi')->nullable();
+            $table->foreignUuid('users_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

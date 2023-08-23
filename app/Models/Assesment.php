@@ -15,7 +15,7 @@ class Assesment extends Model
     public $incrementing = false;
     protected $table = 'assesment';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','tahun'];
+    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','tahun','users_id'];
 
     protected $hidden = [
         'deleted_at',
@@ -27,15 +27,8 @@ class Assesment extends Model
         return $this->belongsTo(Organisasi::class, 'organisasi_id');
     }
 
-    public function user()
+    public function pic()
     {
-        return $this->hasOneThrough(
-            UsersAssesment::class,
-            User::class,
-            'id',
-            'assesment_id',
-            'id',
-            'id'
-        );
+        return $this->belongsTo(User::class,'users_id');
     }
 }

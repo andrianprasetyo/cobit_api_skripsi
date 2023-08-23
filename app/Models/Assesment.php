@@ -26,4 +26,16 @@ class Assesment extends Model
     {
         return $this->belongsTo(Organisasi::class, 'organisasi_id');
     }
+
+    public function user()
+    {
+        return $this->hasOneThrough(
+            UsersAssesment::class,
+            User::class,
+            'id',
+            'assesment_id',
+            'id',
+            'id'
+        );
+    }
 }

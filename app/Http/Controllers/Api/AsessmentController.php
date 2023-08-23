@@ -56,7 +56,7 @@ class AsessmentController extends Controller
 
     public function detailByID($id)
     {
-        $data=Assesment::with(['organisasi'])->find($id);
+        $data=Assesment::with(['organisasi','user'])->find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -98,7 +98,7 @@ class AsessmentController extends Controller
         try {
 
             $organisasi_id = $request->organisasi_id;
-            if ($request->filled('organisasi_id'))
+            if ($request->filled('organisasi_nama'))
             {
                 $organisasi = new Organisasi();
                 $organisasi->nama = $request->organisasi_nama;
@@ -109,11 +109,11 @@ class AsessmentController extends Controller
             }
 
             $assesment = new Assesment();
-            $assesment->nama = $request->asessment_nama;
+            $assesment->nama = $request->asessment;
             $assesment->deskripsi = $request->deskripsi;
-            $assesment->tahun = $request->tahun;
+            // $assesment->tahun = $request->tahun;
             $assesment->organisasi_id = $organisasi_id;
-            // $assesment->end_date = $request->end_date;
+            $assesment->start_date = $request->tahun.'-'.date('d');
             $assesment->status = 'ongoing';
             $assesment->save();
 
@@ -128,21 +128,22 @@ class AsessmentController extends Controller
             // $user_ass->status='invited';
             // $user_ass->save();
 
-            $role=Roles::where('code','external')->first();
+            $role=Roles::where('code','eksternal')->first();
             if(!$role)
             {
-                return $this->errorResponse('Role Asessment tidak tersedia',404);
+                return $this->errorResponse('Role Eksternal tidak tersedia',404);
             }
 
             $user=new User();
             $user->nama=$request->pic_nama;
             $user->divisi = $request->pic_divisi;
-            $user->jabatan = $request->pic_jabatan;
+            $user->posisi = $request->pic_jabatan;
             $user->email = $request->pic_email;
             $user->status='pending';
             $user->internal=false;
             $user->organisasi_id=$organisasi_id;
-            $user->password= $request->code;
+            $user->password= Str::random(10);
+            $user->username=Str::slug($request->pic_nama, '.');
             $user->save();
 
             $role_user=new RoleUsers();
@@ -164,7 +165,7 @@ class AsessmentController extends Controller
             return $this->successResponse();
         } catch (\Exception $e) {
             DB::rollback();
-            return $this->errorResponse($e->getMessage(),$e->getCode());
+            return $this->errorResponse($e->getMessage());
         }
     }
     public function edit(Request $request,$id)

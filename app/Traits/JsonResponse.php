@@ -1,8 +1,6 @@
 <?php
 namespace App\Traits;
 
-use Illuminate\Http\Request;
-
 trait JsonResponse
 {
     protected function successResponse($data=null, $message = 'Ok', $code = 200)
@@ -23,7 +21,7 @@ trait JsonResponse
         ], $code);
     }
 
-    protected function paging($list,$limit=null,$offset=null)
+    protected function paging($list,$limit=null,$offset=null,$resource=null)
     {
 
         $total = $list->count();
@@ -41,7 +39,12 @@ trait JsonResponse
             $meta['current_page'] = (int)$offset;
         }
 
-        $data['list'] = $list->get();
+        $list_data=$list->get();
+        if($resource != null)
+        {
+            $list_data = $resource::collection($list_data);
+        }
+        $data['list'] = $list_data;
         $meta['total'] = $total;
         $data['meta'] = $meta;
 

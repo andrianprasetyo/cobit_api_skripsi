@@ -105,4 +105,9 @@ class User extends Authenticatable implements JWTSubject
         $currentDatetime = Carbon::now();
         return $this->belongsTo(Otp::class,'users_id')->where('expire_at','>',$currentDatetime);
     }
+
+    public function assesments()
+    {
+        return $this->hasMany(UsersAssesment::class, 'users_id');
+    }
 }

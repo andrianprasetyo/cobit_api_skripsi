@@ -8,12 +8,14 @@ use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
 use App\Models\Quisioner;
+use App\Models\QuisionerGrupJawaban;
 use App\Models\QuisionerHasil;
 use App\Models\QuisionerJawaban;
 use App\Models\QuisionerPertanyaan;
 use App\Models\AssessmentUsers;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuisionerController extends Controller
 {
@@ -36,10 +38,10 @@ class QuisionerController extends Controller
         $validate_msg['id.uuid'] = 'Responden ID tidak valid';
         $validate_msg['id.exists'] = 'Responden ID tidak terdaftar';
 
-        // $validate['assesment_id'] = 'required|uuid|exists:assesment,id';
-        // $validate_msg['assesment_id.required'] = 'Assesment ID harus di isi';
-        // $validate_msg['assesment_id.uuid'] = 'Assesment ID tidak valid';
-        // $validate_msg['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
+        $validate['assesment_id'] = 'required|uuid|exists:assesment,id';
+        $validate_msg['assesment_id.required'] = 'Assesment ID harus di isi';
+        $validate_msg['assesment_id.uuid'] = 'Assesment ID tidak valid';
+        $validate_msg['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
 
         $validate['nama']='required';
         $validate_msg['nama.required'] = 'Nama responden harus di isi';
@@ -50,26 +52,40 @@ class QuisionerController extends Controller
 
         $id=$request->id;
         $responden= AssessmentUsers::with(['assesment.organisasi'])->find($id);
-        $responden->nama = $request->nama;
-        $responden->divisi = $request->divisi;
-        $responden->jabatan = $request->jabatan;
-        $responden->jabatan = $request->jabatan;
-        $responden->status = 'active';
-        $responden->save();
+        if ($responden->is_proses == 'done')
+        {
+            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+        }
 
-        $quisioner_responden = new AssessmentQuisioner();
-        $quisioner_responden->assesment_id = $responden->assesment->id;
-        $quisioner_responden->quisioner_id = $quisioner->id;
-        $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
-        $quisioner_responden->allow = true;
-        $quisioner_responden->save();
+        DB::beginTransaction();
+        try {
+            $responden->nama = $request->nama;
+            $responden->divisi = $request->divisi;
+            $responden->jabatan = $request->jabatan;
+            $responden->jabatan = $request->jabatan;
+            $responden->status = 'active';
+            $responden->save();
 
-        return $this->successResponse($responden);
+            $quisioner_responden = new AssessmentQuisioner();
+            $quisioner_responden->assesment_id = $request->assesment_id;
+            $quisioner_responden->quisioner_id = $quisioner->id;
+            $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
+            $quisioner_responden->allow = true;
+            $quisioner_responden->save();
+
+            DB::commit();
+            return $this->successResponse($responden);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function listquestion(Request $request,$id)
     {
-        $page = $request->get('question', 1);
+        $offset = $request->get('question', 1);
+        $limit=1;
+        $page = ($offset * $limit) - $limit;
 
         $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($id);
         if(!$user_assesment)
@@ -77,12 +93,70 @@ class QuisionerController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        // $user_quisioner=AssessmentQuisioner::where('')
-        $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner'])
-            ->whereRelation('pertanyaan','quisioner_id',$user_assesment->assesmentquisioner->quisioner_id);
+        if($user_assesment->status == 'pending')
+        {
+            return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner',400);
+        }
 
-        $list->orderBy('sorting','ASC');
-        $data = $this->paging($list, 1, $page);
+        if ($user_assesment->is_proses == 'done')
+        {
+            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+        }
+
+        // return $this->successResponse($user_assesment);
+
+        // $user_quisioner=AssessmentQuisioner::where('')
+        // $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner'])
+        //     ->whereRelation('pertanyaan','quisioner_id',$user_assesment->assesmentquisioner->quisioner_id);
+
+        $list_df = DB::table('design_faktor')
+            ->select(
+                    'design_faktor.*',
+                    'quisioner_pertanyaan.id as quisioner_pertanyaan_id',
+                'quisioner_pertanyaan.quisioner_grup_jawaban_id',
+                'quisioner_pertanyaan.pertanyaan',
+                )
+            ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
+            ->where('')
+            ->whereNull('design_faktor.deleted_at')
+            ->whereNull('quisioner_pertanyaan.deleted_at');
+
+        $list_df->orderBy('design_faktor.sorting', 'ASC');
+        $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
+        $total = $list_df->count();
+        $list_df->limit($limit);
+        $list_df->skip($page);
+
+        $list_data_df=$list_df->get();
+
+        $list_data=[];
+        if(!$list_data_df->isEmpty())
+        {
+            foreach ($list_data_df as $_item_df) {
+                $df=$_item_df;
+                $komponen=DesignFaktorKomponen::where('design_faktor_id',$_item_df->id)->get();
+                $list_komponen=[];
+                if(!$komponen->isEmpty())
+                {
+                    foreach ($komponen as $_item_komponen) {
+                        $komp=$_item_komponen;
+                        $grup=QuisionerGrupJawaban::with('jawabans')->find($_item_df->quisioner_grup_jawaban_id);
+                        $list_komponen[]=$komp;
+                        $komp->grup=$grup;
+                        $list_komponen[]=$komp;
+                    }
+                }
+                $df->komponen= $list_komponen;
+                $list_data[]=$df;
+            }
+        }
+
+        $meta['total_page'] = ceil($total / $limit);
+        $meta['current_page'] = (int) $offset;
+        $data['list'] = $list_data;
+        $meta['total'] = $total;
+        $data['meta'] = $meta;
+        // $data = $this->paging($list, 1, $page);
         return $this->successResponse($data);
     }
 
@@ -123,6 +197,10 @@ class QuisionerController extends Controller
         $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
         $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
 
+        $validate['jenis_grup']='required|in:pilgan,persentase';
+        $validate_msg['jenis_grup.required'] = 'Jenis grup jawaban harus di isi';
+        $validate_msg['jenis_grup.in'] = 'Jenis grup tidak valid (pilgan,persentase)';
+
         // $validate['bobot']= 'required|number';
         // $validate['bobot.required'] ='Bobot harus di isi';
         // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
@@ -140,6 +218,7 @@ class QuisionerController extends Controller
         //     return $this->errorResponse('Anda sudah mengisi quisioner jawaban ini',400);
         // }
 
+        DB::beginTransaction();
         try {
             $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
 
@@ -160,9 +239,10 @@ class QuisionerController extends Controller
             $data->bobot = $bobot->bobot;
             $data->save();
 
+            DB::commit();
             return $this->successResponse();
         } catch (\Exception $e) {
-            // DB::rollback();
+            DB::rollback();
             return $this->errorResponse($e->getMessage());
         }
     }

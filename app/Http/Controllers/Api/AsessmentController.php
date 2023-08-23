@@ -207,13 +207,14 @@ class AsessmentController extends Controller
             $validate_msg['id.exists'] = 'assesment ID tidak terdaftar';
 
             $validate['email'] = 'required|array';
-            $validate['email.*'] = 'required|email|unique:assesment_users,email';
+            // $validate['email.*'] = 'required|email|unique:assesment_users,email';
+            $validate['email.*'] = 'required|email';
 
             $validate_msg['email.required'] = 'Email harus di isi';
             $validate_msg['email.array'] = 'Email harus dalam bentuk array';
             $validate_msg['email.*.required'] = 'Email harus di isi';
             $validate_msg['email.*.email'] = 'Email tidak valid';
-            $validate_msg['email.*.unique'] = 'Email sudah digunakan';
+            // $validate_msg['email.*.unique'] = 'Email sudah digunakan';
 
             // $validate['responden'] = 'required|array';
             // $validate['responden.required'] = 'Responden harus di isi';
@@ -230,6 +231,11 @@ class AsessmentController extends Controller
             $request->validate($validate, $validate_msg);
 
             // return $this->successResponse();
+            $_chekc_exists_mail=AssessmentUsers::where('assesment_id',$request->id)->whereIn('email',$request->email)->exists();
+            if($_chekc_exists_mail)
+            {
+                return $this->errorResponse('Terdapat email yang sudah terdaftar pada assesment yang sama',400);
+            }
 
             $assesment = Assesment::with('organisasi')->find($request->id);
             if (!$assesment) {

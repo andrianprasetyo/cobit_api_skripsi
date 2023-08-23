@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AssesmentUsersResource;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
@@ -25,7 +26,7 @@ class QuisionerController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        return $this->successResponse($responden);
+        return $this->successResponse(new AssesmentUsersResource($responden));
     }
 
     public function start(Request $request)

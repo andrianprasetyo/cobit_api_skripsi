@@ -116,12 +116,8 @@ class QuisionerGrupPilganSeeder extends Seeder
                 'jenis'=>'persentase',
                 'jawaban'=>[
                     [
-                        'jawaban'=>'High',
-                        'bobot'=>40
-                    ],
-                    [
-                        'jawaban'=>'Normal',
-                        'bobot'=>60
+                        'jawaban'=>'Persentase HN',
+                        'bobot'=>100
                     ]
                 ]
             ],
@@ -152,70 +148,38 @@ class QuisionerGrupPilganSeeder extends Seeder
                 'jenis'=>'persentase',
                 'jawaban'=>[
                     [
-                        'jawaban'=>'High',
-                        'bobot'=>20
-                    ],
-                    [
-                        'jawaban'=>'Normal',
-                        'bobot'=>50
-                    ],
-                    [
-                        'jawaban'=>'Low',
-                        'bobot'=>30
+                        'jawaban'=>'Persentase HNL',
+                        'bobot'=>100
                     ]
                 ]
             ],
             [
                 'nama' => 'Grup Outsource',
-                'jenis'=>'pilgan',
+                'jenis'=>'persentase',
                 'jawaban'=>[
                     [
-                        'jawaban'=>'Outsourcing',
-                        'bobot'=>20
-                    ],
-                    [
-                        'jawaban'=>'Cloud',
-                        'bobot'=>50
-                    ],
-                    [
-                        'jawaban'=>'In-House',
-                        'bobot'=>30
+                        'jawaban'=>'Persentase Outsource',
+                        'bobot'=>100
                     ]
                 ]
             ],
             [
                 'nama' => 'Grup AgileDevOps',
-                'jenis'=>'pilgan',
+                'jenis'=>'persentase',
                 'jawaban'=>[
                     [
-                        'jawaban'=>'Agile',
-                        'bobot'=>20
-                    ],
-                    [
-                        'jawaban'=>'DevOps',
-                        'bobot'=>50
-                    ],
-                    [
-                        'jawaban'=>'Traditional',
-                        'bobot'=>30
+                        'jawaban'=>'Persentase Agile',
+                        'bobot'=>100
                     ]
                 ]
             ],
             [
                 'nama' => 'Grup FirstMover',
-                'jenis'=>'pilgan',
+                'jenis'=>'persentase',
                 'jawaban'=>[
                     [
-                        'jawaban'=>'First Mover',
-                        'bobot'=>60
-                    ],
-                    [
-                        'jawaban'=>'Follower',
-                        'bobot'=>30
-                    ],
-                    [
-                        'jawaban'=>'Slow Mover',
-                        'bobot'=>10
+                        'jawaban'=>'persentase Firstmover',
+                        'bobot'=>100
                     ]
                 ]
             ]

@@ -22,12 +22,8 @@ class QuisionerJawaban extends Model
         'updated_at'
     ];
 
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($model) {
-    //         $model->id = Str::uuid();
-    //     });
-    // }
+    public function grup()
+    {
+        return $this->hasOne(QuisionerGrupJawaban::class,'id','quisioner_grup_jawaban_id');
+    }
 }

@@ -136,24 +136,38 @@ class QuisionerController extends Controller
         if(!$list_data_df->isEmpty())
         {
             foreach ($list_data_df as $_item_df) {
-                $df=$_item_df;
-                $komponen=DesignFaktorKomponen::where('design_faktor_id',$_item_df->id)->get();
-                $list_komponen=[];
+                // $df=$_item_df;
+                $komponen=DesignFaktorKomponen::where('design_faktor_id',$_item_df->id)
+                    ->orderBy('urutan','ASC')
+                    ->get();
 
-                $grup=QuisionerGrupJawaban::with('jawabans')->find($_item_df->quisioner_grup_jawaban_id);
-                $df->grup=new GrupAnswerResource($grup);
+                // $list_data_df->komponen= $komponen;
+                $list_komponen=[];
+                $grup = QuisionerGrupJawaban::with('jawabans')->find($_item_df->quisioner_grup_jawaban_id);
+
+                // $_item_df->grup = new GrupAnswerResource($grup);
+                $_item_df->grup= $grup;
 
                 if(!$komponen->isEmpty())
                 {
                     foreach ($komponen as $_item_komponen) {
-                        $komp=$_item_komponen;
+                        // $komp=$_item_komponen;
+                        // $komp->grup = $grup;
+                        // $_item_komponen->grup=$grup;
 
-                        // $list_komponen[]=$komp;
-                        $jawabans=[];
-                        if(count($grup->jawabans) > 0)
+                        $jawabans=QuisionerJawaban::with('grup')
+                            ->where('quisioner_grup_jawaban_id', $_item_df->quisioner_grup_jawaban_id)
+                            ->orderBy('sorting','ASC')
+                            ->get();
+
+                        // $komp->grup->jawabans=$jawabans;
+                        // $list_komponen[] = $komp;
+                        $jawabanss=[];
+                        if(!$jawabans->isEmpty())
                         {
-                            foreach ($grup->jawabans as $_item_jawaban) {
+                            foreach ($jawabans as $_item_jawaban) {
 
+                                // $j=$_item_jawaban;
                                 $_jawaban=QuisionerHasil::select('bobot')
                                     ->where('assesment_users_id', $id)
                                     ->where('quisioner_id',$_item_df->quisioner_id)
@@ -162,22 +176,32 @@ class QuisionerController extends Controller
                                     ->where('jawaban_id', $_item_jawaban->id)
                                     ->first();
 
-                                $_hasil=null;
+                                $_item_jawaban->hasil=null;
                                 if($_jawaban)
                                 {
-                                    $_hasil=$_jawaban->bobot;
+                                    $_item_jawaban->hasil = $_jawaban->bobot;
                                 }
-                                $_item_jawaban->hasil=$_hasil;
-                                $jawabans[]=$_item_jawaban;
-                            }
-                            $grup->jawabans=$jawabans;
-                        }
-                        $komp->grup = $grup;
-                        $list_komponen[]=$komp;
-                    }
-                }
 
-                $df->komponen= $list_komponen;
+                                // $params = array(
+                                //     'assesment_users_id' => $id,
+                                //     'quisioner_id' => $user_assesment->assesmentquisioner->quisioner_id,
+                                //     'quisioner_pertanyaan_id' => $_item_df->quisioner_pertanyaan_id,
+                                //     'design_faktor_komponen_id' => $_item_komponen->id,
+                                //     'jawaban_id' => $_item_jawaban->id,
+                                // );
+                                // $_item_jawaban->params = $params;
+                                $jawabanss[] = $_item_jawaban;
+                            }
+
+                            // $_item_komponen->grup->jawabans = $jawabanss;
+                            $_item_komponen->jawabans=$jawabanss;
+                        }
+                        // $list_komponen
+
+                        $list_komponen[] = $_item_komponen;
+                    }
+                    $_item_df->komponen = $list_komponen;
+                }
 
                 // $jawaban=QuisionerHasil::where('assesment_users_id',$id)
                 //     ->where('quisioner_pertanyaan_id',$_item_df->quisioner_pertanyaan_id)
@@ -185,7 +209,7 @@ class QuisionerController extends Controller
                 //     ->first();
 
                 // $df->jawaban=$jawaban;
-                $list_data[]=$df;
+                $list_data[]=$_item_df;
             }
         }
 
@@ -214,7 +238,7 @@ class QuisionerController extends Controller
 
                 foreach ($_item_hasil['komponen'] as $_item_komponen) {
 
-                    foreach ($_item_komponen['grup']['jawabans'] as $_item_grup) {
+                    foreach ($_item_komponen['jawabans'] as $_item_grup) {
 
                         $list_jawaban[] = array(
                             'assesment_user_id' => $request->assesment_user_id,

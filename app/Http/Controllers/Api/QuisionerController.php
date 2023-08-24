@@ -26,13 +26,17 @@ class QuisionerController extends Controller
     use JsonResponse;
     public function detailRespondenByCode(Request $request)
     {
-        $responden = AssessmentUsers::with(['assesment.organisasi'])->where('code',$request->get('code'))->first();
+        $responden = AssessmentUsers::with(['assesment.organisasi'])
+            ->withCount('assesmentquisionerhasil')
+            ->where('code',$request->get('code'))
+            ->first();
+
         if(!$responden)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        return $this->successResponse(new AssesmentUsersResource($responden));
+        return $this->successResponse($responden);
     }
 
     public function start(QuisionerStartRequest $request)
@@ -145,7 +149,7 @@ class QuisionerController extends Controller
                         $komp=$_item_komponen;
 
                         // $list_komponen[]=$komp;
-                        $j=[];
+                        $jawabans=[];
                         if(count($grup->jawabans) > 0)
                         {
                             foreach ($grup->jawabans as $_item_jawaban) {
@@ -164,9 +168,9 @@ class QuisionerController extends Controller
                                     $_hasil=$_jawaban->bobot;
                                 }
                                 $_item_jawaban->hasil=$_hasil;
-                                $j[]=$_item_jawaban;
+                                $jawabans[]=$_item_jawaban;
                             }
-                            $grup->jawabans=$j;
+                            $grup->jawabans=$jawabans;
                         }
                         $komp->grup = $grup;
                         $list_komponen[]=$komp;

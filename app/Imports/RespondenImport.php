@@ -26,7 +26,21 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
     {
         return [
             'nama' => 'required',
-            'email' => 'required|email|unique:assesment_users,email',
+            'email' => [
+                'required',
+                'email',
+                function ($attribute, $value, $fail) {
+                    $_chekc_exists_mail = AssessmentUsers::select('email')
+                        ->where('assesment_id', $this->assesment_id)
+                        ->where('email', $value)
+                        ->exists();
+
+                    if ($_chekc_exists_mail) {
+                        $fail('Terdapat email yang sudah terdaftar pada assesment yang sama (' . $value . ')');
+                    }
+                }
+            ],
+            // 'email' => 'required|email|unique:assesment_users,email',
         ];
     }
 
@@ -66,6 +80,8 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
         if (isset($row['jabatan']) && $row['jabatan'] != '') {
             $responden->jabatan = $row['jabatan'];
         }
+
+
         $responden->assesment_id = $this->assesment_id;
         $responden->status = 'pending';
         $responden->code = Str::random(50);

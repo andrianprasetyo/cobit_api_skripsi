@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Quisioner\QuisionerFinishRequest;
+use App\Http\Requests\Quisioner\QuisionerSaveAnswerRequest;
+use App\Http\Requests\Quisioner\QuisionerStartRequest;
 use App\Http\Resources\AssesmentUsersResource;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
@@ -31,27 +34,17 @@ class QuisionerController extends Controller
         return $this->successResponse(new AssesmentUsersResource($responden));
     }
 
-    public function start(Request $request)
+    public function start(QuisionerStartRequest $request)
     {
-        $validate['id']='required|uuid|exists:assesment_users,id';
-        $validate_msg['id.required']='Responden ID harus di isi';
-        $validate_msg['id.uuid'] = 'Responden ID tidak valid';
-        $validate_msg['id.exists'] = 'Responden ID tidak terdaftar';
 
-        $validate['assesment_id'] = 'required|uuid|exists:assesment,id';
-        $validate_msg['assesment_id.required'] = 'Assesment ID harus di isi';
-        $validate_msg['assesment_id.uuid'] = 'Assesment ID tidak valid';
-        $validate_msg['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
+        $request->validated();
 
-        $validate['nama']='required';
-        $validate_msg['nama.required'] = 'Nama responden harus di isi';
-
-        $request->validate($validate,$validate_msg);
-
-        $quisioner = Quisioner::where('aktif', true)->first();
-
-        $id=$request->id;
-        $responden= AssessmentUsers::with(['assesment.organisasi'])->find($id);
+        // $quisioner = Quisioner::find($request->quisioner_id);
+        // if($quisioner->aktif)
+        // {
+        //     return $this->errorResponse('Quisioner')
+        // }
+        $responden= AssessmentUsers::with(['assesment.organisasi'])->find($request->id);
         if ($responden->is_proses == 'done')
         {
             return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
@@ -64,11 +57,12 @@ class QuisionerController extends Controller
             $responden->jabatan = $request->jabatan;
             $responden->jabatan = $request->jabatan;
             $responden->status = 'active';
+            $responden->code=null;
             $responden->save();
 
             $quisioner_responden = new AssessmentQuisioner();
             $quisioner_responden->assesment_id = $request->assesment_id;
-            $quisioner_responden->quisioner_id = $quisioner->id;
+            $quisioner_responden->quisioner_id = $request->quisioner_id;
             $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
             $quisioner_responden->allow = true;
             $quisioner_responden->save();
@@ -117,12 +111,13 @@ class QuisionerController extends Controller
                 'quisioner_pertanyaan.pertanyaan',
                 )
             ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
-            ->where('')
+            ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)
             ->whereNull('design_faktor.deleted_at')
             ->whereNull('quisioner_pertanyaan.deleted_at');
 
         $list_df->orderBy('design_faktor.sorting', 'ASC');
         $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
+
         $total = $list_df->count();
         $list_df->limit($limit);
         $list_df->skip($page);
@@ -146,7 +141,14 @@ class QuisionerController extends Controller
                         $list_komponen[]=$komp;
                     }
                 }
+
                 $df->komponen= $list_komponen;
+
+                $jawaban=QuisionerHasil::where('assesment_users_id',$id)
+                    ->where('quisioner_pertanyaan_id',$_item_df->quisioner_pertanyaan_id)
+                    ->first();
+
+                $df->jawaban=$jawaban;
                 $list_data[]=$df;
             }
         }
@@ -160,69 +162,47 @@ class QuisionerController extends Controller
         return $this->successResponse($data);
     }
 
-    public function saveJawaban(Request $request)
+    public function saveJawaban(QuisionerSaveAnswerRequest $request)
     {
-        $validate['quisioner_id'] = 'required|uuid|exists:quisioner,id';
-        $validate_msg['quisioner_id.required']='Quisioner ID harus di isi';
-        $validate_msg['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
-        $validate_msg['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
+        // $validate['quisioner_id'] = 'required|uuid|exists:quisioner,id';
+        // $validate_msg['quisioner_id.required']='Quisioner ID harus di isi';
+        // $validate_msg['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
+        // $validate_msg['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
 
-        $validate['quisioner_pertanyaan_id'] = 'required|uuid|exists:quisioner_pertanyaan,id';
-        $validate_msg['quisioner_pertanyaan_id.required'] = 'Quisioner Pertanyaan ID harus di isi';
-        $validate_msg['quisioner_pertanyaan_id.uuid'] = 'Quisioner Pertanyaan ID tidak valid';
-        $validate_msg['quisioner_pertanyaan_id.exists'] = 'Quisioner Pertanyaan ID tidak terdaftar';
+        // $validate['quisioner_pertanyaan_id'] = 'required|uuid|exists:quisioner_pertanyaan,id';
+        // $validate_msg['quisioner_pertanyaan_id.required'] = 'Quisioner Pertanyaan ID harus di isi';
+        // $validate_msg['quisioner_pertanyaan_id.uuid'] = 'Quisioner Pertanyaan ID tidak valid';
+        // $validate_msg['quisioner_pertanyaan_id.exists'] = 'Quisioner Pertanyaan ID tidak terdaftar';
 
-        $validate['quisioner_jawaban_id'] = 'required|uuid|exists:quisioner_jawaban,id';
-        $validate_msg['quisioner_jawaban_id.required'] = 'Quisioner jawaban ID harus di isi';
-        $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
-        $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
+        // $validate['jenis_grup'] = 'required|in:pilgan,persentase';
+        // $validate_msg['jenis_grup.required'] = 'Jenis grup jawaban harus di isi';
+        // $validate_msg['jenis_grup.in'] = 'Jenis grup tidak valid (pilgan,persentase)';
 
-        $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
-        $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
-        $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
-        $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
+        // $validate['quisioner_jawaban_id'] = 'required|uuid|exists:quisioner_jawaban,id';
+        // $validate_msg['quisioner_jawaban_id.required'] = 'Quisioner jawaban ID harus di isi';
+        // $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
+        // $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
 
-        // $validate['responden_id'] = 'required|uuid|exists:assesment_users,id';
-        // $validate_msg['responden_id.required'] = 'Responden user ID harus di isi';
-        // $validate_msg['responden_id.uuid'] = 'Responden ID tidak valid';
-        // $validate_msg['responden_id.exists'] = 'Responden ID tidak terdaftar';
+        // $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
+        // $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
+        // $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
+        // $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
 
-        $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
-        $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
-        $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
-        $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
-
-        $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
-        $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
-        $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
-        $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
-
-        $validate['jenis_grup']='required|in:pilgan,persentase';
-        $validate_msg['jenis_grup.required'] = 'Jenis grup jawaban harus di isi';
-        $validate_msg['jenis_grup.in'] = 'Jenis grup tidak valid (pilgan,persentase)';
+        // $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
+        // $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
+        // $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
+        // $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
 
         // $validate['bobot']= 'required|number';
         // $validate['bobot.required'] ='Bobot harus di isi';
         // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
 
-        $request->validate($validate,$validate_msg);
-        // $_check_jawaban= QuisionerHasil::where('quisioner_id',$request->quisioner_id)
-        //     ->where('quisioner_pertanyaan_id',$request->quisioner_pertanyaan_id)
-        //     ->where('jawaban_id', $request->quisioner_jawaban_id)
-        //     ->where('assesment_users_id', $request->assesment_user_id)
-        //     ->where('design_faktor_komponen_id', $request->design_faktor_komponen_id)
-        //     ->exists();
-
-        // if($_check_jawaban)
-        // {
-        //     return $this->errorResponse('Anda sudah mengisi quisioner jawaban ini',400);
-        // }
+        // $request->validate($validate,$validate_msg);
+        $request->validated();
 
         DB::beginTransaction();
         try {
             $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
-
-            // $data = new QuisionerHasil();
 
             $data=QuisionerHasil::firstOrNew([
                 'quisioner_id'=> $request->quisioner_id,
@@ -246,70 +226,47 @@ class QuisionerController extends Controller
             return $this->errorResponse($e->getMessage());
         }
     }
-    // public function add(Request $request)
-    // {
-    //     $validate['df_kode']='required';
-    //     $validate['df_nama'] = 'required';
-    //     $validate_msg['df_kode.required']='Kode Design faktor harus di isi';
-    //     $validate_msg['df_nama.required'] = 'Nama Design faktor harus di isi';
-    //     // $validate_msg['df_kode.unique'] = 'Kode Design faktor sudah digunakan';
 
-    //     $validate['pertanyaan'] = 'required|unique:quisioner,title';
-    //     $validate_msg['pertanyaan.required'] = 'Nama pertanyaan harus di isi';
-    //     $validate_msg['pertanyaan.unique'] = 'Nama pertanyaan sudah tersedia';
+    public function finish(QuisionerFinishRequest $request)
+    {
+        $request->validated();
+        $assesment_user_id=$request->assesment_user_id;
+        $responden=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($assesment_user_id);
+        if(!$responden)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
 
-    //     $validate['quisioner_grup_jawaban_id'] = 'required|uuid|exists:quisioner_grup_jawaban,id';
-    //     $validate_msg['quisioner_grup_jawaban_id.required'] = 'Grup jawaban harus di isi';
-    //     $validate_msg['quisioner_grup_jawaban_id.uuid'] = 'Grup jawaban ID tidak valid';
-    //     $validate_msg['quisioner_grup_jawaban_id.exists'] = 'Grup jawaban tidak terdaftar';
+        if ($responden->status == 'pending') {
+            return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
+        }
 
-    //     $validate['df_komponen'] = 'required|array';
-    //     $validate['df_komponen.*.nama'] = 'required';
-    //     $validate['df_komponen.*.baseline']='required|integer';
+        if ($responden->is_proses == 'done') {
+            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+        }
 
-    //     $validate_msg['df_komponen.required'] = 'komponen harus di isi';
-    //     $validate_msg['df_komponen.array'] = 'komponen harus dalam bentuk array';
+        $total_soal = DB::table('design_faktor')
+            ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
+            ->where('quisioner_pertanyaan.quisioner_id', $responden->assesmentquisioner->quisioner_id)
+            ->whereNull('design_faktor.deleted_at')
+            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->count();
 
-    //     $validate_msg['df_komponen.*.nama.required'] = 'Nama komponen harus di isi';
-    //     $validate_msg['df_komponen.*.baseline.required'] = 'Baseline komponen harus di isi';
-    //     $validate_msg['df_komponen.*.baseline.integer'] = 'Baseline komponen harus dalam bentuk angka';
+        $total_jawaban=QuisionerHasil::where('assesment_users_id',$assesment_user_id)
+            ->where('quisioner_id', $responden->assesmentquisioner->quisioner_id)
+            ->count();
 
-    //     $request->validate($validate, $validate_msg);
+        if($total_jawaban < $total_soal)
+        {
+            return $this->errorResponse('Harap isi semua jawaban di setiap pertanyaan',400);
+        }
 
-    //     $quesioner=Quisioner::where('aktif',true)->first();
-    //     if(!$quesioner)
-    //     {
-    //         return $this->errorResponse('Quisioner aktif berlum tersedia',404);
-    //     }
+        $responden->status='done';
+        $responden->is_proses = 'done';
+        $responden->save();
 
-    //     $df=DesignFaktor::where('kode',$request->df_kode)->first();
-    //     if(!$df)
-    //     {
-    //         $df=new DesignFaktor();
-    //         $df->kode=$request->df_kode;
-    //         $df->nama = $request->nama;
-    //         $df->deskripsi = $request->deskripsi;
-    //         $df->save();
-    //     }
-
-    //     foreach ($request->df_komponen as $_item_komponen)
-    //     {
-    //         $df_komponen=new DesignFaktorKomponen();
-    //         $df_komponen->nama = $_item_komponen['nama'];
-    //         $df_komponen->baseline = $_item_komponen['baseline'];
-    //         $df_komponen->design_faktor_id=$df->id;
-    //         $df_komponen->save();
-    //     }
-
-    //     foreach ($request as $key => $value) {
-    //         # code...
-    //     }
-    //     $quesioner_pertanyaan=new QuisionerPertanyaan();
-    //     $quesioner_pertanyaan->design_faktor_id=$df->id;
-    //     $quesioner_pertanyaan->quisioner_id = $quesioner->id;
-    //     $quesioner_pertanyaan->quisioner_grup_jawaban_id = $request->quisioner_grup_jawaban_id;
-    //     $quesioner_pertanyaan->save();
-
-    //     return $this->successResponse();
-    // }
+        $data['total_soal'] = $total_soal;
+        $data['total_jawaban']=$total_jawaban;
+        return $this->successResponse($data);
+    }
 }

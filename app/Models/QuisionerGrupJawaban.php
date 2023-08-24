@@ -32,6 +32,6 @@ class QuisionerGrupJawaban extends Model
 
     public function jawabans()
     {
-        return $this->hasMany(QuisionerJawaban::class, 'quisioner_grup_jawaban_id','id');
+        return $this->hasMany(QuisionerJawaban::class, 'quisioner_grup_jawaban_id','id')->orderBy('sorting','ASC');
     }
 }

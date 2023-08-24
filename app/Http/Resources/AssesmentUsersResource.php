@@ -26,6 +26,7 @@ class AssesmentUsersResource extends JsonResource
         $data['is_proses'] = $this->is_proses;
         $data['created_at'] = $this->created_at;
         $data['assesment']=$this->assesment;
+        $data['assesmentquisionerhasil'] = $this->assesmentquisionerhasil;
 
         return $data;
     }

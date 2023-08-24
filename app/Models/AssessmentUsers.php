@@ -35,6 +35,6 @@ class AssessmentUsers extends Model
 
     public function assesmentquisionerhasil()
     {
-        return $this->hasMany(QuisionerHasil::class, 'id', 'assesment_users_id');
+        return $this->hasMany(QuisionerHasil::class, 'assesment_users_id', 'id');
     }
 }

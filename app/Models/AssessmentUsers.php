@@ -32,4 +32,9 @@ class AssessmentUsers extends Model
     {
         return $this->hasOne(AssessmentQuisioner::class, 'assesment_id','assesment_id');
     }
+
+    public function assesmentquisionerhasil()
+    {
+        return $this->hasMany(QuisionerHasil::class, 'id', 'assesment_users_id');
+    }
 }

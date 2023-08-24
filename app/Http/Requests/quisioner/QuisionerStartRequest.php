@@ -26,17 +26,17 @@ class QuisionerStartRequest extends FormRequest
             'id'=> 'required|uuid|exists:assesment_users,id',
             'assesment_id' => 'required|uuid|exists:assesment,id',
             'nama'=>'required',
-            'quisioner_id' => [
-                'required',
-                'uuid',
-                'exists:quisioner,id',
-                function ($attr, $value, $fail) {
-                    $quisioner = Quisioner::find($value);
-                    if (!$quisioner->aktif) {
-                        $fail('Quisioner (' . $quisioner->title . ') tidak aktif');
-                    }
-                }
-            ],
+            // 'quisioner_id' => [
+            //     'required',
+            //     'uuid',
+            //     'exists:quisioner,id',
+            //     function ($attr, $value, $fail) {
+            //         $quisioner = Quisioner::find($value);
+            //         if (!$quisioner->aktif) {
+            //             $fail('Quisioner (' . $quisioner->title . ') tidak aktif');
+            //         }
+            //     }
+            // ],
         ];
     }
 
@@ -50,9 +50,9 @@ class QuisionerStartRequest extends FormRequest
         $validate['assesment_id.uuid'] = 'Assesment ID tidak valid';
         $validate['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
 
-        $validate['quisioner_id.required'] = 'Quisioner ID harus di isi';
-        $validate['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
-        $validate['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
+        // $validate['quisioner_id.required'] = 'Quisioner ID harus di isi';
+        // $validate['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
+        // $validate['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
 
         $validate['nama.required'] = 'Nama responden harus di isi';
         return $validate;

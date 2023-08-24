@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Quisioner\QuisionerFinishRequest;
 use App\Http\Requests\Quisioner\QuisionerSaveAnswerRequest;
 use App\Http\Requests\Quisioner\QuisionerStartRequest;
+use App\Http\Resources\Answer\GrupAnswerResource;
 use App\Http\Resources\AssesmentUsersResource;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
@@ -39,6 +40,7 @@ class QuisionerController extends Controller
 
         $request->validated();
 
+        $quisioner = Quisioner::where('aktif',true)->first();
         // $quisioner = Quisioner::find($request->quisioner_id);
         // if($quisioner->aktif)
         // {
@@ -57,7 +59,7 @@ class QuisionerController extends Controller
             $responden->jabatan = $request->jabatan;
             $responden->jabatan = $request->jabatan;
             $responden->status = 'active';
-            $responden->code=null;
+            // $responden->code=null;
             $responden->save();
 
             $quisioner_responden = new AssessmentQuisioner();
@@ -103,12 +105,14 @@ class QuisionerController extends Controller
         // $list=DesignFaktor::with(['komponen', 'pertanyaan.grup.jawabans', 'pertanyaan.quisioner'])
         //     ->whereRelation('pertanyaan','quisioner_id',$user_assesment->assesmentquisioner->quisioner_id);
 
+
         $list_df = DB::table('design_faktor')
             ->select(
                     'design_faktor.*',
                     'quisioner_pertanyaan.id as quisioner_pertanyaan_id',
                 'quisioner_pertanyaan.quisioner_grup_jawaban_id',
                 'quisioner_pertanyaan.pertanyaan',
+                'quisioner_pertanyaan.quisioner_id',
                 )
             ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
             ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)
@@ -131,24 +135,52 @@ class QuisionerController extends Controller
                 $df=$_item_df;
                 $komponen=DesignFaktorKomponen::where('design_faktor_id',$_item_df->id)->get();
                 $list_komponen=[];
+
+                $grup=QuisionerGrupJawaban::with('jawabans')->find($_item_df->quisioner_grup_jawaban_id);
+                $df->grup=new GrupAnswerResource($grup);
+
                 if(!$komponen->isEmpty())
                 {
                     foreach ($komponen as $_item_komponen) {
                         $komp=$_item_komponen;
-                        $grup=QuisionerGrupJawaban::with('jawabans')->find($_item_df->quisioner_grup_jawaban_id);
-                        $list_komponen[]=$komp;
-                        $komp->grup=$grup;
+
+                        // $list_komponen[]=$komp;
+                        $j=[];
+                        if(count($grup->jawabans) > 0)
+                        {
+                            foreach ($grup->jawabans as $_item_jawaban) {
+
+                                $_jawaban=QuisionerHasil::select('bobot')
+                                    ->where('assesment_users_id', $id)
+                                    ->where('quisioner_id',$_item_df->quisioner_id)
+                                    ->where('quisioner_pertanyaan_id',$_item_df->quisioner_pertanyaan_id)
+                                    ->where('design_faktor_komponen_id', $_item_komponen->id)
+                                    ->where('jawaban_id', $_item_jawaban->id)
+                                    ->first();
+
+                                $_hasil=null;
+                                if($_jawaban)
+                                {
+                                    $_hasil=$_jawaban->bobot;
+                                }
+                                $_item_jawaban->hasil=$_hasil;
+                                $j[]=$_item_jawaban;
+                            }
+                            $grup->jawabans=$j;
+                        }
+                        $komp->grup = $grup;
                         $list_komponen[]=$komp;
                     }
                 }
 
                 $df->komponen= $list_komponen;
 
-                $jawaban=QuisionerHasil::where('assesment_users_id',$id)
-                    ->where('quisioner_pertanyaan_id',$_item_df->quisioner_pertanyaan_id)
-                    ->first();
+                // $jawaban=QuisionerHasil::where('assesment_users_id',$id)
+                //     ->where('quisioner_pertanyaan_id',$_item_df->quisioner_pertanyaan_id)
+                //     ->where('design_faktor_komponen_id', $komponen->id)
+                //     ->first();
 
-                $df->jawaban=$jawaban;
+                // $df->jawaban=$jawaban;
                 $list_data[]=$df;
             }
         }
@@ -164,63 +196,54 @@ class QuisionerController extends Controller
 
     public function saveJawaban(QuisionerSaveAnswerRequest $request)
     {
-        // $validate['quisioner_id'] = 'required|uuid|exists:quisioner,id';
-        // $validate_msg['quisioner_id.required']='Quisioner ID harus di isi';
-        // $validate_msg['quisioner_id.uuid'] = 'Quisioner ID tidak valid';
-        // $validate_msg['quisioner_id.exists'] = 'Quisioner ID tidak terdaftar';
 
-        // $validate['quisioner_pertanyaan_id'] = 'required|uuid|exists:quisioner_pertanyaan,id';
-        // $validate_msg['quisioner_pertanyaan_id.required'] = 'Quisioner Pertanyaan ID harus di isi';
-        // $validate_msg['quisioner_pertanyaan_id.uuid'] = 'Quisioner Pertanyaan ID tidak valid';
-        // $validate_msg['quisioner_pertanyaan_id.exists'] = 'Quisioner Pertanyaan ID tidak terdaftar';
-
-        // $validate['jenis_grup'] = 'required|in:pilgan,persentase';
-        // $validate_msg['jenis_grup.required'] = 'Jenis grup jawaban harus di isi';
-        // $validate_msg['jenis_grup.in'] = 'Jenis grup tidak valid (pilgan,persentase)';
-
-        // $validate['quisioner_jawaban_id'] = 'required|uuid|exists:quisioner_jawaban,id';
-        // $validate_msg['quisioner_jawaban_id.required'] = 'Quisioner jawaban ID harus di isi';
-        // $validate_msg['quisioner_jawaban_id.uuid'] = 'Quisioner jawaban ID tidak valid';
-        // $validate_msg['quisioner_jawaban_id.exists'] = 'Quisioner jawaban ID tidak terdaftar';
-
-        // $validate['assesment_user_id'] = 'required|uuid|exists:assesment_users,id';
-        // $validate_msg['assesment_user_id.required'] = 'Asessment user ID harus di isi';
-        // $validate_msg['assesment_user_id.uuid'] = 'Asessment user ID tidak valid';
-        // $validate_msg['assesment_user_id.exists'] = 'Asessment user ID tidak terdaftar';
-
-        // $validate['design_faktor_komponen_id'] = 'required|uuid|exists:design_faktor_komponen,id';
-        // $validate_msg['design_faktor_komponen_id.required'] = 'Design faktor ID harus di isi';
-        // $validate_msg['design_faktor_komponen_id.uuid'] = 'Design faktor ID tidak valid';
-        // $validate_msg['design_faktor_komponen_id.exists'] = 'Design faktor ID tidak terdaftar';
-
-        // $validate['bobot']= 'required|number';
-        // $validate['bobot.required'] ='Bobot harus di isi';
-        // $validate['bobot.number'] = 'Bobot harus dalam bentuk angka';
-
-        // $request->validate($validate,$validate_msg);
         $request->validated();
 
         DB::beginTransaction();
         try {
-            $bobot = QuisionerJawaban::find($request->quisioner_jawaban_id);
 
-            $data=QuisionerHasil::firstOrNew([
-                'quisioner_id'=> $request->quisioner_id,
-                'quisioner_pertanyaan_id'=> $request->quisioner_pertanyaan_id,
-                'assesment_users_id'=> $request->assesment_user_id,
-                'design_faktor_komponen_id'=> $request->design_faktor_komponen_id,
-            ]);
+            $list_jawaban=[];
+            foreach ($request->hasil as $_item_hasil) {
+                // $komponen = $_item_hasil['komponen'];
+                $quisioner_id = $_item_hasil['quisioner_id'];
+                $quisioner_pertanyaan_id=$_item_hasil['quisioner_pertanyaan_id'];
 
-            $data->quisioner_id = $request->quisioner_id;
-            $data->quisioner_pertanyaan_id = $request->quisioner_pertanyaan_id;
-            $data->jawaban_id = $request->quisioner_jawaban_id;
-            $data->assesment_users_id = $request->assesment_user_id;
-            $data->design_faktor_komponen_id = $request->design_faktor_komponen_id;
-            $data->bobot = $bobot->bobot;
-            $data->save();
+                foreach ($_item_hasil['komponen'] as $_item_komponen) {
+
+                    foreach ($_item_komponen['grup']['jawabans'] as $_item_grup) {
+
+                        $list_jawaban[] = array(
+                            'assesment_user_id' => $request->assesment_user_id,
+                            'quisioner_id' => $quisioner_id,
+                            'quisioner_pertanyaan_id' => $quisioner_pertanyaan_id,
+                            'design_faktor_komponen_id' => $_item_komponen['id'],
+                            'quisioner_jawaban_id' => $_item_grup['id'],
+                            'hasil' => $_item_grup['hasil'],
+                        );
+
+                        if($_item_grup['hasil'] != null)
+                        {
+                            $save=QuisionerHasil::firstOrNew([
+                                'quisioner_id'=> $quisioner_id,
+                                'quisioner_pertanyaan_id'=> $quisioner_pertanyaan_id,
+                                'assesment_users_id'=> $request->assesment_user_id,
+                                'design_faktor_komponen_id'=> $_item_komponen['id'],
+                            ]);
+
+                            $save->quisioner_id = $quisioner_id;
+                            $save->quisioner_pertanyaan_id = $quisioner_pertanyaan_id;
+                            $save->jawaban_id = $_item_grup['id'];
+                            $save->assesment_users_id = $request->assesment_user_id;
+                            $save->design_faktor_komponen_id = $_item_komponen['id'];
+                            $save->bobot = $_item_grup['hasil'];
+                            $save->save();
+                        }
+                    }
+                }
+            }
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($list_jawaban);
         } catch (\Exception $e) {
             DB::rollback();
             return $this->errorResponse($e->getMessage());

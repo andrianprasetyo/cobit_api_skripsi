@@ -118,6 +118,7 @@ class QuisionerController extends Controller
                 'quisioner_pertanyaan.quisioner_grup_jawaban_id',
                 'quisioner_pertanyaan.pertanyaan',
                 'quisioner_pertanyaan.quisioner_id',
+                'quisioner_pertanyaan.sorting',
                 )
             ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
             ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)

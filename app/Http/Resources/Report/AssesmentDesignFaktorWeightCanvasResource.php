@@ -5,7 +5,7 @@ namespace App\Http\Resources\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DomainCanvasResource extends JsonResource
+class AssesmentDesignFaktorWeightCanvasResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,11 +16,9 @@ class DomainCanvasResource extends JsonResource
     {
         return [
             'id'=>$this->id,
-            'kode'=>$this->kode,
-            'urutan'=>$this->urutan,
-            // 'ket'=>$this->id,
-            'assesmentcanvas' =>new AssesmentCanvasResource($this->assesmentcanvas),
-            'assesmenthasil'=> AssesmentHasilCanvasResource::collection($this->assesmenthasil),
+            'weight' => $this->weight,
+            'assesment_id'=>$this->assesment_id,
+            'designfaktor'=> new DesignFaktorCanvasResource($this->designfaktor)
         ];
     }
 }

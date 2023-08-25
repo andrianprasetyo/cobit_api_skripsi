@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
 use App\Models\AssessmentUsers;
 use App\Models\QuisionerHasil;
+use App\Models\QuisionerPertanyaan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -46,15 +47,17 @@ class ReportController extends Controller
         //     return $this->errorResponse('Data tidak ditemukan', 404);
         // }
 
-        $list = QuisionerHasil::query()->get();
+        $list = QuisionerHasil::with(['pertanyaan'])->get();
         $data = QuisionerHasilResource::collection($list);
-        return $this->successResponse($data);
+        return $this->successResponse($list);
     }
 
     public function downloadExcel(Request $request)
     {
-        $list = QuisionerHasil::query()->get()->toArray();
-        $data= QuisionerHasilResource::collection($list);
-        return Excel::download(new RespondenQuisionerHasilExport($list),'tes.xlsx');
+        $pertanyaan = QuisionerPertanyaan::all();
+        $list = QuisionerHasil::query()->get();
+        // $data= QuisionerHasilResource::collection($list);
+        $data['pertanyaan']=$pertanyaan;
+        return Excel::download(new RespondenQuisionerHasilExport($data),'tes.xlsx');
     }
 }

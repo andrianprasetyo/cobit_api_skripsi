@@ -46,7 +46,7 @@ class QuisionerController extends Controller
 
         $quisioner = Quisioner::where('aktif',true)->first();
         // $quisioner = Quisioner::find($request->quisioner_id);
-        if($quisioner->aktif)
+        if(!$quisioner)
         {
             return $this->errorResponse('Quisioner tidak di temukan',400);
         }
@@ -69,7 +69,7 @@ class QuisionerController extends Controller
 
             $quisioner_responden = new AssessmentQuisioner();
             $quisioner_responden->assesment_id = $request->assesment_id;
-            $quisioner_responden->quisioner_id = $quisioner->quisioner_id;
+            $quisioner_responden->quisioner_id = $quisioner->id;
             $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
             $quisioner_responden->allow = true;
             $quisioner_responden->save();
@@ -94,7 +94,7 @@ class QuisionerController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        if($user_assesment->status == 'pending')
+        if($user_assesment->status == 'diundang')
         {
             return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner',400);
         }
@@ -124,7 +124,7 @@ class QuisionerController extends Controller
             ->whereNull('design_faktor.deleted_at')
             ->whereNull('quisioner_pertanyaan.deleted_at');
 
-        $list_df->orderBy('design_faktor.sorting', 'ASC');
+        $list_df->orderBy('design_faktor.urutan', 'ASC');
         $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
 
         $total = $list_df->count();
@@ -289,7 +289,7 @@ class QuisionerController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        if ($responden->status == 'pending') {
+        if ($responden->status == 'diundang') {
             return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
         }
 

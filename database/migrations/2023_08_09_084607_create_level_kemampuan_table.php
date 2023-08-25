@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('kegiatan');
             $table->text('translate');
             $table->integer('bobot');
-            $table->char('level');
+            $table->string('level');
             $table->timestamps();
             $table->softDeletes();
         });

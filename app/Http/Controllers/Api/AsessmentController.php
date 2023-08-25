@@ -148,7 +148,7 @@ class AsessmentController extends Controller
             $assesment->deskripsi = $request->deskripsi;
             // $assesment->tahun = $request->tahun;
             $assesment->organisasi_id = $organisasi_id;
-            $assesment->start_date = $request->tahun . '-' . date('d');
+            $assesment->tahun = $request->tahun;
             $assesment->status = 'ongoing';
             $assesment->users_id=$user->id;
             $assesment->save();
@@ -292,7 +292,7 @@ class AsessmentController extends Controller
                 $responden = new AssessmentUsers();
                 $responden->email = $_item_email;
                 $responden->assesment_id = $assesment->id;
-                $responden->status = 'pending';
+                $responden->status = 'diundang';
                 $responden->code = Str::random(50);
                 $responden->save();
                 Notification::send($responden, new InviteRespondenNotif($organisasi));

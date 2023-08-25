@@ -31,7 +31,7 @@
         <p style="margin: 20px 0 10px 0;">
             Jika Tombol diatas tidak berfungsi, silahkan gunakan link dibawah ini
         </p>
-        <a href="{{$data->url}}" target="_blank" style="display: block; font-size: 14px; line-height: 120%; margin-bottom: 24px; color: #203058; text-decoration: none;">{{$data->token}}</a>
+        <a href="{{$data->url}}" target="_blank" style="display: block; font-size: 14px; line-height: 120%; margin-bottom: 24px; color: #203058; text-decoration: none;">{{$data->kode}}</a>
         <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 100%;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
             <td style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; padding-top: 32px; padding-bottom: 32px;">

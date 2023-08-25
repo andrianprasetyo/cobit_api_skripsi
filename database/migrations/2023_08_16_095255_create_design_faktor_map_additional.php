@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('design_faktor_map_additional', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->char('domain','10');
+            $table->string('domain','10');
             $table->foreignUuid('design_faktor_id');
             $table->integer('urutan');
             $table->timestamps();

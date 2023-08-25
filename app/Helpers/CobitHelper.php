@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers;
 
+use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
 use App\Models\AssessmentUsersHasil;
 use App\Models\DesignFaktor;
@@ -39,11 +40,50 @@ class CobitHelper
                     CobitHelper::prosesHasilDF2($assesment_user_id,$df->id);
                 }
             }
+            CobitHelper::setAssesmentHasilAvg($u->assesment_id);
             $u->is_proses='done';
             $u->save();
         }
     }
 
+    public static function assesmentDfWeight($assesmentId){
+        $df=DesignFaktor::get();
+        foreach($df as $d){
+            $checkExist=AssesmentDesignFaktorWeight::where('assesment_id',$assesmentId)->where('design_faktor_id',$d->id)->first();
+            if(!$checkExist){
+                $add=new AssesmentDesignFaktorWeight();
+                $add->assesment_id=$assesmentId;
+                $add->design_faktor_id=$d->id;
+                $add->weight=$d->weight;
+                $add->save();
+            }
+        }
+    }
+    public function setCanvas(){
+        
+    }
+    public static function setAssesmentHasilAvg($assesmentId){
+        DB::table('assesment_hasil')->where('assesment_id',$assesmentId)->delete();
+        DB::insert("
+            INSERT INTO assesment_hasil (assesment_id,design_faktor_id,domain_id,relative_importance)
+            SELECT
+                au.assesment_id,
+                auh.design_faktor_id,
+                auh.domain_id,
+                (5*ROUND(AVG ( relative_importance )/5)) AS relative_importance
+            FROM
+                assesment_users_hasil auh
+                JOIN assesment_users au ON au.ID = auh.assesment_user_id
+            WHERE
+                au.assesment_id=:assesment_id
+            GROUP BY
+                au.assesment_id,
+                auh.design_faktor_id,
+                auh.domain_id
+        ",[
+            'assesment_id'=>'99f73f9a-e744-41f3-85ea-c005ba19950b'
+        ]);
+    }
     public static function prosesHasilDF2($assesment_user_id,$designFaktorId){
         $dataQuesioner=DB::select("
             SELECT

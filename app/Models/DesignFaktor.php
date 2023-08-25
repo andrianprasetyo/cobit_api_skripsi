@@ -15,7 +15,7 @@ class DesignFaktor extends Model
     public $incrementing = false;
     protected $table = 'design_faktor';
     protected $keyType = 'string';
-    protected $fillable = ['kode', 'nama', 'deskripsi'];
+    protected $fillable = ['kode', 'nama', 'deskripsi','weight'];
 
     protected $hidden = [
         'deleted_at',

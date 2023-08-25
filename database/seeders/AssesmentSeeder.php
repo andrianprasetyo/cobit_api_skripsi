@@ -27,7 +27,7 @@ class AssesmentSeeder extends Seeder
         }*/
         $organisasi=new Organisasi();
         $organisasi->nama="PT MSI";
-        $organisasi->desksipsi=null;
+        $organisasi->deskripsi=null;
         $organisasi->save();
 
         $assesment=new Assesment();

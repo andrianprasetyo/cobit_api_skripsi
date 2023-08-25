@@ -21,4 +21,29 @@ class QuisionerHasil extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function quisioner()
+    {
+        return $this->belongsTo(Quisioner::class, 'quisioner_id');
+    }
+
+    public function pertanyaan()
+    {
+        return $this->belongsTo(QuisionerPertanyaan::class, 'quisioner_pertanyaan_id');
+    }
+
+    public function jawaban()
+    {
+        return $this->belongsTo(QuisionerJawaban::class, 'jawaban_id');
+    }
+
+    public function responden()
+    {
+        return $this->belongsTo(AssessmentUsers::class, 'assesment_users_id');
+    }
+
+    public function dfkomponen()
+    {
+        return $this->belongsTo(DesignFaktorKomponen::class, 'design_faktor_komponen_id');
+    }
 }

@@ -189,10 +189,10 @@ class CobitHelper
         $dataCanvas=DB::select("SELECT ac.* FROM assesment_canvas ac JOIN domain d ON d.id=ac.domain_id where ac.assesment_id=:assesment_id ORDER BY d.urutan asc",['assesment_id'=>$assesment_id]);
         foreach($dataCanvas as $dc){
             if($dc->step2_init_value>=0){
-                $step2Value=100*$dc->step2_init_value/$maxValue;
+                $step2Value= $maxValue !=0?100*$dc->step2_init_value/$maxValue:0;
                 $step2Value=5*round($step2Value/5);
             }else{
-                $step2Value=100*$dc->step2_init_value/$maxValue;
+                $step2Value=$maxValue !=0?100*$dc->step2_init_value/$maxValue:0;
                 $step2Value=5*round($step2Value/5);
             }
             AssesmentCanvas::where('id',$dc->id)->update([
@@ -272,10 +272,10 @@ class CobitHelper
         $dataCanvas=DB::select("SELECT ac.* FROM assesment_canvas ac JOIN domain d ON d.id=ac.domain_id where ac.assesment_id=:assesment_id ORDER BY d.urutan asc",['assesment_id'=>$assesment_id]);
         foreach($dataCanvas as $dc){
             if($dc->step3_init_value>=0){
-                $step3Value=100*$dc->step3_init_value/$maxValue;
+                $step3Value=$maxValue !=0?100*$dc->step3_init_value/$maxValue:0;
                 $step3Value=5*round($step3Value/5);
             }else{
-                $step3Value=100*$dc->step3_init_value/$maxValue;
+                $step3Value=$maxValue !=0?100*$dc->step3_init_value/$maxValue:0;
                 $step3Value=5*round($step3Value/5);
             }
             AssesmentCanvas::where('id',$dc->id)->update([
@@ -515,7 +515,7 @@ class CobitHelper
             // $save->save();
         }
 
-        AssessmentUsersHasil::create($result);
+        AssessmentUsersHasil::insert($result);
         return true;
     }
     public static function prosesHasilStraight($assesment_user_id,$designFaktorId){
@@ -683,7 +683,7 @@ class CobitHelper
             );
         }
 
-        AssessmentUsersHasil::create($result);
+        AssessmentUsersHasil::insert($result);
         return true;
     }
 }

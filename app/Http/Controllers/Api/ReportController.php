@@ -6,6 +6,9 @@ use App\Exports\RespondenQuisionerHasilExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
+use App\Http\Resources\Report\AssesmentDesignFaktorWeightCanvasResource;
+use App\Http\Resources\Report\DesignFaktorCanvasResource;
+use App\Http\Resources\Report\DomainCanvasResource;
 use App\Models\Assesment;
 use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
@@ -91,17 +94,22 @@ class ReportController extends Controller
     public function canvas(Request $request)
     {
 
-        $hasil=Domain::with([
-            'assesmenthasil'=>function($q) use ($request){
-                $q->where('assesment_id',$request->assesment_id);
-            },
+        $_assesment=Assesment::where('id',$request->assesment_id)->exists();
+        if(!$_assesment)
+        {
+            return $this->errorResponse('Assesment tidak terdaftar',404);
+        }
+
+        $hasil= Domain::with([
+            'assesmenthasil',
             'assesmenthasil.designfaktor',
-            'assesmentcanvas'=>function($q) use($request){
-                $q->where('assesment_id', $request->assesment_id);
-            },
+            'assesmentcanvas',
         ])
-        ->orderBy('urutan','ASC')
-        ->get();
+            ->whereRelation('assesmenthasil','assesment_id', $request->assesment_id)
+            ->whereRelation('assesmentcanvas', 'assesment_id', $request->assesment_id)
+            ->orderBy('urutan', 'ASC')
+            ->get();
+
 
         $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
             ->get();
@@ -109,10 +117,9 @@ class ReportController extends Controller
         $df=DesignFaktor::orderBy('urutan','ASC')
         ->get();
 
-
-        $data['hasil']=$hasil;
-        $data['weight'] = $weight;
-        $data['df'] = $df;
+        $data['hasil']=DomainCanvasResource::collection($hasil);
+        $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
+        $data['df'] = DesignFaktorCanvasResource::collection($df);
         return $this->successResponse($data);
     }
 

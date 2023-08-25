@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Exports\RespondenQuisionerHasilExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Canvas\AdjustmenValueCanvasRequest;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
 use App\Http\Resources\Report\AssesmentDesignFaktorWeightCanvasResource;
 use App\Http\Resources\Report\DesignFaktorCanvasResource;
 use App\Http\Resources\Report\DomainCanvasResource;
 use App\Models\Assesment;
+use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
 use App\Models\DesignFaktor;
@@ -123,4 +125,18 @@ class ReportController extends Controller
         return $this->successResponse($data);
     }
 
+    public function setValueAdjustment(AdjustmenValueCanvasRequest $request)
+    {
+        $request->validated();
+        $data=AssesmentCanvas::find($request->id);
+        if(!$data)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        $data->adjustment=$request->nilai;
+        $data->save();
+
+        return $this->successResponse();
+    }
 }

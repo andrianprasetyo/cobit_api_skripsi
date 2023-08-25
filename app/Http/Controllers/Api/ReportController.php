@@ -6,6 +6,7 @@ use App\Exports\RespondenQuisionerHasilExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
+use App\Models\Assesment;
 use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
 use App\Models\DesignFaktor;
@@ -14,6 +15,7 @@ use App\Models\QuisionerHasil;
 use App\Models\QuisionerPertanyaan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
@@ -62,6 +64,28 @@ class ReportController extends Controller
         // $data= QuisionerHasilResource::collection($list);
         $data['pertanyaan']=$pertanyaan;
         return Excel::download(new RespondenQuisionerHasilExport($data),'tes.xlsx');
+    }
+
+    //
+    public function setHasilCanvas()
+    {
+        DB::beginTransaction();
+        try {
+            ini_set('max_execution_time', 300);
+            $assesment = Assesment::get();
+            foreach ($assesment as $as) {
+                CobitHelper::assesmentDfWeight($as->id);
+                CobitHelper::setCanvasStep2Value($as->id);
+                CobitHelper::setCanvasStep3Value($as->id);
+                CobitHelper::updateCanvasAdjust($as->id);
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function canvas(Request $request)

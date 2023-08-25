@@ -32,6 +32,7 @@ class WelcomeController extends Controller
         ini_set('max_execution_time', 300);
         $assesment=Assesment::get();
         foreach($assesment as $as){
+            CobitHelper::setAssesmentHasilAvg($as->id);
             CobitHelper::assesmentDfWeight($as->id);
             CobitHelper::setCanvasStep2Value($as->id);
             CobitHelper::setCanvasStep3Value($as->id);

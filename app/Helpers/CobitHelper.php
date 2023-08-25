@@ -303,7 +303,7 @@ class CobitHelper
                 auh.design_faktor_id,
                 auh.domain_id
         ",[
-            'assesment_id'=>'99f73f9a-e744-41f3-85ea-c005ba19950b'
+            'assesment_id'=>$assesmentId
         ]);
     }
     public static function prosesHasilDF2($assesment_user_id,$designFaktorId){

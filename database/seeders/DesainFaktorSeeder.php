@@ -87,11 +87,12 @@ class DesainFaktorSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $item) {
+        foreach ($data as $key=>$item) {
             DesignFaktor::create([
                 'kode' => $item['kode'],
                 'nama' => $item['nama'],
                 'deskripsi' => $item['deskripsi'],
+                'urutan'=>$key
             ]);
         }
     }

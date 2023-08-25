@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('assesment_users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('assesment_id');
-            $table->char('email',50);
-            $table->char('nama',150);
-            $table->char('divisi',100);
-            $table->char('jabatan',100);
-            $table->char('code',100)->comment('Kode invitation random string 50 karakter');
-            $table->char('status',15)->default('diundang')->comment('diundang, selesai');
+            $table->string('email',50);
+            $table->string('nama',150)->nullable();
+            $table->string('divisi',100)->nullable();
+            $table->string('jabatan',100)->nullable();
+            $table->string('code',100)->comment('Kode invitation random string 50 karakter')->nullable();
+            $table->string('status',15)->default('diundang')->comment('diundang, selesai');
 //            $table->foreignUuid('users_id');
             $table->timestamps();
             $table->softDeletes();

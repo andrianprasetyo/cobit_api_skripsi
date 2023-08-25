@@ -83,7 +83,7 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
 
 
         $responden->assesment_id = $this->assesment_id;
-        $responden->status = 'pending';
+        $responden->status = 'diundang';
         $responden->code = Str::random(50);
         $responden->save();
 

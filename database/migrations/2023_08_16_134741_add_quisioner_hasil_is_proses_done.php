@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('quisioner_hasil',function(Blueprint $table){
-            $table->char('is_proses','10')->nullable()->comment('proses, selesai');
+            $table->string('is_proses','10')->nullable()->comment('proses, selesai');
         });
     }
 

@@ -193,7 +193,7 @@ class CobitHelper
                 $step2Value=5*round($step2Value/5);
             }else{
                 $step2Value=100*$dc->step2_init_value/$maxValue;
-                $step2Value=-5*round($step2Value/5);
+                $step2Value=5*round($step2Value/5);
             }
             AssesmentCanvas::where('id',$dc->id)->update([
                 'step2_value'=>$step2Value
@@ -219,9 +219,8 @@ class CobitHelper
                     df.urutan ASC
             ", [
                 'assesment_id' => $assesment_id,
-                'domain_id' => $dom->id
+                'domain_id' => $dom->domain_id
             ]);
-
             $dfWeight = DB::select("
                 SELECT
                     adfw.*,
@@ -276,8 +275,8 @@ class CobitHelper
                 $step3Value=100*$dc->step3_init_value/$maxValue;
                 $step3Value=5*round($step3Value/5);
             }else{
-                $step3Value=100*$dc->step2_init_value/$maxValue;
-                $step3Value=-5*round($step3Value/5);
+                $step3Value=100*$dc->step3_init_value/$maxValue;
+                $step3Value=5*round($step3Value/5);
             }
             AssesmentCanvas::where('id',$dc->id)->update([
                 'step3_value'=>$step3Value

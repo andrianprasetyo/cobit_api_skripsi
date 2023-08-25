@@ -12,4 +12,10 @@ class AssesmentHasil extends Model
     public $incrementing = false;
     protected $table = 'assesment_hasil';
     protected $keyType = 'string';
+
+
+    public function designfaktor()
+    {
+        return $this->belongsTo(DesignFaktor::class,'design_faktor_id')->orderBy('urutan','ASC');
+    }
 }

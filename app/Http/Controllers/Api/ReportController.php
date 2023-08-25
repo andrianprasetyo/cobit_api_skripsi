@@ -6,7 +6,10 @@ use App\Exports\RespondenQuisionerHasilExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
+use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
+use App\Models\DesignFaktor;
+use App\Models\Domain;
 use App\Models\QuisionerHasil;
 use App\Models\QuisionerPertanyaan;
 use App\Traits\JsonResponse;
@@ -60,4 +63,33 @@ class ReportController extends Controller
         $data['pertanyaan']=$pertanyaan;
         return Excel::download(new RespondenQuisionerHasilExport($data),'tes.xlsx');
     }
+
+    public function canvas(Request $request)
+    {
+
+        $hasil=Domain::with([
+            'assesmenthasil'=>function($q) use ($request){
+                $q->where('assesment_id',$request->assesment_id);
+            },
+            'assesmenthasil.designfaktor',
+            'assesmentcanvas'=>function($q) use($request){
+                $q->where('assesment_id', $request->assesment_id);
+            },
+        ])
+        ->orderBy('urutan','ASC')
+        ->get();
+
+        $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
+            ->get();
+
+        $df=DesignFaktor::orderBy('urutan','ASC')
+        ->get();
+
+
+        $data['hasil']=$hasil;
+        $data['weight'] = $weight;
+        $data['df'] = $df;
+        return $this->successResponse($data);
+    }
+
 }

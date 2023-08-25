@@ -20,4 +20,14 @@ class Domain extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function assesmenthasil()
+    {
+        return $this->hasMany(AssesmentHasil::class,'domain_id');
+    }
+
+    public function assesmentcanvas()
+    {
+        return $this->belongsTo(AssesmentCanvas::class, 'id','domain_id');
+    }
 }

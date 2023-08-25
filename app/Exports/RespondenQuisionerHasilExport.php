@@ -2,15 +2,17 @@
 
 namespace App\Exports;
 
+use App\Models\QuisionerPertanyaan;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class RespondenQuisionerHasilExport implements FromArray, WithHeadings, WithCustomStartCell
+class RespondenQuisionerHasilExport implements FromView
 {
     private $data;
     /**
@@ -26,30 +28,36 @@ class RespondenQuisionerHasilExport implements FromArray, WithHeadings, WithCust
         $this->data=$data;
     }
 
+    // public function query()
+    // {
+    //     $pertanyaan = QuisionerPertanyaan::all();
+    //     return $pertanyaan;
+    // }
+
     // public function collection()
     // {
     //     return $this->data;
     // }
 
-    public function array(): array
-    {
-        return $this->data;
-    }
+    // public function array(): array
+    // {
+    //     return $this->data;
+    // }
 
-    public function headings(): array
-    {
-        return [
-            'ID',
-            'Name',
-            'Email',
-            // Add more headings here
-        ];
-    }
+    // public function headings(): array
+    // {
+    //     return [
+    //         'ID',
+    //         'Name',
+    //         'Email',
+    //         // Add more headings here
+    //     ];
+    // }
 
-    public function startCell(): string
-    {
-        return 'D2';
-    }
+    // public function startCell(): string
+    // {
+    //     return 'D2';
+    // }
 
     // public function map($row): array
     // {
@@ -66,10 +74,10 @@ class RespondenQuisionerHasilExport implements FromArray, WithHeadings, WithCust
     //     // return ['A3','B4'];
     // }
 
-    // public function view(): View
-    // {
-    //     return view('report.quisionerhasil',$this->data);
-    // }
+    public function view(): View
+    {
+        return view('export',['data'=>$this->data]);
+    }
 
     // public function array(): array
     // {

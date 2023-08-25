@@ -64,11 +64,16 @@ class ReportController extends Controller
 
     public function downloadExcel(Request $request)
     {
-        $pertanyaan = QuisionerPertanyaan::all();
-        $list = QuisionerHasil::query()->get();
-        // $data= QuisionerHasilResource::collection($list);
-        $data['pertanyaan']=$pertanyaan;
-        return Excel::download(new RespondenQuisionerHasilExport($data),'tes.xlsx');
+        try {
+            $pertanyaan = QuisionerPertanyaan::orderBy('sorting', 'ASC')->get();
+            // return $this->successResponse($pertanyaan);
+            // $list = QuisionerHasil::query()->get();
+            // // $data= QuisionerHasilResource::collection($list);
+            // $data['pertanyaan']=$pertanyaan;
+            return Excel::download(new RespondenQuisionerHasilExport($pertanyaan), 'tes.xlsx');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     //

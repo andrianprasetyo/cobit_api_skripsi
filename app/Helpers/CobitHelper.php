@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers;
 
+use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssessmentUsers;
 use App\Models\AssessmentUsersHasil;
@@ -59,8 +60,180 @@ class CobitHelper
             }
         }
     }
-    public function setCanvas(){
-        
+    public static function setCanvasStep2Value($assesment_id){
+        //Step2 init value
+        $domain=Domain::get();
+        foreach($domain as $dom){
+            $respondentHasil=DB::select("
+                SELECT
+                    *
+                FROM
+                    assesment_hasil ah
+                    JOIN design_faktor df ON ah.design_faktor_id = df.ID
+                WHERE
+                    ah.assesment_id =:assesment_id
+                    AND ah.domain_id =:domain_id
+                    AND df.kode IN ( 'DF1', 'DF2', 'DF3', 'DF4' )
+                ORDER BY
+                    df.urutan ASC
+            ",[
+                'assesment_id'=>$assesment_id,
+                'domain_id'=>$dom->id
+            ]);
+
+            $dfWeight=DB::select("
+                SELECT
+                    adfw.*,
+                    df.kode
+                FROM
+                    assesment_design_faktor_weight adfw
+                    JOIN design_faktor df ON df.ID = adfw.design_faktor_id
+                WHERE
+                    adfw.assesment_id =:assesment_id
+                    AND df.kode IN ( 'DF1', 'DF2', 'DF3', 'DF4' )
+                ORDER BY
+                    df.urutan ASC
+            ",[
+                'assesment_id'=>$assesment_id
+            ]);
+
+            $step2InitValue=0;
+            foreach($respondentHasil as $k=>$rh){
+                $step2InitValue+=$rh->relative_importance*$dfWeight[$k]->weight;
+            }
+
+
+            $checkCanvasAssesmentDomainExist=AssesmentCanvas::where('assesment_id',$assesment_id)->where('domain_id',$dom->id)->first();
+            if(!$checkCanvasAssesmentDomainExist){
+                $assesmentCanvas=new AssesmentCanvas();
+                $assesmentCanvas->assesment_id=$assesment_id;
+                $assesmentCanvas->domain_id=$dom->id;
+            }else{
+                $assesmentCanvas=$checkCanvasAssesmentDomainExist;
+            }
+            $assesmentCanvas->step2_init_value=$step2InitValue;
+            $assesmentCanvas->save();
+        }
+
+        //get MaxMinValue
+        $maxMinValue=DB::select("
+        select max(step2_init_value) as max_value,-min(step2_init_value) as min_value FROM assesment_canvas ac where ac.assesment_id=:assesment_id
+        ",['assesment_id'=>$assesment_id]);
+        $maxValue=0;
+        $maxMinValue=$maxMinValue[0];
+        if($maxValue<=$maxMinValue->max_value){
+            $maxValue=$maxMinValue->max_value;
+        }
+        if($maxValue<=$maxMinValue->min_value){
+            $maxValue=$maxMinValue->min_value;
+        }
+
+        //set Step2 Value
+        /*
+         * IFERROR(
+                IF(F6>=0;
+                    MROUND(TRUNC(100*SUMPRODUCT(B$5:E$5;B6:E6)/MAX(F$50:F$51));5);
+                    MROUND(TRUNC(100*SUMPRODUCT(B$5:E$5;B6:E6)/MAX(F$50:F$51));-5)
+                );
+            0)
+         * */
+        $dataCanvas=DB::select("SELECT ac.* FROM assesment_canvas ac JOIN domain d ON d.id=ac.domain_id where ac.assesment_id=:assesment_id ORDER BY d.urutan asc",['assesment_id'=>$assesment_id]);
+        foreach($dataCanvas as $dc){
+            if($dc->step2_init_value>=0){
+                $step2Value=100*$dc->step2_init_value/$maxValue;
+                $step2Value=5*round($step2Value/5);
+            }else{
+                $step2Value=100*$dc->step2_init_value/$maxValue;
+                $step2Value=-5*round($step2Value/5);
+            }
+            AssesmentCanvas::where('id',$dc->id)->update([
+                'step2_value'=>$step2Value
+            ]);
+        }
+
+        //END Step2 init value
+    }
+    public static function setCanvasStep3Value($assesment_id){
+        $domain=DB::select("SELECT ac.* FROM assesment_canvas ac JOIN domain d ON d.id=ac.domain_id where ac.assesment_id=:assesment_id ORDER BY d.urutan asc",['assesment_id'=>$assesment_id]);
+        foreach($domain as $dom) {
+            $respondentHasil = DB::select("
+                SELECT
+                    *
+                FROM
+                    assesment_hasil ah
+                    JOIN design_faktor df ON ah.design_faktor_id = df.ID
+                WHERE
+                    ah.assesment_id =:assesment_id
+                    AND ah.domain_id =:domain_id
+                    AND df.kode IN ( 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10' )
+                ORDER BY
+                    df.urutan ASC
+            ", [
+                'assesment_id' => $assesment_id,
+                'domain_id' => $dom->id
+            ]);
+
+            $dfWeight = DB::select("
+                SELECT
+                    adfw.*,
+                    df.kode
+                FROM
+                    assesment_design_faktor_weight adfw
+                    JOIN design_faktor df ON df.ID = adfw.design_faktor_id
+                WHERE
+                    adfw.assesment_id =:assesment_id
+                    AND df.kode IN ( 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10' )
+                ORDER BY
+                    df.urutan ASC
+            ", [
+                'assesment_id' => $assesment_id
+            ]);
+
+            $step3PraInitValue = 0;
+            foreach ($respondentHasil as $k => $rh) {
+                $step3PraInitValue += $rh->relative_importance * $dfWeight[$k]->weight;
+            }
+            $step3InitValue=$step3PraInitValue+$dom->step2_init_value;
+            AssesmentCanvas::where('id',$dom->id)->update([
+                'step3_init_value'=>$step3InitValue
+            ]);
+        }
+
+        //get MaxMinValue
+        $maxMinValue=DB::select("
+        select max(step3_init_value) as max_value,-min(step3_init_value) as min_value FROM assesment_canvas ac where ac.assesment_id=:assesment_id
+        ",['assesment_id'=>$assesment_id]);
+        $maxValue=0;
+        $maxMinValue=$maxMinValue[0];
+        if($maxValue<=$maxMinValue->max_value){
+            $maxValue=$maxMinValue->max_value;
+        }
+        if($maxValue<=$maxMinValue->min_value){
+            $maxValue=$maxMinValue->min_value;
+        }
+
+        //set step3 value
+        /*
+         * IFERROR(
+                IF(P6>0;
+                    MROUND(TRUNC(100*SUMPRODUCT(B$5:N$5;B6:N6)/MAX(P$50:P$51));5);
+                    MROUND(TRUNC(100*SUMPRODUCT(B$5:N$5;B6:N6)/MAX(P$50:P$51));-5)
+                );
+            0)
+        */
+        $dataCanvas=DB::select("SELECT ac.* FROM assesment_canvas ac JOIN domain d ON d.id=ac.domain_id where ac.assesment_id=:assesment_id ORDER BY d.urutan asc",['assesment_id'=>$assesment_id]);
+        foreach($dataCanvas as $dc){
+            if($dc->step3_init_value>=0){
+                $step3Value=100*$dc->step3_init_value/$maxValue;
+                $step3Value=5*round($step3Value/5);
+            }else{
+                $step3Value=100*$dc->step2_init_value/$maxValue;
+                $step3Value=-5*round($step3Value/5);
+            }
+            AssesmentCanvas::where('id',$dc->id)->update([
+                'step3_value'=>$step3Value
+            ]);
+        }
     }
     public static function setAssesmentHasilAvg($assesmentId){
         DB::table('assesment_hasil')->where('assesment_id',$assesmentId)->delete();

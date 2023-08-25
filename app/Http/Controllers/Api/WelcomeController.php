@@ -33,6 +33,8 @@ class WelcomeController extends Controller
         $assesment=Assesment::get();
         foreach($assesment as $as){
             CobitHelper::assesmentDfWeight($as->id);
+            CobitHelper::setCanvasStep2Value($as->id);
+            CobitHelper::setCanvasStep3Value($as->id);
         }
     }
 

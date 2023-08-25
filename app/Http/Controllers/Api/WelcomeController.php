@@ -35,6 +35,7 @@ class WelcomeController extends Controller
             CobitHelper::assesmentDfWeight($as->id);
             CobitHelper::setCanvasStep2Value($as->id);
             CobitHelper::setCanvasStep3Value($as->id);
+            CobitHelper::updateCanvasAdjust($as->id);
         }
     }
 

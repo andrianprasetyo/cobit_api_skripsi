@@ -46,7 +46,56 @@ class CobitHelper
             $u->save();
         }
     }
-
+    public static function updateCanvasAdjust($assesmentId){
+        $data=DB::select("
+            SELECT
+                ac.id,
+                d.kode,
+                ac.step2_init_value,
+                ac.step2_value,
+                ac.step3_init_value,
+                ac.step3_value,
+                COALESCE ( adjustment, 0 ) as adjustment,
+                ( step3_value + COALESCE ( adjustment, 0 ) ) AS step4,
+                CASE
+                    WHEN (step3_value )>=75 THEN
+                        4
+                    WHEN (step3_value )>=50 THEN
+                        3
+                    WHEN (step3_value )>=25 THEN
+                        2
+                    ELSE
+                        1
+                END AS suggest_capability_level,
+                CASE
+                    WHEN (step3_value + COALESCE ( adjustment, 0 ))>=75 THEN
+                        4
+                    WHEN (step3_value + COALESCE ( adjustment, 0 ))>=50 THEN
+                        3
+                    WHEN (step3_value + COALESCE ( adjustment, 0 ))>=25 THEN
+                        2
+                    ELSE
+                        1
+                END AS aggreed_capability_level
+            FROM
+                assesment_canvas ac
+                JOIN DOMAIN d ON d.ID = ac.domain_id
+            WHERE
+                ac.assesment_id=:assesment_id
+            ORDER BY
+                d.urutan ASC
+        ",[
+            'assesment_id'=>$assesmentId
+        ]);
+        foreach($data as $dt){
+            AssesmentCanvas::where('id',$dt->id)->update([
+                'adjustment'=>$dt->adjustment,
+                'origin_capability_level'=>$dt->suggest_capability_level,
+                'suggest_capability_level'=>$dt->suggest_capability_level,
+                'aggreed_capability_level'=>$dt->aggreed_capability_level
+            ]);
+        }
+    }
     public static function assesmentDfWeight($assesmentId){
         $df=DesignFaktor::get();
         foreach($df as $d){

@@ -46,10 +46,11 @@ class QuisionerController extends Controller
 
         $quisioner = Quisioner::where('aktif',true)->first();
         // $quisioner = Quisioner::find($request->quisioner_id);
-        // if($quisioner->aktif)
-        // {
-        //     return $this->errorResponse('Quisioner')
-        // }
+        if($quisioner->aktif)
+        {
+            return $this->errorResponse('Quisioner tidak di temukan',400);
+        }
+
         $responden= AssessmentUsers::with(['assesment.organisasi'])->find($request->id);
         if ($responden->is_proses == 'done')
         {
@@ -68,7 +69,7 @@ class QuisionerController extends Controller
 
             $quisioner_responden = new AssessmentQuisioner();
             $quisioner_responden->assesment_id = $request->assesment_id;
-            $quisioner_responden->quisioner_id = $request->quisioner_id;
+            $quisioner_responden->quisioner_id = $quisioner->quisioner_id;
             $quisioner_responden->organisasi_id = $responden->assesment->organisasi_id;
             $quisioner_responden->allow = true;
             $quisioner_responden->save();

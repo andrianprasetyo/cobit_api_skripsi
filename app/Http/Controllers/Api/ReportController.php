@@ -10,6 +10,7 @@ use App\Http\Resources\Quisioner\QuisionerHasilResource;
 use App\Http\Resources\Report\AssesmentDesignFaktorWeightCanvasResource;
 use App\Http\Resources\Report\DesignFaktorCanvasResource;
 use App\Http\Resources\Report\DomainCanvasResource;
+use App\Jobs\SetCanvasHasilDataJob;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
@@ -77,18 +78,22 @@ class ReportController extends Controller
     }
 
     //
-    public function setHasilCanvas()
+    public function setHasilCanvas($id)
     {
+        $_assesment = Assesment::where('id', $id)->exists();
+        if (!$_assesment) {
+            return $this->errorResponse('Assesment tidak terdaftar', 404);
+        }
         DB::beginTransaction();
         try {
-            ini_set('max_execution_time', 300);
-            $assesment = Assesment::get();
-            foreach ($assesment as $as) {
-                CobitHelper::assesmentDfWeight($as->id);
-                CobitHelper::setCanvasStep2Value($as->id);
-                CobitHelper::setCanvasStep3Value($as->id);
-                CobitHelper::updateCanvasAdjust($as->id);
-            }
+            // ini_set('max_execution_time', 300);
+            // // $assesment = Assesment::get();
+            // CobitHelper::setAssesmentHasilAvg($id);
+            // CobitHelper::assesmentDfWeight($id);
+            // CobitHelper::setCanvasStep2Value($id);
+            // CobitHelper::setCanvasStep3Value($id);
+            // CobitHelper::updateCanvasAdjust($id);
+            SetCanvasHasilDataJob::dispatch($id);
 
             DB::commit();
             return $this->successResponse();

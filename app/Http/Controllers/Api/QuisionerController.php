@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Quisioner\QuisionerFinishRequest;
 use App\Http\Requests\Quisioner\QuisionerSaveAnswerRequest;
 use App\Http\Requests\Quisioner\QuisionerStartRequest;
 use App\Http\Resources\Answer\GrupAnswerResource;
 use App\Http\Resources\AssesmentUsersResource;
+use App\Jobs\SetProsesQuisionerHasilQueue;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
@@ -283,43 +285,54 @@ class QuisionerController extends Controller
     public function finish(QuisionerFinishRequest $request)
     {
         $request->validated();
-        $assesment_user_id=$request->assesment_user_id;
-        $responden=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($assesment_user_id);
-        if(!$responden)
-        {
-            return $this->errorResponse('Data tidak ditemukan',404);
+
+        DB::beginTransaction();
+        try {
+            $assesment_user_id = $request->assesment_user_id;
+            $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($assesment_user_id);
+            if (!$responden) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+
+            if ($responden->status == 'diundang') {
+                return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
+            }
+
+            if ($responden->status == 'done') {
+                return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+            }
+
+            $total_soal = DB::table('design_faktor')
+                ->join('quisioner_pertanyaan', 'design_faktor.id', '=', 'quisioner_pertanyaan.design_faktor_id')
+                ->where('quisioner_pertanyaan.quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                ->whereNull('design_faktor.deleted_at')
+                ->whereNull('quisioner_pertanyaan.deleted_at')
+                ->count();
+
+            $total_jawaban = QuisionerHasil::where('assesment_users_id', $assesment_user_id)
+                ->where('quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                ->count();
+
+            if ($total_jawaban < $total_soal) {
+                return $this->errorResponse('Harap isi semua jawaban di setiap pertanyaan', 400);
+            }
+
+            $responden->status = 'done';
+            $responden->is_proses = null;
+            $responden->save();
+
+            SetProsesQuisionerHasilQueue::dispatch($responden->id);
+
+            // CobitHelper::getQuisionerHasil($responden->id);
+
+            $data['total_soal'] = $total_soal;
+            $data['total_jawaban'] = $total_jawaban;
+
+            DB::commit();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
         }
-
-        if ($responden->status == 'diundang') {
-            return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
-        }
-
-        if ($responden->is_proses == 'done') {
-            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
-        }
-
-        $total_soal = DB::table('design_faktor')
-            ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
-            ->where('quisioner_pertanyaan.quisioner_id', $responden->assesmentquisioner->quisioner_id)
-            ->whereNull('design_faktor.deleted_at')
-            ->whereNull('quisioner_pertanyaan.deleted_at')
-            ->count();
-
-        $total_jawaban=QuisionerHasil::where('assesment_users_id',$assesment_user_id)
-            ->where('quisioner_id', $responden->assesmentquisioner->quisioner_id)
-            ->count();
-
-        if($total_jawaban < $total_soal)
-        {
-            return $this->errorResponse('Harap isi semua jawaban di setiap pertanyaan',400);
-        }
-
-        $responden->status='done';
-        $responden->is_proses = 'done';
-        $responden->save();
-
-        $data['total_soal'] = $total_soal;
-        $data['total_jawaban']=$total_jawaban;
-        return $this->successResponse($data);
     }
 }

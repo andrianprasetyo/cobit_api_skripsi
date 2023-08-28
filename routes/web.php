@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\CommandController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,11 +16,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json("Cobit Rest API V1");
 });
 
 Route::controller(DownloadController::class)->group(function(){
-    Route::get('/download/sample/template-intvite-respondent', 'TemplateInviteResponden');
+    Route::get('/download/sample/template-invite-respondent', 'TemplateInviteResponden');
 });
 
 Route::get('/artisan', [CommandController::class, 'run']);

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\UserRespondenExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserAssesmentResource;
+use App\Models\Assesment;
 use App\Models\AssessmentUsers;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UsersAssesmentController extends Controller
 {
@@ -43,5 +46,12 @@ class UsersAssesmentController extends Controller
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
         return $this->successResponse(new UserAssesmentResource($data));
+    }
+
+    public function exportUser(Request $request)
+    {
+        $assesment=Assesment::find($request->id);
+        $data = AssessmentUsers::where('assesment_id', $request->id)->get();
+        return Excel::download(new UserRespondenExport($data), 'user-responden-'.$assesment->nama.'.xlsx');
     }
 }

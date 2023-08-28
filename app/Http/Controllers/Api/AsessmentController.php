@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Notifications\InviteRespondenNotif;
 use App\Notifications\InviteUserNotif;
 use App\Traits\JsonResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -180,7 +181,25 @@ class AsessmentController extends Controller
         $data->deskripsi = $request->deskripsi;
         $data->save();
 
-        $this->successResponse();
+        return $this->successResponse();
+    }
+    public function setStatus(Request $request,$id)
+    {
+        $request->validate(
+            [
+                'status'=>'required|in:ongoing,completed',
+            ],
+            [
+                'status.required'=>'Status harus di isi',
+                'status.in' => 'Status tidak valid (ongoing|completed)',
+            ]
+        );
+
+        $data=Assesment::find($id);
+        $data->status=$request->status;
+        $data->save();
+
+        return $this->successResponse();
     }
 
     public function remove($id)
@@ -222,31 +241,15 @@ class AsessmentController extends Controller
                             $mail[]=$_item_mail->email;
                         }
                         $fail('Terdapat email yang sudah terdaftar pada assesment yang sama ('. implode(',', $mail).')');
-                        // $fail(implode(',',$mail));
                     }
                 }
             ];
-            // $validate['email.*'] = 'required|email|unique:assesment_users,email';
             $validate['email.*'] = 'required|email';
 
             $validate_msg['email.required'] = 'Email harus di isi';
             $validate_msg['email.array'] = 'Email harus dalam bentuk array';
             $validate_msg['email.*.required'] = 'Email harus di isi';
             $validate_msg['email.*.email'] = 'Email tidak valid';
-
-            // $validate_msg['email.*.unique'] = 'Email sudah digunakan';
-
-            // $validate['responden'] = 'required|array';
-            // $validate['responden.required'] = 'Responden harus di isi';
-            // $validate['responden.array'] = 'Responden harus dalam bentuk dalam array';
-
-            // $validate['responden.*.nama'] = 'required';
-            // $validate['responden.*.email'] = 'required|email|unique:assesment_users,email';
-
-            // $validate_msg['responden.*.nama.required'] = 'Nama responden harus di isi';
-            // $validate_msg['responden.*.email.required'] = 'Email responden harus di isi';
-            // $validate_msg['responden.*.email.email'] = 'Email tidak valid';
-            // $validate_msg['responden.*.email.unique'] = 'Email sudah digunakan';
 
             $request->validate($validate, $validate_msg);
 
@@ -260,6 +263,17 @@ class AsessmentController extends Controller
             $assesment = Assesment::with('organisasi')->find($request->id);
             if (!$assesment) {
                 return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+
+            if($assesment->status == 'completed')
+            {
+                return $this->errorResponse('Assesment sudah dilaksanakan/Completed',400);
+            }
+
+            $_exp_date=Carbon::parse($assesment->tahun);
+            if(Carbon::now()->gte($_exp_date))
+            {
+                return $this->errorResponse('Assesment sudah lewat batas tahun ('.$_exp_date.')');
             }
             $organisasi=$assesment->organisasi;
             // $quisioner=Quisioner::where('aktif',true)->first();
@@ -324,6 +338,16 @@ class AsessmentController extends Controller
         );
 
         $file = $request->file('file');
+
+        $assesment = Assesment::find($request->id);
+        if ($assesment->status == 'completed') {
+            return $this->errorResponse('Assesment sudah dilaksanakan/Completed', 400);
+        }
+
+        $_exp_date = Carbon::parse($assesment->tahun);
+        if (Carbon::now()->gte($_exp_date)) {
+            return $this->errorResponse('Assesment sudah lewat batas tahun (' . $_exp_date . ')');
+        }
 
         try {
 

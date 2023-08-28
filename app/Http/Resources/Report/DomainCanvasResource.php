@@ -18,7 +18,7 @@ class DomainCanvasResource extends JsonResource
             'id'=>$this->id,
             'kode'=>$this->kode,
             'urutan'=>$this->urutan,
-            // 'ket'=>$this->id,
+            'ket'=>$this->ket,
             'assesmentcanvas' =>new AssesmentCanvasResource($this->assesmentcanvas),
             'assesmenthasil'=> AssesmentHasilCanvasResource::collection($this->assesmenthasil),
         ];

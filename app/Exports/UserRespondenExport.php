@@ -2,13 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\AssessmentUsers;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\FromView;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Illuminate\Contracts\View\View;
 
 class UserRespondenExport implements FromArray
 {

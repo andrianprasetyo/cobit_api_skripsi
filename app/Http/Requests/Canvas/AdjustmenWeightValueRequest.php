@@ -27,7 +27,7 @@ class AdjustmenWeightValueRequest extends FormRequest
             'nilai' => [
                 'required',
                 'numeric',
-                'min:0',
+                //'min:0',
                 // 'max:100'
             ],
         ];
@@ -46,7 +46,7 @@ class AdjustmenWeightValueRequest extends FormRequest
 
             'nilai.required' => 'Nilai weight harus di isi',
             'nilai.numeric' => 'Nilai weight tidak valid',
-            'nilai.min' => 'Nilai weight min 0',
+            // 'nilai.min' => 'Nilai weight min 0',
             // 'nilai.max' => 'Nilai adjustmen max 100',
         ];
     }

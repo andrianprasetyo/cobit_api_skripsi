@@ -23,7 +23,7 @@ class AdjustmenValueCanvasRequest extends FormRequest
     {
         return [
             'id' => ['required', 'uuid', 'exists:assesment_canvas,id'],
-            'nilai'=>['required','numeric','min:0','max:100'],
+            'nilai'=>['required','numeric','min:-100','max:100'],
         ];
     }
 
@@ -35,7 +35,7 @@ class AdjustmenValueCanvasRequest extends FormRequest
             'id.exists' => 'Assesment canvas ID tidak terdaftar',
             'nilai.required' => 'Nilai adjustmen harus di isi',
             'nilai.numeric' => 'Nilai adjustmen tidak valid',
-            'nilai.min' => 'Nilai adjustmen min 0-100',
+            'nilai.min' => 'Nilai adjustmen min -100',
             'nilai.max' => 'Nilai adjustmen max 100',
         ];
     }

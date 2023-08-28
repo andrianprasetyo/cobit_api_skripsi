@@ -1,0 +1,18 @@
+<table>
+    <head>
+        <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Divisi/Bagian</th>
+            <th>Jabatan</th>
+        </tr>
+    </head>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>a</td>
+            <td>sd</td>
+            <td>d</td>
+        </tr>
+    </tbody>
+</table>

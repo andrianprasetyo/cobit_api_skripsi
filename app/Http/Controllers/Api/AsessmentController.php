@@ -126,6 +126,7 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Role Eksternal tidak tersedia',404);
             }
 
+            $_token=Str::random(50);
             $user=new User();
             $user->nama=$request->pic_nama;
             $user->divisi = $request->pic_divisi;
@@ -134,7 +135,8 @@ class AsessmentController extends Controller
             $user->status='pending';
             $user->internal=false;
             $user->organisasi_id=$organisasi_id;
-            $user->password= Str::random(10);
+            $user->token=$_token;
+            $user->password= $_token;
             $user->username=Str::slug($request->pic_nama, '.');
             $user->save();
 
@@ -318,7 +320,6 @@ class AsessmentController extends Controller
             return $this->errorResponse($e->getMessage());
         }
     }
-
     public function inviteRespondentByExcel(Request $request)
     {
 

@@ -183,4 +183,41 @@ class AuthController extends Controller
 
         return $this->successResponse(null,'Password berhasil diubah');
     }
+
+    public function tokenVerify(Request $request)
+    {
+        $_token_check=User::where('token',$request->token)->first();
+
+        if(!$_token_check)
+        {
+            return $this->errorResponse('Token tidak valid',404);
+        }
+
+        return $this->successResponse($_token_check);
+    }
+
+    public function userTokenVerify(Request $request)
+    {
+        $user = User::find($request->id);
+
+        if (!$user) {
+            return $this->errorResponse('User tidak ditemukan', 404);
+        }
+
+        if($user->status == 'active')
+        {
+            return $this->errorResponse('User sudah melakukan aktifasi', 400);
+        }
+
+        if ($user->status == 'banned') {
+            return $this->errorResponse('User sudah di blokir', 400);
+        }
+
+        $user->status='active';
+        $user->token=null;
+        $user->email_verified_at=Carbon::now();
+        $user->save();
+
+        return $this->successResponse();
+    }
 }

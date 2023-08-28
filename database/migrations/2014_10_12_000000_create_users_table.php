@@ -25,6 +25,7 @@ return new class extends Migration
             $table->json('avatar')->nullable();
             $table->foreignUuid('organisasi_id')->nullable();
             $table->foreignUuid('assesment_id')->nullable();
+            $table->text('token')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

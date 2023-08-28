@@ -12,4 +12,14 @@ class AssesmentCanvas extends Model
     public $incrementing = false;
     protected $table = 'assesment_canvas';
     protected $keyType = 'string';
+
+    public function assesment()
+    {
+        return $this->belongsTo(Assesment::class, 'assesment_id');
+    }
+
+    public function domain()
+    {
+        return $this->belongsTo(Domain::class, 'domain_id');
+    }
 }

@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\AssesmentDomainExport;
 use App\Http\Controllers\Controller;
+use App\Models\Assesment;
+use App\Models\AssesmentCanvas;
 use App\Models\Domain;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DomainController extends Controller
 {
@@ -91,5 +95,18 @@ class DomainController extends Controller
         $data->delete();
 
         return $this->successResponse();
+    }
+
+    public function exportDomainByAssesment(Request $request)
+    {
+        $id=$request->id;
+        $assesment = Assesment::find($id);
+        $data=AssesmentCanvas::with(['assesment','domain'])->where('assesment_id',$id)->get();
+
+        if (!$assesment) {
+            return $this->errorResponse('Assesment ID tidak terdaftar', 404);
+        }
+
+        return Excel::download(new AssesmentDomainExport($data), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
     }
 }

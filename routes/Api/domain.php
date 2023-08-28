@@ -6,3 +6,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::put('/domain/edit/{id}', 'DomainController@edit');
     Route::delete('/domain/remove/{id}', 'DomainController@remove');
 });
+
+Route::get('/domain/assesment/download', 'DomainController@exportDomainByAssesment');

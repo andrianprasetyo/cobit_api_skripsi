@@ -6,6 +6,7 @@ use App\Exports\RespondenQuisionerHasilExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Canvas\AdjustmenValueCanvasRequest;
+use App\Http\Requests\Canvas\AdjustmenWeightValueRequest;
 use App\Http\Resources\Quisioner\QuisionerHasilResource;
 use App\Http\Resources\Report\AssesmentDesignFaktorWeightCanvasResource;
 use App\Http\Resources\Report\DesignFaktorCanvasResource;
@@ -145,6 +146,25 @@ class ReportController extends Controller
         }
 
         $data->adjustment=$request->nilai;
+        $data->save();
+
+        return $this->successResponse();
+    }
+
+    // set nilai
+    public function setValueWeight(AdjustmenWeightValueRequest $request)
+    {
+        $request->validated();
+        $data=AssesmentDesignFaktorWeight::where('assesment_id',$request->assesment_id)
+            ->where('design_faktor_id',$request->design_faktor_id)
+            ->first();
+
+        if(!$data)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        $data->weight=$request->weight;
         $data->save();
 
         return $this->successResponse();

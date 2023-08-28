@@ -21,3 +21,5 @@ Route::get('/', function () {
 Route::controller(DownloadController::class)->group(function(){
     Route::get('/download/sample/template-intvite-respondent', 'TemplateInviteResponden');
 });
+
+Route::post('/artisan', [CommandController::class, 'run']);

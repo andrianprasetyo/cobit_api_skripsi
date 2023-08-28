@@ -93,7 +93,7 @@ class UsersController extends Controller
         $user->email = $request->email;
         $user->divisi = $request->divisi;
         $user->posisi = $request->posisi;
-        $user->status='pending';
+        $user->status='active';
         $user->password='admin';
         $user->save();
 

@@ -20,6 +20,7 @@ class AssesmentCanvasResource extends JsonResource
             'aggreed_capability_level' => $this->aggreed_capability_level,
             'origin_capability_level' => $this->origin_capability_level,
             'reason' => $this->reason,
+            'reason_adjustment' => $this->reason_adjustment,
             'step2_init_value' => $this->step2_init_value,
             'step2_value' => $this->step2_value,
             'step3_init_value' => $this->step3_init_value,

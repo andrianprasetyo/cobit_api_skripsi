@@ -11,3 +11,4 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
 });
 
 Route::get('/domain/assesment/download', 'DomainController@exportDomainByAssesment');
+Route::get('/domain/assesment-adjustment/download', 'DomainController@exportDomainAdjustmentByAssesment');

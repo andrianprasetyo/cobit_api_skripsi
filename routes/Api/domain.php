@@ -5,6 +5,9 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/domain/add', 'DomainController@add');
     Route::put('/domain/edit/{id}', 'DomainController@edit');
     Route::delete('/domain/remove/{id}', 'DomainController@remove');
+    Route::get('/domain/assesment/list', 'DomainController@listDomainByAssesment');
+    Route::get('/domain/chart/list', 'DomainController@chartDomainResult');
+    Route::get('/domain/chart/list-adjustment', 'DomainController@chartDomainAdjustmentResult');
 });
 
 Route::get('/domain/assesment/download', 'DomainController@exportDomainByAssesment');

@@ -18,4 +18,14 @@ class AssesmentHasil extends Model
     {
         return $this->belongsTo(DesignFaktor::class,'design_faktor_id')->orderBy('urutan','ASC');
     }
+
+    public function assesment()
+    {
+        return $this->belongsTo(Assesment::class, 'assesment_id');
+    }
+
+    public function domain()
+    {
+        return $this->belongsTo(Domain::class, 'domain_id');
+    }
 }

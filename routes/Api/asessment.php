@@ -6,5 +6,6 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::put('/assesment/edit/{id}', 'AsessmentController@edit');
     Route::put('/assesment/set-status/{id}', 'AsessmentController@setStatus');
     Route::post('/assesment/responden/invite', 'AsessmentController@inviteRespondent');
-    Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');
+
 });
+Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');

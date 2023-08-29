@@ -16,7 +16,7 @@ class AssesmentDesignFaktorWeightCanvasResource extends JsonResource
     {
         return [
             'id'=>$this->id,
-            'weight' => $this->weight,
+            'weight' => (float)$this->weight,
             'assesment_id'=>$this->assesment_id,
             'designfaktor'=> new DesignFaktorCanvasResource($this->designfaktor)
         ];

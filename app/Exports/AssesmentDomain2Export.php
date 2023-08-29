@@ -6,12 +6,14 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class AssesmentDomainExport implements FromArray, WithColumnWidths, WithStyles
+class AssesmentDomain2Export implements FromArray, WithColumnWidths, WithStyles
 {
-
+    /**
+    * @return \Illuminate\Support\Collection
+    */
     private $data;
 
     public function __construct($data)
@@ -23,9 +25,9 @@ class AssesmentDomainExport implements FromArray, WithColumnWidths, WithStyles
             foreach ($data as $_item) {
                 $list[] = array(
                     $no,
-                    $_item->kode.'-'.strip_tags($_item->ket),
-                    $_item->aggreed_capability_level,
-                    $_item->suggest_capability_level >= 3?'Ya':'Tidak'
+                    $_item->kode . '-' . strip_tags($_item->ket),
+                    $_item->suggest_capability_level,
+                    $_item->aggreed_capability_level
                 );
                 $no++;
             }
@@ -33,12 +35,12 @@ class AssesmentDomainExport implements FromArray, WithColumnWidths, WithStyles
         $this->data = $list;
     }
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function array(): array
     {
         return [
-            ['No', 'Governance & Management Objective', 'Target Capability Level','Assesment'], // Customize your headers here
+            ['No', 'Governance & Management Objective', 'Target Capability Level', 'Target Capability Adjustment'], // Customize your headers here
             $this->data
         ];
         // return $this->data;
@@ -47,7 +49,7 @@ class AssesmentDomainExport implements FromArray, WithColumnWidths, WithStyles
     public function columnWidths(): array
     {
         return [
-            'B'=>50,
+            'B' => 50,
             'C' => 30,
         ];
     }

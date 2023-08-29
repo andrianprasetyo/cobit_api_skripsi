@@ -37,11 +37,12 @@ class ReportController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = QuisionerHasil::query();
+        $list = QuisionerHasil::with(['responden']);
 
-        // if ($request->filled('assesment_id')) {
-        //     $list->where('assesment_id', $request->assesment_id);
-        // }
+        if ($request->filled('assesment_id')) {
+            $list->whereRelation('responden','assesment_id', $request->assesment_id);
+        }
+
         if ($request->filled('search')) {
             $list->whereRelation('responden', 'nama', 'ilike', '%' . $search . '%');
             $list->orWhereRelation('responden','email', 'ilike', '%' . $search . '%');
@@ -136,7 +137,7 @@ class ReportController extends Controller
         return $this->successResponse($data);
     }
 
-    public function setValueAdjustment(AdjustmenValueCanvasRequest $request)
+    public function setValueAdjustmentBACKUP(AdjustmenValueCanvasRequest $request)
     {
         $request->validated();
         $data=AssesmentCanvas::find($request->id);
@@ -149,6 +150,52 @@ class ReportController extends Controller
         $data->save();
 
         return $this->successResponse();
+    }
+
+    public function setValueAdjustment(AdjustmenValueCanvasRequest $request)
+    {
+        $request->validated();
+
+        $payload=$request->data;
+        $hasil = $payload['hasil'];
+        $weight=$payload['weight'];
+
+        DB::beginTransaction();
+        try {
+            if (count($hasil) > 0) {
+                foreach ($hasil as $_item_hasil) {
+                    $assesmentcanvas = $_item_hasil['assesmentcanvas'];
+                    $_id = $assesmentcanvas['id'];
+                    $_adjustment = $assesmentcanvas['adjustment'];
+                    $_reason = $assesmentcanvas['reason'];
+                    $_reason_adjst = $assesmentcanvas['reason_adjustment'];
+
+                    $_adjust = AssesmentCanvas::find($_id);
+                    $_adjust->adjustment = $_adjustment;
+                    $_adjust->reason = $_reason;
+                    $_adjust->reason_adjustment = $_reason_adjst;
+                    // $_adjust->save();
+                }
+            }
+
+            if (count($weight) > 0) {
+                foreach ($weight as $_item_weight) {
+                    $_id = $_item_weight['id'];
+                    $_n = $_item_weight['weight'];
+                    $_weight = AssesmentDesignFaktorWeight::find($_id);
+                    $_weight->weight = $_n;
+                    // $_weight->save();
+                }
+            }
+
+            SetCanvasHasilDataJob::dispatch($request->assement_id);
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     // set nilai

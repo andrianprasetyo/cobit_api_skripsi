@@ -20,10 +20,11 @@ return new class extends Migration
             $table->integer('step3_init_value')->nullable();
             $table->integer('step3_value')->nullable();
             $table->integer('adjustment')->nullable();
-            $table->string('reason')->nullable();
+            $table->text('reason')->nullable();
             $table->integer('origin_capability_level')->nullable();
             $table->integer('suggest_capability_level')->nullable();
             $table->integer('aggreed_capability_level')->nullable();
+            $table->text('reason_adjustment')->nullable();
             $table->timestamps();
         });
         DB::statement('ALTER TABLE assesment_canvas ALTER COLUMN id SET DEFAULT uuid_generate_v4();');

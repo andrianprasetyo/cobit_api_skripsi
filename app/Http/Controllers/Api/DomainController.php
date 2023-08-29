@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\AssesmentDomain2Export;
 use App\Exports\AssesmentDomainExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Chart\ChartDomainResource;
@@ -105,12 +106,18 @@ class DomainController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'created_at');
-        $sortType = $request->get('sortType', 'desc');
+        $sortBy = $request->get('sortBy', 'domain.urutan');
+        $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
         $assesment_id = $request->assesment_id;
-        $list = AssesmentCanvas::with(['domain'])
-            ->where('assesment_id', $assesment_id);
+
+        // $list = AssesmentCanvas::with(['domain'])
+        //     ->where('assesment_id', $assesment_id);
+
+        $list=DB::table('assesment_canvas')
+            ->join('domain','assesment_canvas.domain_id','=','domain.id')
+            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan')
+            ->where('assesment_canvas.assesment_id',$assesment_id);
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page);
@@ -121,7 +128,13 @@ class DomainController extends Controller
     {
         $id=$request->id;
         $assesment = Assesment::find($id);
-        $data=AssesmentCanvas::with(['assesment','domain'])->where('assesment_id',$id)->get();
+        // $data=AssesmentCanvas::with(['assesment','domain'])->where('assesment_id',$id)->get();
+        $data = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
+            ->where('assesment_canvas.assesment_id', $id)
+            ->orderBy('domain.urutan','ASC')
+            ->get();
 
         if (!$assesment)
         {
@@ -129,6 +142,26 @@ class DomainController extends Controller
         }
 
         return Excel::download(new AssesmentDomainExport($data), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
+    }
+
+    public function exportDomainAdjustmentByAssesment(Request $request)
+    {
+        $id = $request->id;
+        $assesment = Assesment::find($id);
+        // $data = AssesmentCanvas::with(['assesment', 'domain'])->where('assesment_id', $id)->get();
+
+        $data = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
+            ->where('assesment_canvas.assesment_id', $id)
+            ->orderBy('domain.urutan', 'ASC')
+            ->get();
+
+        if (!$assesment) {
+            return $this->errorResponse('Assesment ID tidak terdaftar', 404);
+        }
+
+        return Excel::download(new AssesmentDomain2Export($data), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
     }
 
     public function chartDomainResultBACKUP(Request $request)

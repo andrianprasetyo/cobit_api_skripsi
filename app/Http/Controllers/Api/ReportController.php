@@ -174,7 +174,7 @@ class ReportController extends Controller
                     $_adjust->adjustment = $_adjustment;
                     $_adjust->reason = $_reason;
                     $_adjust->reason_adjustment = $_reason_adjst;
-                    // $_adjust->save();
+                    $_adjust->save();
                 }
             }
 
@@ -184,7 +184,7 @@ class ReportController extends Controller
                     $_n = $_item_weight['weight'];
                     $_weight = AssesmentDesignFaktorWeight::find($_id);
                     $_weight->weight = $_n;
-                    // $_weight->save();
+                    $_weight->save();
                 }
             }
 

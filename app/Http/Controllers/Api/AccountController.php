@@ -17,7 +17,11 @@ class AccountController extends Controller
     use JsonResponse;
     public function me()
     {
-        $account=auth()->user();
+        $account= auth()->user();
+        $user= $account;
+        $user->assesment=$account->assesment;
+        $user->organisasi = $account->organisasi;
+        $user->roleaktif = $account->roleaktif;
         return $this->successResponse($account);
     }
 

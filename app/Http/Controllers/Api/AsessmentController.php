@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Assesment\AddPICRequest;
 use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
@@ -359,6 +360,83 @@ class AsessmentController extends Controller
             return $this->successResponse();
         } catch (\Exception $e) {
             // DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function addPIC(AddPICRequest $request)
+    {
+
+        $request->validated();
+
+        $users = $request->user_id;
+        $assesment_id = $request->assesment_id;
+        $organisasi_id = $request->organisasi_id;
+        $account = auth()->user();
+
+        if (isset($account->organisasi->id)) {
+            $organisasi_id = $account->organisasi->id;
+        }
+
+        $_check_assesment = Assesment::where('id', $assesment_id)
+            ->where('organisasi_id', $organisasi_id)
+            ->exists();
+
+        if (!$_check_assesment) {
+            $_ass = Assesment::find($assesment_id);
+            $_organisasi = Organisasi::find($organisasi_id);
+            return $this->errorResponse('Assesment ' . $_ass->nama . ' tidak terdaftar pada organisasi ' . $_organisasi->nama);
+        }
+
+        $role = Roles::where('code', 'eksternal')->first();
+        if (!$role) {
+            return $this->errorResponse('Role Eksternal tidak tersedia', 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($users as $_item_user) {
+                $user_id = isset($_item_user['id']) ? $_item_user['id'] : null;
+
+                if (isset($_item_user['email'])) {
+                    $email = $_item_user['email'];
+                    $_token = Str::random(50);
+                    $user = new User();
+                    $user->email = $email;
+                    $user->status = 'pending';
+                    $user->internal = false;
+                    $user->organisasi_id = $organisasi_id;
+                    $user->token = $_token;
+                    $user->password = $_token;
+                    $user->username = null;
+                    $user->save();
+
+                    $user_id = $user->id;
+
+                    $role_user = new RoleUsers();
+                    $role_user->users_id = $user_id;
+                    $role_user->roles_id = $role->id;
+                    $role_user->default = true;
+                    $role_user->save();
+
+                    Notification::send($user, new InviteUserNotif($user));
+                }
+
+                $user_ass = new UserAssesment();
+                $user_ass->users_id = $user_id;
+                $user_ass->assesment_id = $assesment_id;
+                $user_ass->default = false;
+                $user_ass->save();
+
+                // if (isset($_item_user['id'])) {
+                //     // notif invite assesment users exists
+                // }
+            }
+
+            DB::commit();
+            $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse($e->getMessage());
         }
     }

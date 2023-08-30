@@ -6,25 +6,24 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
-class Roles extends Model
+class UserAssesment extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
 
     public $incrementing = false;
-    protected $table = 'roles';
+    protected $table = 'users_assesment';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'code','deskripsi','aktif'];
+    protected $fillable = ['assesment_id', 'users_id', 'default'];
 
     protected $hidden = [
         'deleted_at',
-        'updated_at',
+        // 'updated_at',
         // 'created_at'
     ];
 
-    public function usersrole()
+    public function assesment()
     {
-        return $this->hasMany(RoleUsers::class,'roles_id','id');
+        return $this->belongsTo(Assesment::class, 'assesment_id');
     }
 }

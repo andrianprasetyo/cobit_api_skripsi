@@ -108,6 +108,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function assesments()
     {
-        return $this->hasMany(UsersAssesment::class, 'users_id');
+        return $this->hasMany(UserAssesment::class, 'users_id');
+    }
+
+    public function assesment()
+    {
+        return $this->belongsTo(UserAssesment::class,'id','users_id')->where('default',true);
     }
 }

@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\RoleAktifResource;
+use App\Http\Resources\User\UserAssesmentsResource;
+use App\Http\Resources\User\UserResource;
 use App\Models\Otp;
 use App\Models\RoleUsers;
 use App\Models\User;
+use App\Models\UserAssesment;
 use App\Notifications\ResetPasswordNotif;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
@@ -34,10 +38,23 @@ class AuthController extends Controller
         );
 
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
-        $auth = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal','password','organisasi_id','avatar')
+        $auth = User::select(
+                'id',
+                'username',
+                'nama',
+                'email',
+                'divisi',
+                'posisi',
+                'status',
+                'internal',
+                'password',
+                'organisasi_id',
+                'avatar'
+                )
             ->with([
                 'organisasi',
-                'roleaktif.role'
+                'roleaktif.role',
+                'assesment'
             ])
             ->where('username', $request->username)
             ->first();
@@ -59,6 +76,7 @@ class AuthController extends Controller
             return $this->errorResponse('Role belum terdaftar', 401);
         }
 
+
         // $account = User::select('id','username','nama','email','divisi','posisi','status','internal')
         //     ->with([
         //         'roleaktif.role'
@@ -66,10 +84,18 @@ class AuthController extends Controller
         //     // ->where('username', $request->username)
         //     ->find($auth->id);
 
+        // $auth->assesment_id=$auth->assesment != null?$auth->assesment->id : null;
+        // $auth->organisasi_id = $auth->organisasi != null ? $auth->organisasi->id:null;
+
         $token=Auth::login($auth);
         $role_users=RoleUsers::with(['role'])->where('users_id',$auth->id)->get();
-        $user=$auth;
-        $user['roles']=$role_users;
+        $user = $auth;
+        if(!$auth->internal){
+            $assesment=UserAssesment::with('assesment')->where('users_id',$auth->id)->get();
+            $user['assesments'] = UserAssesmentsResource::collection($assesment);
+        }
+
+        $user['roles'] = $role_users;
         $data=[
             'access_token' => $token,
             'token_type' => 'bearer',

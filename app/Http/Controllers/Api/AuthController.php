@@ -212,7 +212,28 @@ class AuthController extends Controller
 
     public function tokenVerify(Request $request)
     {
-        $_token_check=User::where('token',$request->token)->first();
+        // $_token_check=User::where('token',$request->token)->first();
+        $_token_check = User::select(
+            'id',
+            'username',
+            'nama',
+            'email',
+            'divisi',
+            'posisi',
+            'status',
+            'internal',
+            'password',
+            'organisasi_id',
+            'avatar',
+            'token'
+        )
+            ->with([
+                'organisasi',
+                // 'roleaktif.role',
+                'assesment'
+            ])
+            ->where('token', $request->token)
+            ->first();
 
         if(!$_token_check)
         {

@@ -44,4 +44,9 @@ class DesignFaktor extends Model
     {
         return $this->hasOne(QuisionerPertanyaan::class, 'design_faktor_id', 'id');
     }
+
+    public function assesmentweight()
+    {
+        return $this->hasOne(AssesmentDesignFaktorWeight::class,'design_faktor_id','id');
+    }
 }

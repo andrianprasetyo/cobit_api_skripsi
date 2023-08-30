@@ -56,6 +56,6 @@ class UsersAssesmentController extends Controller
             return $this->errorResponse('Assesment ID tidak terdaftar',404);
         }
         $data = AssessmentUsers::where('assesment_id', $request->id)->get();
-        return Excel::download(new UserRespondenExport($data), 'user-responden-'.$assesment->nama.'.xlsx');
+        return Excel::download(new UserRespondenExport($data), 'responden-'.$assesment->nama.'.xlsx');
     }
 }

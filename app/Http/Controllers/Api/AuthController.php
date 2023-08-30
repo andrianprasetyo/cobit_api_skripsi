@@ -245,6 +245,26 @@ class AuthController extends Controller
 
     public function userTokenVerify(Request $request)
     {
+
+        $request->validate(
+            [
+                // 'otp'=>'required',
+                // 'token' => 'required',
+                'id'=>'required|exists:users,id',
+                'password' => ['required', Password::min(8), Password::min(8)->mixedCase(), Password::min(8)->numbers()],
+                'password_confirmation' => ['required'],
+            ],
+            [
+                // 'otp.required' => 'Kode OTP harus di isi',
+                // 'token.required' => 'Token harus di isi',
+                'id.required'=>'Users ID harus di isi',
+                'id.exists' => 'Users ID tidak terdaftar',
+                'password.required' => 'Password harus di isi',
+                'password.min' => 'Password minimal 8 karakter',
+                'password.confirmed' => 'Password tidak sama',
+                'password_confirmation' => 'Konfirmasi password harus di isi',
+            ]
+        );
         $user = User::find($request->id);
 
         if (!$user) {

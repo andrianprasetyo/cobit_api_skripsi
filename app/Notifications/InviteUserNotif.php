@@ -39,7 +39,7 @@ class InviteUserNotif extends Notification implements ShouldQueue
         $data['nama'] = $notifiable->nama;
         $data['kode'] = $notifiable->token;
         // $data['kode'] = $this->data->code;
-        $data['url'] = config('app.url_fe') . '/auth/verify?token=' . $notifiable->token;
+        $data['url'] = config('app.url_fe') . '/account/verify?token=' . $notifiable->token;
 
         return (new MailMessage)
             ->subject('Verifikasi Akun | ' . config('app.name'))

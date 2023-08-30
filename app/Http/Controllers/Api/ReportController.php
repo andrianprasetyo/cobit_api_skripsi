@@ -128,8 +128,9 @@ class ReportController extends Controller
         $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
             ->get();
 
-        $df=DesignFaktor::orderBy('urutan','ASC')
-        ->get();
+        $df=DesignFaktor::with('assesmentweight')
+            ->orderBy('urutan','ASC')
+            ->get();
 
         $data['hasil']=DomainCanvasResource::collection($hasil);
         $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
@@ -160,6 +161,7 @@ class ReportController extends Controller
         $hasil = $payload['hasil'];
         $weight=$payload['weight'];
 
+        $tes=[];
         DB::beginTransaction();
         try {
             if (count($hasil) > 0) {
@@ -183,15 +185,20 @@ class ReportController extends Controller
                     $_id = $_item_weight['id'];
                     $_n = $_item_weight['weight'];
                     $_weight = AssesmentDesignFaktorWeight::find($_id);
-                    $_weight->weight = $_n;
+                    $_weight->weight = (float)$_n;
                     $_weight->save();
+
+                    $tes[]=array(
+                        'id'=>$_id,
+                        'n'=>$_n
+                    );
                 }
             }
 
             SetCanvasHasilDataJob::dispatch($request->assement_id);
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($tes);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

@@ -20,6 +20,7 @@ class DesignFaktorCanvasResource extends JsonResource
             'nama' => $this->nama,
             'urutan' => $this->urutan,
             'weight' => $this->weight,
+            'assesmentweight'=>$this->assesmentweight,
         ];
     }
 }

@@ -177,7 +177,7 @@ class ReportController extends Controller
 
         $payload=$request->data;
         $hasil = $payload['hasil'];
-        $weight=$payload['weight'];
+        // $weight=$payload['weight'];
         $df=$payload['df'];
 
         $tes=[];

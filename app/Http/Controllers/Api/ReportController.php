@@ -15,6 +15,7 @@ use App\Jobs\SetCanvasHasilDataJob;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
+use App\Models\AssesmentHasil;
 use App\Models\AssessmentUsers;
 use App\Models\DesignFaktor;
 use App\Models\Domain;
@@ -115,16 +116,30 @@ class ReportController extends Controller
         }
 
         $hasil= Domain::with([
-            'assesmenthasil',
-            'assesmenthasil.designfaktor',
+            // 'assesmenthasil',
+            // 'assesmenthasil.designfaktor',
             'assesmentcanvas',
         ])
-            ->whereRelation('assesmenthasil','assesment_id', $request->assesment_id)
+            // ->whereRelation('assesmenthasil','assesment_id', $request->assesment_id)
             ->whereRelation('assesmentcanvas', 'assesment_id', $request->assesment_id)
             ->orderBy('urutan', 'ASC')
             ->get();
 
 
+        $_hasil=[];
+        if(!$hasil->isEmpty())
+        {
+            foreach ($hasil as $_item_hasil) {
+                $hasil_init=$_item_hasil;
+
+                $ass_hasil=AssesmentHasil::where('assesment_id',$request->assesment_id)
+                    ->where('domain_id',$_item_hasil->id)
+                    ->get();
+
+                $hasil_init['assesmenthasil']=$ass_hasil;
+                $_hasil[]=$hasil_init;
+            }
+        }
         $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
             ->where('assesment_id', $request->assesment_id)
             ->get();
@@ -134,7 +149,8 @@ class ReportController extends Controller
             ->orderBy('urutan','ASC')
             ->get();
 
-        $data['hasil']=DomainCanvasResource::collection($hasil);
+        // $data['hasil'] = DomainCanvasResource::collection($hasil);
+        $data['hasil']=$_hasil;
         $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
         $data['df'] = DesignFaktorCanvasResource::collection($df);
         return $this->successResponse($data);

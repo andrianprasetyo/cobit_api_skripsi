@@ -126,9 +126,11 @@ class ReportController extends Controller
 
 
         $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
+            ->where('assesment_id', $request->assesment_id)
             ->get();
 
         $df=DesignFaktor::with('assesmentweight')
+            ->whereRelation('assesmentweight','assesment_id', $request->assesment_id)
             ->orderBy('urutan','ASC')
             ->get();
 

@@ -151,7 +151,7 @@ class ReportController extends Controller
 
         // $data['hasil'] = DomainCanvasResource::collection($hasil);
         $data['hasil']=$_hasil;
-        $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
+        // $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
         $data['df'] = DesignFaktorCanvasResource::collection($df);
         return $this->successResponse($data);
     }
@@ -178,6 +178,7 @@ class ReportController extends Controller
         $payload=$request->data;
         $hasil = $payload['hasil'];
         $weight=$payload['weight'];
+        $df=$payload['df'];
 
         $tes=[];
         DB::beginTransaction();
@@ -198,18 +199,21 @@ class ReportController extends Controller
                 }
             }
 
-            if (count($weight) > 0) {
-                foreach ($weight as $_item_weight) {
+            if (count($df) > 0) {
+                foreach ($df as $_item_df) {
+                    $_item_weight=$_item_df['assesmentweight'];
                     $_id = $_item_weight['id'];
                     $_n = $_item_weight['weight'];
                     $_weight = AssesmentDesignFaktorWeight::find($_id);
                     $_weight->weight = (float)$_n;
                     $_weight->save();
 
-                    $tes[]=array(
-                        'id'=>$_id,
-                        'n'=>$_n
-                    );
+                    // $tes[]=array(
+                    //     // 'item'=>$_item_weight,
+                    //     // 'id'=>$_id,
+                    //     // 'n'=>$_n,
+                    //     'w'=>$_weight,
+                    // );
                 }
             }
 

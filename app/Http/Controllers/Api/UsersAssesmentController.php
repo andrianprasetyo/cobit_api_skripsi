@@ -75,6 +75,9 @@ class UsersAssesmentController extends Controller
         {
             return $this->errorResponse('Data tidak ditemukan',404);
         }
+        if ($data->status != 'diundang') {
+            return $this->errorResponse('Responden sudah melakukan quisoner', 400);
+        }
         $data->delete();
         return $this->successResponse();
     }

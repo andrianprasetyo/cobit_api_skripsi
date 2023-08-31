@@ -68,5 +68,14 @@ class UsersAssesmentController extends Controller
         return Excel::download(new UserRespondenExport($data), 'responden-'.$assesment->nama.'.xlsx');
     }
 
-
+    public function removeResponden($id)
+    {
+        $data=AssessmentUsers::find();
+        if(!$data)
+        {
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+        $data->delete();
+        return $this->successResponse();
+    }
 }

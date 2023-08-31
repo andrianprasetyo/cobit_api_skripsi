@@ -70,7 +70,7 @@ class UsersAssesmentController extends Controller
 
     public function removeResponden($id)
     {
-        $data=AssessmentUsers::find();
+        $data=AssessmentUsers::find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak ditemukan',404);

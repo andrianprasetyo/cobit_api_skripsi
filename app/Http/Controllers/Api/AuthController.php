@@ -57,6 +57,7 @@ class AuthController extends Controller
                 'assesment'
             ])
             ->where('username', $request->username)
+            ->orWhere('email',$request->username)
             ->first();
 
         if(!$auth || !Hash::check($request->password, $auth->password)){

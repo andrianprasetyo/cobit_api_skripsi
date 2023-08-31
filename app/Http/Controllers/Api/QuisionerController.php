@@ -9,7 +9,9 @@ use App\Http\Requests\Quisioner\QuisionerSaveAnswerRequest;
 use App\Http\Requests\Quisioner\QuisionerStartRequest;
 use App\Http\Resources\Answer\GrupAnswerResource;
 use App\Http\Resources\AssesmentUsersResource;
+use App\Jobs\SetCanvasHasilDataJob;
 use App\Jobs\SetProsesQuisionerHasilQueue;
+use App\Models\Assesment;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
@@ -290,9 +292,14 @@ class QuisionerController extends Controller
         try {
             $assesment_user_id = $request->assesment_user_id;
             $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($assesment_user_id);
-            if (!$responden) {
-                return $this->errorResponse('Data tidak ditemukan', 404);
-            }
+            // $assesment=Assesment::find($responden->assesment_id);
+            // if (!$responden) {
+            //     return $this->errorResponse('Data tidak ditemukan', 404);
+            // }
+
+            // if (!$assesment) {
+            //     return $this->errorResponse('Assesment tidak ditemukan', 404);
+            // }
 
             if ($responden->status == 'diundang') {
                 return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
@@ -321,7 +328,8 @@ class QuisionerController extends Controller
             $responden->is_proses = null;
             $responden->save();
 
-            SetProsesQuisionerHasilQueue::dispatch($responden->assesment->id);
+            // SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
+            SetCanvasHasilDataJob::dispatch($responden->assesment_id);
 
             // CobitHelper::getQuisionerHasil($responden->id);
 

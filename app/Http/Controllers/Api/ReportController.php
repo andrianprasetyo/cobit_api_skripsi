@@ -18,6 +18,7 @@ use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentUsers;
 use App\Models\DesignFaktor;
+use App\Models\DesignFaktorKomponen;
 use App\Models\Domain;
 use App\Models\QuisionerHasil;
 use App\Models\QuisionerPertanyaan;
@@ -69,12 +70,70 @@ class ReportController extends Controller
     public function downloadExcel(Request $request)
     {
         try {
-            $pertanyaan = QuisionerPertanyaan::orderBy('sorting', 'ASC')->get();
+            // $pertanyaan = QuisionerPertanyaan::orderBy('sorting', 'ASC')->get();
             // return $this->successResponse($pertanyaan);
             // $list = QuisionerHasil::query()->get();
             // // $data= QuisionerHasilResource::collection($list);
             // $data['pertanyaan']=$pertanyaan;
-            return Excel::download(new RespondenQuisionerHasilExport($pertanyaan), 'tes.xlsx');
+            $komponen_df=DesignFaktorKomponen::orderBy('urutan','ASC')->get();
+            $list_pertanyaan=QuisionerPertanyaan::orderBy('sorting','ASC')->get();
+
+            $assesment_id=$request->id;
+            $list=DB::table('quisioner_hasil')
+                ->join('assesment_users', 'quisioner_hasil.assesment_users_id', '=', 'assesment_users.id')
+                ->join('quisioner_pertanyaan', 'quisioner_hasil.quisioner_pertanyaan_id', '=', 'quisioner_pertanyaan.id')
+                ->join('design_faktor_komponen', 'quisioner_hasil.design_faktor_komponen_id', '=', 'design_faktor_komponen.id')
+                ->join('quisioner_jawaban','quisioner_hasil.jawaban_id','=','quisioner_jawaban.id')
+                ->where('assesment_users.assesment_id',$assesment_id)
+                ->select(
+                        'quisioner_hasil.*',
+                        'assesment_users.*',
+                        'quisioner_pertanyaan.pertanyaan',
+                        'quisioner_pertanyaan.sorting',
+                        'design_faktor_komponen.id as komponen_id',
+                    'design_faktor_komponen.nama as komponen_nama',
+                    'quisioner_jawaban.jawaban',
+                )
+                ->orderBy('quisioner_pertanyaan.sorting', 'ASC')
+                ->orderBy('design_faktor_komponen.urutan','ASC')
+                ->limit(3)
+                ->get();
+
+            $users = [];
+            $komponens = [];
+            $pertanyaans=[];
+            $jawabans=[];
+
+            foreach ($list as $_item_user) {
+                $users[]=array(
+                    'nama'=>$_item_user->nama,
+                    'jabatan' => $_item_user->jabatan,
+                    'komponen' => $_item_user->jabatan,
+                );
+                $jawabans[]=array(
+                    'jawaban_id'=>$_item_user->jawaban_id,
+                    'jawaban' => $_item_user->jawaban,
+                );
+                // $_komponens=QuisionerHasil::where('design_faktor_komponen_id',$_item_user->komponen_id)
+                //     ->where('quisioner_pertanyaan_id',$_item_user->quisioner_pertanyaan_id)
+                //     ->first();
+
+                // $komponens[]=$_komponens;
+            }
+
+            foreach ($list_pertanyaan as $_item_pertanyaan) {
+                $pertanyaans[]=array(
+                    'id'=>$_item_pertanyaan->id,
+                    'pertanyaan' => $_item_pertanyaan->pertanyaan,
+                );
+            }
+
+            $data['users'] = $users;
+            $data['jawabans'] = $jawabans;
+            $data['pertanyaan']=$list_pertanyaan;
+            $data['komponen']=$komponen_df;
+            // return $this->successResponse($data);
+            return Excel::download(new RespondenQuisionerHasilExport($data), 'tes.xlsx');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

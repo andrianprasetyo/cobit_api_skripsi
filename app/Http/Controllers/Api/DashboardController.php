@@ -43,56 +43,42 @@ class DashboardController extends Controller
 
     public function assesmentChart(Request $request)
     {
-        $assesment_id=$request->id;
-        $status=AssessmentUsers::select('status')->groupBy('status')->get();
+        $assesment_id = $request->id;
+        $now=$request->get('tahun', date('Y'));
         $categories=[];
         $series = [];
-        $series_data = [];
-        $now = date('Y');
-        if(!$status->isEmpty())
-        {
-            foreach ($status as $_item_status) {
-                // $categories[]=$_item_status->status;
-
-
-                // $series_data[]=array(
-                //     'name' => $_item_status->status,
-                //     'data' => 0
-                // );
-            }
-        }
 
         for ($imonth = 1; $imonth <= 12; $imonth++) {
             $name = Carbon::create()->month($imonth)->startOfMonth()->format('F');
             $categories[] = $name;
 
-            // $qry_total_all = AssessmentUsers::where('assesment_id', $assesment_id)
-            //     ->whereYear('created_at', $now)
-            //     ->whereMonth('created_at', $imonth)
-            //     ->count();
-
-            $qry_total_done=AssessmentUsers::where('assesment_id',$assesment_id)
+            $qry_total_done=AssessmentUsers::where('status', 'done')
                 ->whereYear('created_at', $now)
-                ->whereMonth('created_at', $imonth)
-                ->where('status', 'done')
-                ->count();
+                ->whereMonth('created_at', $imonth);
 
-            $qry_total_invited = AssessmentUsers::where('assesment_id', $assesment_id)
+            $qry_total_invited = AssessmentUsers::where('status', 'diundang')
                 ->whereYear('created_at', $now)
-                ->whereMonth('created_at', $imonth)
-                ->where('status', 'diundang')
-                ->count();
+                ->whereMonth('created_at', $imonth);
 
-            $qry_total_active = AssessmentUsers::where('assesment_id', $assesment_id)
+            $qry_total_active = AssessmentUsers::where('status', 'active')
                 ->whereYear('created_at', $now)
-                ->whereMonth('created_at', $imonth)
-                ->where('status', 'active')
-                ->count();
+                ->whereMonth('created_at', $imonth);
 
-            $total_done[] = $qry_total_done;
-            $total_invited[] = $qry_total_invited;
-            $total_active[]=$qry_total_active;
-            $total_all[] = $qry_total_done+ $qry_total_invited + $qry_total_active;
+            if($request->filled('id'))
+            {
+                $qry_total_done->where('assesment_id', $assesment_id);
+                $qry_total_invited->where('assesment_id', $assesment_id);
+                $qry_total_active->where('assesment_id', $assesment_id);
+            }
+
+            $_total_done=$qry_total_done->count();
+            $_total_invited = $qry_total_invited->count();
+            $_total_active=$qry_total_active->count();
+
+            $total_done[] = $_total_done;
+            $total_invited[] = $_total_invited;
+            $total_active[]=$_total_active;
+            $total_all[] = $_total_done+ $_total_invited + $_total_active;
         }
 
         $series= array(

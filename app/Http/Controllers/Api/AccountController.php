@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Assesment;
 use App\Models\RoleUsers;
 use App\Models\User;
+use App\Models\UserAssesment;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +17,15 @@ use Illuminate\Validation\Rules\Password;
 class AccountController extends Controller
 {
     use JsonResponse;
+
+    private $account;
+    private $assesment=null;
+
+    public function __construct()
+    {
+        $this->account=auth()->user();
+        $this->assesment = auth()->user()->assesment;
+    }
     public function me()
     {
         $account= auth()->user();
@@ -25,7 +36,7 @@ class AccountController extends Controller
         return $this->successResponse($account);
     }
 
-    public function changeRole()
+    public function changeRole(Request $request)
     {
         $account = User::select('id', 'username', 'nama', 'email', 'divisi', 'posisi', 'status', 'internal')
             ->with(
@@ -33,7 +44,7 @@ class AccountController extends Controller
                     'role.role'
                 ]
             )
-            ->whereRelation('role', 'roles_id', '=', 'c5a34686-3824-11ee-8fa9-28d2440c0aa8')
+            ->whereRelation('role', 'roles_id', '=', $request->id)
             ->find(auth()->user()->id);
 
         $token = Auth::login($account);
@@ -49,8 +60,99 @@ class AccountController extends Controller
             'user' => $user
         ];
 
-        return $this->successResponse($user);
+        return $this->successResponse($data);
     }
+
+    public function changeAssesment(Request $request)
+    {
+        $assesment=Assesment::find($request->id);
+        if(!$assesment)
+        {
+            return $this->errorResponse('Assesment tidak ditemukan',404);
+        }
+
+        $auth = User::select(
+            'id',
+            'username',
+            'nama',
+            'email',
+            'divisi',
+            'posisi',
+            'status',
+            'internal',
+            'password',
+            'organisasi_id',
+            'avatar')
+            ->with([
+                    'organisasi',
+                    'roleaktif.role',
+                    'assesment'
+                ])
+            ->find(auth()->user()->id);
+
+        $token = Auth::login($auth);
+        $role_users = RoleUsers::with(['role'])->where('users_id', $auth->id)->get();
+        $user = $auth;
+        $user['roles'] = $role_users;
+        $data = [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * config('jwt.ttl'),
+            'user' => $user
+        ];
+
+        return $this->successResponse($data);
+    }
+
+    public function myAssesment()
+    {
+        $data=null;
+        if(!$this->account->internal && isset($this->assesment->assesment_id))
+        {
+            $data=UserAssesment::with('assesment')
+                ->where('assesment_id', $this->assesment->assesment_id)
+                ->get();
+        }
+
+        return $this->successResponse($data);
+    }
+
+    public function setDefaultRole($id)
+    {
+        $data = RoleUsers::where('users_id', $this->account->id)->find($id);
+        if (!$data) {
+            return $this->errorResponse('Assesment tidak ditemukan', 404);
+        }
+        if (!$data->default) {
+            RoleUsers::where('users_id', $this->account->id)->update([
+                'default' => false
+            ]);
+            $data->default = true;
+            $data->save();
+        }
+
+        return $this->successResponse();
+    }
+
+    public function setDefaultAssesment($id)
+    {
+        $data=UserAssesment::where('users_id',$this->account->id)->find($id);
+        if(!$data)
+        {
+            return $this->errorResponse('Assesment tidak ditemukan',404);
+        }
+        if(!$data->default)
+        {
+            UserAssesment::where('users_id', $this->account->id)->update([
+                'default' => false
+            ]);
+            $data->default = true;
+            $data->save();
+        }
+
+        return $this->successResponse();
+    }
+
 
     public function refresh()
     {
@@ -92,7 +194,6 @@ class AccountController extends Controller
         $user->save();
         return $this->successResponse(null);
     }
-
 
     public function edit(Request $request)
     {

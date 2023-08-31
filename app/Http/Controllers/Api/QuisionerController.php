@@ -321,7 +321,7 @@ class QuisionerController extends Controller
             $responden->is_proses = null;
             $responden->save();
 
-            SetProsesQuisionerHasilQueue::dispatch($responden->id);
+            SetProsesQuisionerHasilQueue::dispatch($responden->assesment->id);
 
             // CobitHelper::getQuisionerHasil($responden->id);
 

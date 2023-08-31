@@ -481,4 +481,23 @@ class AsessmentController extends Controller
         Notification::send($user, new InviteUserNotif($user));
         return $this->successResponse();
     }
+
+    public function reAktifasi(Request $request,$id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return $this->errorResponse('User tidak ditemukan', 404);
+        }
+
+        if ($user->status != 'pending') {
+            return $this->errorResponse('User sudah melakukan verifikasi', 400);
+        }
+
+        $_token = Str::random(50);
+        $user->token = $_token;
+        $user->save();
+
+        Notification::send($user, new InviteUserNotif($user));
+        return $this->successResponse();
+    }
 }

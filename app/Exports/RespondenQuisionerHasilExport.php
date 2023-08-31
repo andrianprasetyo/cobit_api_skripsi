@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class RespondenQuisionerHasilExport implements FromArray
+class RespondenQuisionerHasilExport implements FromView
 {
     private $data;
     /**
@@ -28,30 +28,30 @@ class RespondenQuisionerHasilExport implements FromArray
         // dd($data['users']);
         $list = [];
 
-        if (isset($data['users'])) {
-            $no = 1;
-            foreach ($data['users'] as $_item) {
-                $list[] = array(
-                    // $no,
-                    $_item['nama'],
-                    $_item['divisi'],
-                    $_item['jabatan'],
-                );
+        // if (isset($data['users'])) {
+        //     $no = 1;
+        //     foreach ($data['users'] as $_item) {
+        //         $list[] = array(
+        //             // $no,
+        //             $_item['nama'],
+        //             $_item['divisi'],
+        //             $_item['jabatan'],
+        //         );
 
-                $no++;
-            }
-        }
+        //         $no++;
+        //     }
+        // }
         $this->data=$list;
     }
 
-    public function array(): array
-    {
-        return [
-            ['Nama Lengkap', 'Divisi/Bagian', 'Jabatan'], // Customize your headers here
-            $this->data
-        ];
-        // return $this->data;
-    }
+    // public function array(): array
+    // {
+    //     return [
+    //         ['Nama Lengkap', 'Divisi/Bagian', 'Jabatan'], // Customize your headers here
+    //         $this->data
+    //     ];
+    //     // return $this->data;
+    // }
 
     // public function query()
     // {
@@ -99,10 +99,10 @@ class RespondenQuisionerHasilExport implements FromArray
     //     // return ['A3','B4'];
     // }
 
-    // public function view(): View
-    // {
-    //     return view('export',['data'=>$this->data]);
-    // }
+    public function view(): View
+    {
+        return view('export',['data'=>$this->data]);
+    }
 
     // public function array(): array
     // {

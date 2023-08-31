@@ -6,11 +6,9 @@
         </tr>
     </head>
     <tbody>
-        @foreach($data as $item)
         <tr>
-            <td>{{$item->pertanyaan}}</td>
-            <td>{{$item->sorting}}</td>
+            <td>1</td>
+            <td>2</td>
         </tr>
-        @endforeach
     </tbody>
 </table>

@@ -464,6 +464,11 @@ class AsessmentController extends Controller
             return $this->errorResponse('User sudah melakukan verifikasi',400);
         }
 
+        $_mail_check=User::where('email',$request->pic_email)->where('id','!=',$user->id)->exists();
+        if($_mail_check)
+        {
+            return $this->errorResponse('Email .'.$request->pic_email.' sudah digunakan',400);
+        }
         $_token = Str::random(50);
         $user->nama = $request->pic_nama;
         $user->divisi = $request->pic_divisi;

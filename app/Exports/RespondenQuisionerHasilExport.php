@@ -25,13 +25,29 @@ class RespondenQuisionerHasilExport implements FromArray
 
     public function __construct($data)
     {
-        $this->data=$data;
+        // dd($data['users']);
+        $list = [];
+
+        if (isset($data['users'])) {
+            $no = 1;
+            foreach ($data['users'] as $_item) {
+                $list[] = array(
+                    // $no,
+                    $_item['nama'],
+                    $_item['divisi'],
+                    $_item['jabatan'],
+                );
+
+                $no++;
+            }
+        }
+        $this->data=$list;
     }
 
     public function array(): array
     {
         return [
-            ['No', 'Nama Lengkap', 'Divisi/Bagian', 'Jabatan'], // Customize your headers here
+            ['Nama Lengkap', 'Divisi/Bagian', 'Jabatan'], // Customize your headers here
             $this->data
         ];
         // return $this->data;

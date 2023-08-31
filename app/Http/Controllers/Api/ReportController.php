@@ -96,7 +96,7 @@ class ReportController extends Controller
                 )
                 ->orderBy('quisioner_pertanyaan.sorting', 'ASC')
                 ->orderBy('design_faktor_komponen.urutan','ASC')
-                ->limit(3)
+                // ->limit(3)
                 ->get();
 
             $users = [];
@@ -108,6 +108,7 @@ class ReportController extends Controller
                 $users[]=array(
                     'nama'=>$_item_user->nama,
                     'jabatan' => $_item_user->jabatan,
+                    'divisi' => $_item_user->divisi,
                     'komponen' => $_item_user->jabatan,
                 );
                 $jawabans[]=array(

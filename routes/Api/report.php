@@ -7,4 +7,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/report/canvas/set-adjustment', 'ReportController@setValueAdjustment');
     Route::post('/report/canvas/set-weight', 'ReportController@setValueWeight');
 });
+Route::get('/responden/quisioner/download','ReportController@downloadExcel2');
 Route::get('/report/download/quisioner-result', 'ReportController@downloadExcel');

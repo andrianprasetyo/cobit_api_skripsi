@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\RespondenQuisionerHasilExport;
+use App\Exports\QuesionerResultExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Canvas\AdjustmenValueCanvasRequest;
@@ -67,6 +68,94 @@ class ReportController extends Controller
         return $this->successResponse($list);
     }
 
+    public function downloadExcel2(Request $request){
+        $assesment_id=$request->id;
+        $assesmen=Assesment::where('id',$assesment_id)->first();
+        $header=DB::select("
+            SELECT
+                df.ID,
+                df.kode,
+                df.deskripsi,
+                dfk.ID AS dfk_id,
+                dfk.nama,
+                dfk.deskripsi,
+                qp.pertanyaan,
+                qp.sorting 
+            FROM
+                design_faktor_komponen dfk
+                JOIN design_faktor df ON df.ID = dfk.design_faktor_id  and df.deleted_at is null and dfk.deleted_at is null
+                JOIN quisioner_pertanyaan qp ON qp.design_faktor_id=df.id and qp.deleted_at is null
+            ORDER BY
+                df.urutan ASC,
+                qp.sorting asc,
+                dfk.urutan ASC
+        ");
+        // dd($assesment_id);
+        $hasilQuesioner=DB::select("
+            SELECT
+                *,
+                (
+                    select json_agg(tbl2) from (
+                        select
+                            json_build_object(
+                                'id',tbl.id,
+                                'kode',tbl.kode,
+                                'deskripsi',tbl.deskripsi,
+                                'dfk_id',tbl.dfk_id,
+                                'nama',tbl.nama,
+                                'komponen_deskripsi',komponen_deskripsi,
+                                'jawaban',jawaban,
+                                'bobot',bobot,
+                                'pertanyaan',pertanyaan,
+                                'assesment_users_id',assesment_users_id,
+                                'nama_grup_jawaban',nama_grup_jawaban,
+                                'jenis',jenis
+                            ) as jawaban
+                        from (
+                        SELECT
+                            df.ID,
+                            df.kode,
+                            df.deskripsi,
+                            dfk.ID AS dfk_id,
+                            dfk.nama,
+                            dfk.deskripsi as komponen_deskripsi,
+                            qj.jawaban,
+                            qj.bobot,
+                            qp.pertanyaan,
+                            qh.assesment_users_id,
+                            qgj.nama as nama_grup_jawaban,
+                            qgj.jenis 
+                        FROM
+                            design_faktor_komponen dfk
+                            JOIN design_faktor df ON df.ID = dfk.design_faktor_id 
+                            left JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id=dfk.id and qh.assesment_users_id=au.id
+                            left JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
+                            left JOIN quisioner_grup_jawaban qgj ON qgj.id=qj.quisioner_grup_jawaban_id
+                            left JOIN quisioner_pertanyaan qp ON qp.id=qh.quisioner_pertanyaan_id
+                        ORDER BY
+                            df.urutan ASC,
+                            qp.sorting asc,
+                            dfk.urutan ASC
+                            
+                            ) as tbl
+                    
+                    ) as tbl2
+                ) as jawaban_quesioner 
+            FROM
+                assesment_users au 
+            WHERE
+                au.status = 'done'
+                and au.assesment_id=:assesment_id
+        ",[
+            'assesment_id'=>$assesment_id
+        ]);
+        // return view('report.quesionerresult',[
+        //     'header'=>$header,
+        //     'hasil'=>$hasilQuesioner
+        // ]);
+        return Excel::download(new QuesionerResultExport($hasilQuesioner,$header), 'hasilquesioner-'.$assesmen->nama.'.xlsx');
+        dd($hasilQuesioner);
+    }
     public function downloadExcel(Request $request)
     {
         try {
@@ -98,7 +187,7 @@ class ReportController extends Controller
                 ->orderBy('design_faktor_komponen.urutan','ASC')
                 // ->limit(3)
                 ->get();
-
+            dd($list);
             $users = [];
             $komponens = [];
             $pertanyaans=[];

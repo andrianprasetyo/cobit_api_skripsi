@@ -24,7 +24,7 @@ class UsersController extends Controller
         $status = $request->status;
         $role = $request->role;
 
-        $list=User::with(['roles','roles.role']);
+        $list=User::with(['roles','roles.role','assesments.assesment']);
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
             $list->orWhere('username', 'ilike', '%' . $search . '%');

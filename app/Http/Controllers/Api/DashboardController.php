@@ -28,7 +28,7 @@ class DashboardController extends Controller
         if($this->account->internal){
             $total_user_pic->groupBy('users_id');
         }else{
-            // $total_user_pic->where('assesment_id');
+            $total_user_pic->where('assesment_id',$this->account->assesment->assesment_id);
         }
 
         $data['total']=array(

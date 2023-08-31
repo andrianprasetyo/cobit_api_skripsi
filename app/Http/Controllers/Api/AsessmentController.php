@@ -40,6 +40,16 @@ class AsessmentController extends Controller
         $search = $request->search;
 
         $list = Assesment::with(['organisasi','pic']);
+
+        if($this->assesment != null)
+        {
+            $account=$this->account;
+            $list->whereIn('id',function($q) use($account){
+                $q->select('assesment_id')
+                    ->from('users_assesment')
+                    ->where('users_id',$account->id);
+            });
+        }
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }

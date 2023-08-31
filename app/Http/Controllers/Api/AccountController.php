@@ -18,14 +18,6 @@ class AccountController extends Controller
 {
     use JsonResponse;
 
-    private $account;
-    private $assesment=null;
-
-    public function __construct()
-    {
-        $this->account=auth()->user();
-        $this->assesment = auth()->user()->assesment;
-    }
     public function me()
     {
         $account= auth()->user();

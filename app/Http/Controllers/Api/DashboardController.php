@@ -14,23 +14,26 @@ class DashboardController extends Controller
 {
     use JsonResponse;
 
-    private $account;
-    private $assesment = null;
+    // private $account;
+    // private $assesment = null;
 
-    public function __construct()
-    {
-        $this->account= auth()->user();
-    }
+    // public function __construct()
+    // {
+    //     $this->account= auth()->user();
+    // }
 
     public function assesment()
     {
         $total_responden = AssessmentUsers::query();
-        $total_assesment = Assesment::query();
+        $total_assesment =0;
         $total_user_pic= UserAssesment::query();
         if($this->account->internal){
+            $total_assesment = Assesment::query();
             $total_user_pic->groupBy('users_id');
         }else{
             $total_user_pic->where('assesment_id',$this->account->assesment->assesment_id);
+            $total_assesment = UserAssesment::where('users_id', $this->account->id);
+            $total_responden->where('assesment_id',$this->account->assesment->assesment_id);
         }
 
         $data['total']=array(
@@ -63,6 +66,27 @@ class DashboardController extends Controller
             $qry_total_active = AssessmentUsers::where('status', 'active')
                 ->whereYear('created_at', $now)
                 ->whereMonth('created_at', $imonth);
+
+
+            if(!$this->account->internal)
+            {
+                $account=$this->account;
+                $qry_total_done->whereIn('assesment_id', function ($q) use ($account) {
+                    $q->select('assesment_id')
+                        ->from('users_assesment')
+                        ->where('users_id', $account->id);
+                });
+                $qry_total_invited->whereIn('assesment_id', function ($q) use ($account) {
+                    $q->select('assesment_id')
+                        ->from('users_assesment')
+                        ->where('users_id', $account->id);
+                });
+                $qry_total_active->whereIn('assesment_id', function ($q) use ($account) {
+                    $q->select('assesment_id')
+                        ->from('users_assesment')
+                        ->where('users_id', $account->id);
+                });
+            }
 
             if($request->filled('id'))
             {

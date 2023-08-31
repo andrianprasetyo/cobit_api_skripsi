@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class RespondenQuisionerHasilExport implements FromView
+class RespondenQuisionerHasilExport implements FromArray
 {
     private $data;
     /**
@@ -26,6 +26,15 @@ class RespondenQuisionerHasilExport implements FromView
     public function __construct($data)
     {
         $this->data=$data;
+    }
+
+    public function array(): array
+    {
+        return [
+            ['No', 'Nama Lengkap', 'Divisi/Bagian', 'Jabatan'], // Customize your headers here
+            $this->data
+        ];
+        // return $this->data;
     }
 
     // public function query()
@@ -74,10 +83,10 @@ class RespondenQuisionerHasilExport implements FromView
     //     // return ['A3','B4'];
     // }
 
-    public function view(): View
-    {
-        return view('export',['data'=>$this->data]);
-    }
+    // public function view(): View
+    // {
+    //     return view('export',['data'=>$this->data]);
+    // }
 
     // public function array(): array
     // {

@@ -277,10 +277,10 @@ class AsessmentController extends Controller
             }
 
             $_exp_date=Carbon::parse($assesment->tahun);
-            if(Carbon::now()->gte($_exp_date))
-            {
-                return $this->errorResponse('Assesment sudah lewat batas tahun ('.$_exp_date.')');
-            }
+            // if(Carbon::now()->gte($_exp_date))
+            // {
+            //     return $this->errorResponse('Assesment sudah lewat batas tahun ('.$_exp_date.')');
+            // }
             $organisasi=$assesment->organisasi;
             // $quisioner=Quisioner::where('aktif',true)->first();
             // foreach ($request->responden as $_item_responden)
@@ -350,9 +350,9 @@ class AsessmentController extends Controller
         }
 
         $_exp_date = Carbon::parse($assesment->tahun);
-        if (Carbon::now()->gte($_exp_date)) {
-            return $this->errorResponse('Assesment sudah lewat batas tahun (' . $_exp_date . ')');
-        }
+        // if (Carbon::now()->gte($_exp_date)) {
+        //     return $this->errorResponse('Assesment sudah lewat batas tahun (' . $_exp_date . ')');
+        // }
 
         try {
 

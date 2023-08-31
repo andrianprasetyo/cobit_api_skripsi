@@ -8,6 +8,6 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/assesment/responden/invite', 'AsessmentController@inviteRespondent');
 
     Route::post('/assesment/pic/invite', 'AsessmentController@addPIC');
-
+    Route::put('/assesment/pic/edit/{id}', 'AsessmentController@editPIC');
 });
 Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');

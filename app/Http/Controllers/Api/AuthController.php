@@ -284,6 +284,7 @@ class AuthController extends Controller
         $user->status='active';
         $user->token=null;
         $user->email_verified_at=Carbon::now();
+        $user->password=$request->password;
         $user->save();
 
         return $this->successResponse();

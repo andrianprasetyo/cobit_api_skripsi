@@ -450,4 +450,30 @@ class AsessmentController extends Controller
             return $this->errorResponse($e->getMessage());
         }
     }
+
+    public function editPIC(Request $request,$id)
+    {
+        $user=User::find($id);
+        if(!$user)
+        {
+            return $this->errorResponse('User tidak ditemukan',404);
+        }
+
+        if($user->status !='pending')
+        {
+            return $this->errorResponse('User sudah melakukan verifikasi',400);
+        }
+
+        $_token = Str::random(50);
+        $user->nama = $request->pic_nama;
+        $user->divisi = $request->pic_divisi;
+        $user->posisi = $request->pic_jabatan;
+        $user->email = $request->pic_email;
+        $user->token = $_token;
+        $user->password = $_token;
+        $user->save();
+
+        Notification::send($user, new InviteUserNotif($user));
+        return $this->successResponse();
+    }
 }

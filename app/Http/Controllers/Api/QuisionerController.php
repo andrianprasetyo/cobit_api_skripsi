@@ -330,13 +330,13 @@ class QuisionerController extends Controller
 
             // SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
             SetCanvasHasilDataJob::dispatch($responden->assesment_id);
-            SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
+            SetProsesQuisionerHasilQueue::dispatch($assesment_user_id);
 
-            $data['total_soal'] = $total_soal;
-            $data['total_jawaban'] = $total_jawaban;
+            // $data['total_soal'] = $total_soal;
+            // $data['total_jawaban'] = $total_jawaban;
 
             DB::commit();
-            return $this->successResponse($data);
+            return $this->successResponse(null);
         } catch (\Exception $e) {
             DB::rollback();
             return $this->errorResponse($e->getMessage());

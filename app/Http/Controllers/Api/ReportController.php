@@ -247,7 +247,7 @@ class ReportController extends Controller
             // CobitHelper::setCanvasStep3Value($id);
             // CobitHelper::updateCanvasAdjust($id);
             SetCanvasHasilDataJob::dispatch($id);
-            SetProsesQuisionerHasilQueue::dispatch($id);
+            // SetProsesQuisionerHasilQueue::dispatch($id);
 
             DB::commit();
             return $this->successResponse();

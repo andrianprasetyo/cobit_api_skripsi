@@ -23,10 +23,11 @@ class WelcomeController extends Controller
     }
     public function prosesHasilQuisioner(){
         ini_set('max_execution_time', 300);
-        $users=AssessmentUsers::where('is_proses',null)->get();
-        foreach($users as $user){
-            CobitHelper::getQuisionerHasil($user->id);
-        }
+        CobitHelper::getQuisionerHasil('99f92060-d210-41dd-87fc-5686e418eb48');
+//        $users=AssessmentUsers::where('is_proses',null)->get();
+//        foreach($users as $user){
+//            CobitHelper::getQuisionerHasil($user->id);
+//        }
     }
     public function prosesHasilCanvas(){
         ini_set('max_execution_time', 300);

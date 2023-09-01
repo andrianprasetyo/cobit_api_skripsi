@@ -120,7 +120,7 @@ class ReportController extends Controller
                             dfk.nama,
                             dfk.deskripsi as komponen_deskripsi,
                             qj.jawaban,
-                            qj.bobot,
+                            qh.bobot,
                             qp.pertanyaan,
                             qh.assesment_users_id,
                             qgj.nama as nama_grup_jawaban,

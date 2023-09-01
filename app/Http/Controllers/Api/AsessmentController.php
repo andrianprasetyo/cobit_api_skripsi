@@ -155,7 +155,9 @@ class AsessmentController extends Controller
             }
 
             $_check_mail_exists = User::where('email', $pic_email)->exists();
-            if($_check_mail_exists)
+            $user_id=$this->account->id;
+            $default_ass=true;
+            if(!$_check_mail_exists)
             {
                 $_token=Str::random(50);
                 $user=new User();
@@ -176,6 +178,9 @@ class AsessmentController extends Controller
                 $role_user->roles_id=$role->id;
                 $role_user->default=true;
                 $role_user->save();
+
+                $user_id=$user->id;
+                $default_ass=false;
             }
 
             $assesment = new Assesment();
@@ -185,13 +190,13 @@ class AsessmentController extends Controller
             $assesment->start_date = $request->start_date;
             $assesment->end_date = $request->end_date;
             $assesment->status = 'ongoing';
-            $assesment->users_id=$user->id;
+            $assesment->users_id=$user_id;
             $assesment->save();
 
             $user_ass=new UserAssesment();
-            $user_ass->users_id=$user->id;
+            $user_ass->users_id= $user_id;
             $user_ass->assesment_id=$assesment->id;
-            $user_ass->default=true;
+            $user_ass->default=$default_ass;
             $user_ass->save();
 
             // $user->assesment=$user_ass;

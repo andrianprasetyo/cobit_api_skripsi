@@ -5,4 +5,5 @@ Route::group([], function ($router) {
     Route::get('/quisioner/responden/list/{id}', 'QuisionerController@listquestion');
     Route::post('/quisioner/responden/save-jawaban', 'QuisionerController@saveJawaban');
     Route::post('/quisioner/responden/finish', 'QuisionerController@finish');
+    Route::get('/quisioner/responden/navigation/list', 'QuisionerController@navigation');
 });

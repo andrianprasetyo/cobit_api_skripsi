@@ -142,6 +142,7 @@ class QuisionerController extends Controller
         if(!$list_data_df->isEmpty())
         {
             foreach ($list_data_df as $_item_df) {
+                // $_item_df->terisi='wkwkwkwk';
                 // $df=$_item_df;
                 $komponen=DesignFaktorKomponen::where('design_faktor_id',$_item_df->id)
                     ->orderBy('urutan','ASC')
@@ -219,6 +220,7 @@ class QuisionerController extends Controller
             }
         }
 
+        // $data['terisi']=array('7684158c-e10b-42c1-96df-a6311d8840bf');
         $meta['total_page'] = ceil($total / $limit);
         $meta['current_page'] = (int) $offset;
         $data['list'] = $list_data;
@@ -341,5 +343,64 @@ class QuisionerController extends Controller
             DB::rollback();
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    public function navigation(Request $request)
+    {
+
+        $assesment_id=$request->assesment_id;
+        $responden_id = $request->responden_id;
+
+        $qry_list_pertanyan = DB::table('design_faktor')
+            ->select(
+                'quisioner_pertanyaan.id',
+                'quisioner_pertanyaan.pertanyaan',
+                )
+            ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
+            // ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)
+            ->whereNull('design_faktor.deleted_at')
+            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->orderBy('design_faktor.urutan', 'ASC')
+            ->orderBy('quisioner_pertanyaan.sorting','ASC')
+            ->get();
+
+        $list_pertanyaan=[];
+        $list_terisi=[];
+        if(!$qry_list_pertanyan->isEmpty())
+        {
+            $urutan=1;
+            foreach ($qry_list_pertanyan as $_item_pertanyaan) {
+                $_check_terisi=DB::table('quisioner_hasil')
+                    ->join('assesment_users', 'quisioner_hasil.assesment_users_id', '=', 'assesment_users.id')
+                    ->join('assesment','assesment_users.assesment_id','=','assesment.id')
+                    ->where('assesment.id',$assesment_id)
+                    ->where('assesment_users.id',$responden_id)
+                    ->where('quisioner_hasil.quisioner_pertanyaan_id',$_item_pertanyaan->id)
+                    ->whereNull('quisioner_hasil.deleted_at')
+                    ->select('quisioner_hasil.quisioner_pertanyaan_id')
+                    ->exists();
+
+                $list_pertanyaan[]=array(
+                    'id'=>$_item_pertanyaan->id,
+                    'pertanyaan'=>$_item_pertanyaan->pertanyaan,
+                    'terisi'=>$_check_terisi,
+                    'urutan'=>$urutan
+                );
+
+                if($_check_terisi)
+                {
+                    $list_terisi[]=$_check_terisi;
+                }
+
+                $urutan++;
+            }
+        }
+
+        $meta['total'] = count($list_pertanyaan);
+        $meta['terisi']=count($list_terisi);
+        $data['pertanyaan']=$list_pertanyaan;
+        $data['meta']=$meta;
+
+        return $this->successResponse($data);
     }
 }

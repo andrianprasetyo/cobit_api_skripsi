@@ -93,6 +93,11 @@ class AccountController extends Controller
             'user' => $user
         ];
 
+        UserAssesment::where('users_id', $this->account->id)
+            ->where('assesment_id',$assesment->id)
+            ->update([
+                'default' => false
+        ]);
         return $this->successResponse($data);
     }
 

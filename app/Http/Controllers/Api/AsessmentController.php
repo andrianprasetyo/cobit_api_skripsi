@@ -133,6 +133,10 @@ class AsessmentController extends Controller
                 $organisasi_id=$organisasi->id;
             }
 
+            if(!$this->account->internal){
+                $organisasi_id=$this->account->organisasi->id;
+            }
+
             // $verify_code=Str::random(50);
             // $user_ass=new AssessmentUsers();
             // $user_ass->assesment_id=$assesment->id;

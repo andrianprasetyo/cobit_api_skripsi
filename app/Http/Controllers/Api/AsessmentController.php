@@ -100,11 +100,11 @@ class AsessmentController extends Controller
         // $validate_msg['tahun.date_format'] = 'Tahun assesment tidak valid (Y-m)';
 
         $validate['pic_nama']='required';
-        $validate['pic_email'] = 'required|email|unique:users,email';
+        $validate['pic_email'] = 'required|email';
         $validate_msg['pic_nama.required']='Nama PIC harus di isi';
         $validate_msg['pic_email.required'] = 'Email PIC harus di isi';
         $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
-        $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
+        // $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
 
         if ($request->filled('organisasi_id')) {
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
@@ -121,6 +121,7 @@ class AsessmentController extends Controller
         DB::beginTransaction();
         try {
 
+            $pic_email=$request->pic_email;
             $organisasi_id = $request->organisasi_id;
             if ($request->filled('organisasi_nama'))
             {
@@ -149,25 +150,29 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Role Eksternal tidak tersedia',404);
             }
 
-            $_token=Str::random(50);
-            $user=new User();
-            $user->nama=$request->pic_nama;
-            $user->divisi = $request->pic_divisi;
-            $user->posisi = $request->pic_jabatan;
-            $user->email = $request->pic_email;
-            $user->status='pending';
-            $user->internal=false;
-            $user->organisasi_id=$organisasi_id;
-            $user->token=$_token;
-            $user->password= $_token;
-            $user->username=Str::slug($request->pic_nama, '.');
-            $user->save();
+            $_check_mail_exists = User::where('email', $pic_email)->exists();
+            if($_check_mail_exists)
+            {
+                $_token=Str::random(50);
+                $user=new User();
+                $user->nama=$request->pic_nama;
+                $user->divisi = $request->pic_divisi;
+                $user->posisi = $request->pic_jabatan;
+                $user->email = $request->pic_email;
+                $user->status='pending';
+                $user->internal=false;
+                $user->organisasi_id=$organisasi_id;
+                $user->token=$_token;
+                $user->password= $_token;
+                $user->username=Str::slug($request->pic_nama, '.');
+                $user->save();
 
-            $role_user=new RoleUsers();
-            $role_user->users_id = $user->id;
-            $role_user->roles_id=$role->id;
-            $role_user->default=true;
-            $role_user->save();
+                $role_user=new RoleUsers();
+                $role_user->users_id = $user->id;
+                $role_user->roles_id=$role->id;
+                $role_user->default=true;
+                $role_user->save();
+            }
 
             $assesment = new Assesment();
             $assesment->nama = $request->asessment;
@@ -187,7 +192,10 @@ class AsessmentController extends Controller
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
-            Notification::send($user, new InviteUserNotif($user));
+            if (!$_check_mail_exists)
+            {
+                Notification::send($user, new InviteUserNotif($user));
+            }
 
             DB::commit();
             return $this->successResponse();

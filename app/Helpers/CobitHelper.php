@@ -3,6 +3,7 @@ namespace App\Helpers;
 
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
+use App\Models\AssesmentHasil;
 use App\Models\AssessmentUsers;
 use App\Models\AssessmentUsersHasil;
 use App\Models\DesignFaktor;
@@ -28,20 +29,47 @@ class CobitHelper
     public static function getQuisionerHasil($assesment_user_id){
         $checkQuesionerDone=AssessmentUsers::where('status','done')->where('id',$assesment_user_id)->first();
         if($checkQuesionerDone){
-            $designFaktor=DesignFaktor::get();
-            AssessmentUsersHasil::where('assesment_user_id',$assesment_user_id)->delete();
             $u=AssessmentUsers::where('id',$assesment_user_id)->first();
             $u->is_proses='running';
             $u->save();
+            DB::table('quisioner_hasil_avg')->where('assesment_id',$u->assesment_id)->delete();
+            DB::insert("
+                insert into quisioner_hasil_avg (quisioner_id,quisioner_pertanyaan_id,design_faktor_komponen_id,assesment_id,avg_bobot)
+                    SELECT
+                        quisioner_id,
+                        quisioner_pertanyaan_id,
+                        design_faktor_komponen_id,
+                        au.assesment_id,
+                        round(avg(qh.bobot),2) as bobot
+                    FROM
+                        quisioner_hasil qh
+                        JOIN assesment_users au ON au.ID = qh.assesment_users_id
+                        AND au.deleted_at IS NULL
+                        AND qh.deleted_at IS NULL
+                        AND au.status = 'done'
+                    WHERE
+                        au.assesment_id=:assesment_id
+                    GROUP BY
+                        quisioner_id,
+                        quisioner_pertanyaan_id,
+                        design_faktor_komponen_id,
+                        au.assesment_id
+
+            ",[
+                'assesment_id'=>$u->assesment_id
+            ]);
+            $designFaktor=DesignFaktor::get();
+//            AssessmentUsersHasil::where('assesment_user_id',$assesment_user_id)->delete();
+            AssesmentHasil::where('assesment_id',$u->assesment_id)->delete();
             foreach($designFaktor as $df){
                 $straightProsesDF=['DF1','DF3','DF4','DF5','DF6','DF7','DF8','DF9','DF10'];
                 if(in_array($df->kode,$straightProsesDF)){
-                    CobitHelper::prosesHasilStraight($assesment_user_id,$df->id);
+                    CobitHelper::prosesHasilStraight($u->assesment_id,$df->id);
                 }else if($df->kode=='DF2'){
-                    CobitHelper::prosesHasilDF2($assesment_user_id,$df->id);
+                    CobitHelper::prosesHasilDF2($u->assesment_id,$df->id);
                 }
             }
-            CobitHelper::setAssesmentHasilAvg($u->assesment_id);
+//            CobitHelper::setAssesmentHasilAvg($u->assesment_id);
             $u->is_proses='done';
             $u->save();
         }
@@ -284,7 +312,7 @@ class CobitHelper
         }
     }
     public static function setAssesmentHasilAvg($assesmentId){
-        DB::table('assesment_hasil')->where('assesment_id',$assesmentId)->delete();
+        /*DB::table('assesment_hasil')->where('assesment_id',$assesmentId)->delete();
         DB::insert("
             INSERT INTO assesment_hasil (assesment_id,design_faktor_id,domain_id,relative_importance)
             SELECT
@@ -303,29 +331,30 @@ class CobitHelper
                 auh.domain_id
         ",[
             'assesment_id'=>$assesmentId
-        ]);
+        ]);*/
     }
-    public static function prosesHasilDF2($assesment_user_id,$designFaktorId){
+    public static function prosesHasilDF2($assesment_id,$designFaktorId){
         $dataQuesioner=DB::select("
             SELECT
-                qj.bobot as jawaban_bobot,
-                dfk.baseline,
-                dfk.design_faktor_id,
-                dfk.nama,
-                dfk.deskripsi,
-                qj.jawaban,
-                qh.*
+                    qh.avg_bobot as jawaban_bobot,
+                    -- qj.bobot as jawaban_bobot,
+                    dfk.baseline,
+                    dfk.design_faktor_id,
+                    dfk.nama,
+                    dfk.deskripsi,
+            -- 		qj.jawaban,
+                    qh.*
             FROM
-                quisioner_hasil qh
-                JOIN quisioner_pertanyaan qp ON qh.quisioner_pertanyaan_id = qp.ID
-                JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id
-                JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
+                    quisioner_hasil_avg qh
+                    JOIN quisioner_pertanyaan qp ON qh.quisioner_pertanyaan_id = qp.ID
+                    JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id
+            -- 		JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
             WHERE
-                qh.assesment_users_id = :assesment_user_id
-                AND qp.design_faktor_id = :design_faktor_id
+                    qh.assesment_id = :assesment_id
+                    AND qp.design_faktor_id = :design_faktor_id
             ORDER BY dfk.urutan asc
         ",[
-            'assesment_user_id'=>$assesment_user_id,
+            'assesment_id'=>$assesment_id,
             'design_faktor_id'=>$designFaktorId
         ]);
         //handle for question>1
@@ -346,13 +375,13 @@ class CobitHelper
                         'baseline'=>$value->baseline,
                         'nama'=>$value->nama,
                         'deskripsi'=>$value->deskripsi,
-                        'jawaban'=>$value->jawaban,
+//                        'jawaban'=>$value->jawaban,
                         'id'=>$value->id,
                         'quisioner_id'=>$value->quisioner_id,
                         'quisioner_pertanyaan_id'=>$value->quisioner_pertanyaan_id,
-                        'jawaban_id'=>$value->jawaban_id,
-                        'assesment_users_id'=>$value->assesment_users_id,
-                        'bobot'=>$value->bobot,
+//                        'jawaban_id'=>$value->jawaban_id,
+//                        'assesment_users_id'=>$value->assesment_users_id,
+//                        'bobot'=>$value->bobot,
                         'design_faktor_komponen_id'=>$value->design_faktor_komponen_id
                     ];
                 }
@@ -362,13 +391,13 @@ class CobitHelper
                     'baseline'=>$dq->baseline,
                     'nama'=>$dq->nama,
                     'deskripsi'=>$dq->deskripsi,
-                    'jawaban'=>$dq->jawaban,
+//                    'jawaban'=>$dq->jawaban,
                     'id'=>$dq->id,
                     'quisioner_id'=>$dq->quisioner_id,
                     'quisioner_pertanyaan_id'=>$dq->quisioner_pertanyaan_id,
-                    'jawaban_id'=>$dq->jawaban_id,
-                    'assesment_users_id'=>$dq->assesment_users_id,
-                    'bobot'=>$dq->bobot,
+//                    'jawaban_id'=>$dq->jawaban_id,
+//                    'assesment_users_id'=>$dq->assesment_users_id,
+//                    'bobot'=>$dq->bobot,
                     'design_faktor_komponen_id'=>$dq->design_faktor_komponen_id
                 ];
             }
@@ -498,7 +527,7 @@ class CobitHelper
 
             $result []=array(
                 'design_faktor_id'=> $designFaktorId,
-                'assesment_user_id'=> $assesment_user_id,
+                'assesment_id'=> $assesment_id,
                 'domain_id'=> $dom->id,
                 'score'=> $hasilScore,
                 'baseline_score'=> $hasilBaseLine,
@@ -515,32 +544,32 @@ class CobitHelper
             // $save->save();
         }
 
-        AssessmentUsersHasil::insert($result);
+        AssesmentHasil::insert($result);
         return true;
     }
-    public static function prosesHasilStraight($assesment_user_id,$designFaktorId){
+    public static function prosesHasilStraight($assesment_id,$designFaktorId){
         // get data kuesioner respondent by df
         $dataQuesioner=DB::select("
             SELECT
-                qh.bobot as jawaban_bobot,
-                -- qj.bobot as jawaban_bobot,
-                dfk.baseline,
-                dfk.design_faktor_id,
-                dfk.nama,
-                dfk.deskripsi,
-                qj.jawaban,
-                qh.*
+                    qh.avg_bobot as jawaban_bobot,
+                    -- qj.bobot as jawaban_bobot,
+                    dfk.baseline,
+                    dfk.design_faktor_id,
+                    dfk.nama,
+                    dfk.deskripsi,
+            -- 		qj.jawaban,
+                    qh.*
             FROM
-                quisioner_hasil qh
-                JOIN quisioner_pertanyaan qp ON qh.quisioner_pertanyaan_id = qp.ID
-                JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id
-                JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
+                    quisioner_hasil_avg qh
+                    JOIN quisioner_pertanyaan qp ON qh.quisioner_pertanyaan_id = qp.ID
+                    JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id
+            -- 		JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
             WHERE
-                qh.assesment_users_id = :assesment_user_id
-                AND qp.design_faktor_id = :design_faktor_id
+                    qh.assesment_id = :assesment_id
+                    AND qp.design_faktor_id = :design_faktor_id
             ORDER BY dfk.urutan asc
         ",[
-            'assesment_user_id'=>$assesment_user_id,
+            'assesment_id'=>$assesment_id,
             'design_faktor_id'=>$designFaktorId
         ]);
 
@@ -562,13 +591,13 @@ class CobitHelper
                         'baseline'=>$value->baseline,
                         'nama'=>$value->nama,
                         'deskripsi'=>$value->deskripsi,
-                        'jawaban'=>$value->jawaban,
+//                        'jawaban'=>$value->jawaban,
                         'id'=>$value->id,
                         'quisioner_id'=>$value->quisioner_id,
                         'quisioner_pertanyaan_id'=>$value->quisioner_pertanyaan_id,
-                        'jawaban_id'=>$value->jawaban_id,
-                        'assesment_users_id'=>$value->assesment_users_id,
-                        'bobot'=>$value->bobot,
+//                        'jawaban_id'=>$value->jawaban_id,
+//                        'assesment_users_id'=>$value->assesment_users_id,
+//                        'bobot'=>$value->bobot,
                         'design_faktor_komponen_id'=>$value->design_faktor_komponen_id
                     ];
                 }
@@ -578,13 +607,13 @@ class CobitHelper
                     'baseline'=>$dq->baseline,
                     'nama'=>$dq->nama,
                     'deskripsi'=>$dq->deskripsi,
-                    'jawaban'=>$dq->jawaban,
+//                    'jawaban'=>$dq->jawaban,
                     'id'=>$dq->id,
                     'quisioner_id'=>$dq->quisioner_id,
                     'quisioner_pertanyaan_id'=>$dq->quisioner_pertanyaan_id,
-                    'jawaban_id'=>$dq->jawaban_id,
-                    'assesment_users_id'=>$dq->assesment_users_id,
-                    'bobot'=>$dq->bobot,
+//                    'jawaban_id'=>$dq->jawaban_id,
+//                    'assesment_users_id'=>$dq->assesment_users_id,
+//                    'bobot'=>$dq->bobot,
                     'design_faktor_komponen_id'=>$dq->design_faktor_komponen_id
                 ];
             }
@@ -675,7 +704,7 @@ class CobitHelper
 
             $result[]=array(
                 'design_faktor_id'=> $designFaktorId,
-                'assesment_user_id'=> $assesment_user_id,
+                'assesment_id'=> $assesment_id,
                 'domain_id'=> $dom->id,
                 'score'=> $hasilScore,
                 'baseline_score'=> $hasilBaseLine,
@@ -683,7 +712,7 @@ class CobitHelper
             );
         }
 
-        AssessmentUsersHasil::insert($result);
+        AssesmentHasil::insert($result);
         return true;
     }
 }

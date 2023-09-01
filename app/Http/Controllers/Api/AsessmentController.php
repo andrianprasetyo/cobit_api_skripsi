@@ -83,11 +83,21 @@ class AsessmentController extends Controller
     {
 
         $validate['asessment']='required';
-        $validate['tahun'] = 'required|date_format:Y-m';
-        // $validate['end_date'] = 'required|date_format:Y-m|after:start_date';
+        // $validate['tahun'] = 'required|date_format:Y-m';
+
+        $validate['start_date'] = 'required|date_format:Y-m-d|before:end_date';
+        $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
+
+        $validate_msg['start_date.required']='Tanggal mulai harus di isi';
+        $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['start_date.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
+        $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
+        $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['end_date.before'] = 'Tanggal selesai harus sesudah tanggal mulai';
+
         $validate_msg['asessment.required']='Nama assesment harus di isi';
-        $validate_msg['tahun.required'] = 'Tahun assesment harus di isi';
-        $validate_msg['tahun.date_format'] = 'Tahun assesment tidak valid (Y-m)';
+        // $validate_msg['tahun.required'] = 'Tahun assesment harus di isi';
+        // $validate_msg['tahun.date_format'] = 'Tahun assesment tidak valid (Y-m)';
 
         $validate['pic_nama']='required';
         $validate['pic_email'] = 'required|email|unique:users,email';
@@ -162,9 +172,9 @@ class AsessmentController extends Controller
             $assesment = new Assesment();
             $assesment->nama = $request->asessment;
             $assesment->deskripsi = $request->deskripsi;
-            // $assesment->tahun = $request->tahun;
             $assesment->organisasi_id = $organisasi_id;
-            $assesment->tahun = $request->tahun;
+            $assesment->start_date = $request->start_date;
+            $assesment->end_date = $request->end_date;
             $assesment->status = 'ongoing';
             $assesment->users_id=$user->id;
             $assesment->save();
@@ -188,6 +198,17 @@ class AsessmentController extends Controller
     }
     public function edit(Request $request,$id)
     {
+        $validate['start_date'] = 'required|date_format:Y-m-d|before:end_date';
+        $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
+
+        $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
+        $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['start_date.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
+        $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
+        $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['end_date.before'] = 'Tanggal selesai harus sesudah tanggal mulai';
+        $request->validate($validate, $validate_msg);
+
         $data = Assesment::with(['organisasi','pic'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
@@ -195,6 +216,8 @@ class AsessmentController extends Controller
 
         $data->nama=$request->nama;
         $data->deskripsi = $request->deskripsi;
+        $data->start_date = $request->start_date;
+        $data->end_date = $request->end_date;
         $data->save();
 
         return $this->successResponse();
@@ -286,7 +309,7 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Assesment sudah dilaksanakan/Completed',400);
             }
 
-            $_exp_date=Carbon::parse($assesment->tahun);
+            // $_exp_date=Carbon::parse($assesment->tahun);
             // if(Carbon::now()->gte($_exp_date))
             // {
             //     return $this->errorResponse('Assesment sudah lewat batas tahun ('.$_exp_date.')');
@@ -359,7 +382,7 @@ class AsessmentController extends Controller
             return $this->errorResponse('Assesment sudah dilaksanakan/Completed', 400);
         }
 
-        $_exp_date = Carbon::parse($assesment->tahun);
+        // $_exp_date = Carbon::parse($assesment->tahun);
         // if (Carbon::now()->gte($_exp_date)) {
         //     return $this->errorResponse('Assesment sudah lewat batas tahun (' . $_exp_date . ')');
         // }
@@ -372,6 +395,24 @@ class AsessmentController extends Controller
             // DB::rollback();
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    public function reinviteResponden($id)
+    {
+        $responden=AssessmentUsers::with(['assesment.organisasi'])->find($id);
+        if(!$responden)
+        {
+            return $this->errorResponse('Responden tidak ditemukan',404);
+        }
+        if($responden->is_proses == 'done')
+        {
+            return $this->errorResponse('Responden sudah melakukan Kuisioner',400);
+        }
+
+        $organisasi = $responden->assesment->organisasi;
+        Notification::send($responden, new InviteRespondenNotif($organisasi,'Kirim ulang Undangan Kuisioner Responden'));
+
+        return $this->successResponse();
     }
 
     public function addPIC(AddPICRequest $request)

@@ -17,8 +17,10 @@ class AssesmentsResource extends JsonResource
         return [
             'id'=>$this->id,
             'nama' => $this->nama,
-            'tahun' => $this->tahun,
+            // 'tahun' => $this->tahun,
             'status' => $this->status,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
         ];
     }
 }

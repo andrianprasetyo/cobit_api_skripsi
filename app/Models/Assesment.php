@@ -15,7 +15,7 @@ class Assesment extends Model
     public $incrementing = false;
     protected $table = 'assesment';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','users_id'];
+    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','users_id','start_date','end_date'];
 
     protected $hidden = [
         'deleted_at',

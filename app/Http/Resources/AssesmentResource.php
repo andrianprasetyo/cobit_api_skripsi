@@ -15,7 +15,7 @@ class AssesmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $tahun=Carbon::parse($this->tahun);
+        // $tahun=Carbon::parse($this->tahun);
         return [
             'id'=>$this->id,
             'nama'=>$this->nama,
@@ -23,9 +23,9 @@ class AssesmentResource extends JsonResource
             'status'=>$this->status,
             'deskripsi'=>$this->deskripsi,
             'created_at'=>$this->created_at,
-            'tahun'=> $tahun->format('Y-m'),
-            // 'start_date' => $start_date->format('Y-m'),
-            // 'end_date'=>$this->end_date,
+            // 'tahun'=> $tahun->format('Y-m'),
+            'start_date' => $this->start_date,
+            'end_date'=>$this->end_date,
             'users_id' => $this->users_id,
             'organisasi'=>$this->organisasi,
             'pic' => $this->pic,

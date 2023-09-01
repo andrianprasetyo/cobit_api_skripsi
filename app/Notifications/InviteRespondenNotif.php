@@ -12,13 +12,18 @@ class InviteRespondenNotif extends Notification implements ShouldQueue
     use Queueable;
 
     private $data=null;
+    private $subject = 'Undangan Kuisioner Responden';
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($data=null)
+    public function __construct($data=null,$subject='')
     {
         $this->data=$data;
+        if($subject !='')
+        {
+            $this->subject=$subject;
+        }
     }
 
     /**
@@ -43,7 +48,7 @@ class InviteRespondenNotif extends Notification implements ShouldQueue
         // $data['organisasi']=json_encode($this->data);
         $data['url'] = config('app.url_fe') . '/quisioner/responden?code='. $notifiable->code;
         return (new MailMessage)
-            ->subject('Undangan Kuisioner Responden | ' . config('app.name'))
+            ->subject($this->subject.' | ' . config('app.name'))
             ->markdown('mail.invited-responden', ['data' => (object) $data]);
     }
 

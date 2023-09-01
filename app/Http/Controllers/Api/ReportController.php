@@ -13,6 +13,7 @@ use App\Http\Resources\Report\AssesmentDesignFaktorWeightCanvasResource;
 use App\Http\Resources\Report\DesignFaktorCanvasResource;
 use App\Http\Resources\Report\DomainCanvasResource;
 use App\Jobs\SetCanvasHasilDataJob;
+use App\Jobs\SetProsesQuisionerHasilQueue;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
@@ -80,7 +81,7 @@ class ReportController extends Controller
                 dfk.nama,
                 dfk.deskripsi,
                 qp.pertanyaan,
-                qp.sorting 
+                qp.sorting
             FROM
                 design_faktor_komponen dfk
                 JOIN design_faktor df ON df.ID = dfk.design_faktor_id  and df.deleted_at is null and dfk.deleted_at is null
@@ -124,10 +125,10 @@ class ReportController extends Controller
                             qp.pertanyaan,
                             qh.assesment_users_id,
                             qgj.nama as nama_grup_jawaban,
-                            qgj.jenis 
+                            qgj.jenis
                         FROM
                             design_faktor_komponen dfk
-                            JOIN design_faktor df ON df.ID = dfk.design_faktor_id 
+                            JOIN design_faktor df ON df.ID = dfk.design_faktor_id
                             left JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id=dfk.id and qh.assesment_users_id=au.id
                             left JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
                             left JOIN quisioner_grup_jawaban qgj ON qgj.id=qj.quisioner_grup_jawaban_id
@@ -136,13 +137,13 @@ class ReportController extends Controller
                             df.urutan ASC,
                             qp.sorting asc,
                             dfk.urutan ASC
-                            
+
                             ) as tbl
-                    
+
                     ) as tbl2
-                ) as jawaban_quesioner 
+                ) as jawaban_quesioner
             FROM
-                assesment_users au 
+                assesment_users au
             WHERE
                 au.status = 'done'
                 and au.assesment_id=:assesment_id
@@ -246,6 +247,7 @@ class ReportController extends Controller
             // CobitHelper::setCanvasStep3Value($id);
             // CobitHelper::updateCanvasAdjust($id);
             SetCanvasHasilDataJob::dispatch($id);
+            SetProsesQuisionerHasilQueue::dispatch($id);
 
             DB::commit();
             return $this->successResponse();

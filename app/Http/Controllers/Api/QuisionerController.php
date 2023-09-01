@@ -330,8 +330,7 @@ class QuisionerController extends Controller
 
             // SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
             SetCanvasHasilDataJob::dispatch($responden->assesment_id);
-
-            // CobitHelper::getQuisionerHasil($responden->id);
+            SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
 
             $data['total_soal'] = $total_soal;
             $data['total_jawaban'] = $total_jawaban;

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('assesment', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nama', 150);
-            $table->string('tahun',10)->nullable();
+            // $table->string('tahun',10)->nullable();
             $table->foreignUuid('organisasi_id');
             $table->string('status')->default('ongoing')->comment('ongoing, completed');// ongoing, completed
             $table->text('deskripsi')->nullable();

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Quisioner;
 
+use App\Models\Assesment;
 use App\Models\Quisioner;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class QuisionerStartRequest extends FormRequest
@@ -24,7 +26,21 @@ class QuisionerStartRequest extends FormRequest
     {
         return [
             'id'=> 'required|uuid|exists:assesment_users,id',
-            'assesment_id' => 'required|uuid|exists:assesment,id',
+            'assesment_id' => [
+                'required',
+                'uuid',
+                'exists:assesment,id',
+                function($attr,$value,$fail){
+                    $_assesment=Assesment::find($value);
+                    if (Carbon::now()->gte($_assesment->assesment->start_date)) {
+                        $fail('Assesment quisoner dimulai pada ' . $_assesment->assesment->start_date, 404);
+                    }
+
+                    if (Carbon::now()->gte($_assesment->assesment->end_date)) {
+                        $fail('Assesment quisoner sudah selesai pada ' . $_assesment->assesment->end_date, 404);
+                    }
+                }
+            ],
             'nama'=>'required',
             // 'quisioner_id' => [
             //     'required',

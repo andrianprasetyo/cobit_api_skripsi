@@ -23,7 +23,9 @@ return new class extends Migration
             $table->string('status',30)->default('pending')->comment('active,pending,banned');
             $table->boolean('internal')->default(true);
             $table->json('avatar')->nullable();
-            // $table->foreignUuid('organisasi_id')->nullable();
+            $table->foreignUuid('organisasi_id')->nullable();
+            $table->foreignUuid('jabatan_id')->nullable();
+            $table->foreignUuid('divisi_id')->nullable();
             // $table->foreignUuid('assesment_id')->nullable();
             $table->text('token')->nullable();
             $table->rememberToken();

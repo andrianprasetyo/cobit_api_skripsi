@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organisasi;
+use App\Models\OrganisasiJabatan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrganisasiController extends Controller
 {
@@ -48,22 +50,42 @@ class OrganisasiController extends Controller
 
     public function add(Request $request)
     {
-        $request->validate(
-            [
-                'nama'=>'required|unique:organisasi,nama'
-            ],
-            [
-                'nama.required'=>'Nama organisasi harus di isi',
-                'nama.unique' => 'Nama organisasi sudah digunakan',
-            ]
-        );
+        DB::beginTransaction();
+        try {
+            $request->validate(
+                [
+                    'nama' => 'required|unique:organisasi,nama'
+                ],
+                [
+                    'nama.required' => 'Nama organisasi harus di isi',
+                    'nama.unique' => 'Nama organisasi sudah digunakan',
+                ]
+            );
 
-        $organisasi=new Organisasi();
-        $organisasi->nama=$request->nama;
-        $organisasi->deskripsi = $request->deskripsi;
-        $organisasi->save();
+            $organisasi = new Organisasi();
+            $organisasi->nama = $request->nama;
+            $organisasi->deskripsi = $request->deskripsi;
+            $organisasi->save();
 
-        return $this->successResponse();
+            $divisi_jabatan=$request->divisi_jabatan;
+            $_lsit_jabdiv=[];
+            if ($request->filled('divisi_jabatan')) {
+                foreach ($divisi_jabatan as $_item) {
+                    $_lsit_jabdiv[]=array(
+                        'nama'=>$_item['nama'],
+                        'jenis' => $_item['jenis'],
+                        'organisasi_id' => $organisasi->id,
+                    );
+                }
+                OrganisasiJabatan::insert($_lsit_jabdiv);
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     public function edit(Request $request,$id)

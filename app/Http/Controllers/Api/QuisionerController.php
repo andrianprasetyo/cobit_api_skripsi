@@ -41,15 +41,15 @@ class QuisionerController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        if(Carbon::now()->gte($responden->assesment->start_date))
-        {
-            return $this->errorResponse('Assesment quisoner dimulai pada '. $responden->assesment->start_date, 404);
-        }
+        // if(Carbon::now()->gte($responden->assesment->start_date))
+        // {
+        //     return $this->errorResponse('Assesment quisoner dimulai pada '. $responden->assesment->start_date, 404);
+        // }
 
-        if (Carbon::now()->gte($responden->assesment->end_date))
-        {
-            return $this->errorResponse('Assesment quisoner sudah selesai pada ' . $responden->assesment->end_date, 404);
-        }
+        // if (Carbon::now()->gte($responden->assesment->end_date))
+        // {
+        //     return $this->errorResponse('Assesment quisoner sudah selesai pada ' . $responden->assesment->end_date, 404);
+        // }
 
         return $this->successResponse($responden);
     }

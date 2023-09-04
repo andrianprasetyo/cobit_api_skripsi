@@ -32,12 +32,16 @@ class QuisionerStartRequest extends FormRequest
                 'exists:assesment,id',
                 function($attr,$value,$fail){
                     $_assesment=Assesment::find($value);
-                    if (Carbon::now()->gte($_assesment->assesment->start_date)) {
-                        $fail('Assesment quisoner dimulai pada ' . $_assesment->assesment->start_date, 404);
+                    $currentDate = Carbon::now();
+                    $start_date = Carbon::parse($_assesment->assesment->start_date)->format('Y-m-d');
+                    $end_date=Carbon::parse($_assesment->assesment->end_date)->format('Y-m-d');
+
+                    if (!$currentDate->startOfDay()->gte($start_date)) {
+                        $fail('Assesment quisoner dimulai pada ' . $start_date, 400);
                     }
 
-                    if (Carbon::now()->gte($_assesment->assesment->end_date)) {
-                        $fail('Assesment quisoner sudah selesai pada ' . $_assesment->assesment->end_date, 404);
+                    if (Carbon::now()->gte($end_date)) {
+                        $fail('Assesment quisoner telah selesai pada ' . $end_date, 400);
                     }
                 }
             ],

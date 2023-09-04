@@ -11,6 +11,7 @@ use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
+use App\Models\OrganisasiJabatan;
 use App\Models\Quisioner;
 use App\Models\Roles;
 use App\Models\RoleUsers;
@@ -110,10 +111,22 @@ class AsessmentController extends Controller
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
             $validate_msg['organisasi_id.uuid']='Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
+
+            $validate['pic_divisi_id'] = 'uuid|exists:organisasi_jabatan,id';
+            $validate_msg['pic_divisi_id.uuid'] = 'Jabatan ID tidak valid';
+            $validate_msg['pic_divisi_id.exists'] = 'Jabatan tidak terdaftar';
+
+            $validate['pic_jabatan_id'] = 'uuid|exists:organisasi_jabatan,id';
+            $validate_msg['pic_jabatan_id.uuid'] = 'Divisi ID tidak valid';
+            $validate_msg['pic_jabatan_id.exists'] = 'Divisi tidak terdaftar';
+
         }else{
             $validate['organisasi_nama']='required|unique:organisasi,nama';
             $validate_msg['organisasi_nama.required']='Nama organisasi harus di isi';
             $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
+
+            $validate['pic_jabatan'] = 'required|string';
+            $validate['pic_divisi'] = 'required|string';
         }
 
         $request->validate($validate, $validate_msg);
@@ -131,6 +144,23 @@ class AsessmentController extends Controller
                 $organisasi->save();
 
                 $organisasi_id=$organisasi->id;
+
+                if($request->filled('pic_jabatan'))
+                {
+                    $jabatan = new OrganisasiJabatan();
+                    $jabatan->nama = $request->pic_jabatan;
+                    $jabatan->jenis = 'jabatan';
+                    $jabatan->organisasi_id = $organisasi_id;
+                    $jabatan->save();
+                }
+
+                if ($request->filled('pic_divisi')) {
+                    $divisi = new OrganisasiJabatan();
+                    $divisi->nama = $request->pic_divisi;
+                    $divisi->jenis = 'divisi';
+                    $divisi->organisasi_id = $organisasi_id;
+                    $divisi->save();
+                }
             }
 
             if(!$this->account->internal){

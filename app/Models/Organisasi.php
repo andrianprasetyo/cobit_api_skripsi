@@ -26,4 +26,14 @@ class Organisasi extends Model
     {
         return $this->belongsTo(Assesment::class, 'assesment_id');
     }
+
+    public function divisi()
+    {
+        return $this->belongsTo(OrganisasiJabatan::class, 'organisasi_id')->where('jenis','divisi');
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(OrganisasiJabatan::class, 'organisasi_id')->where('jenis', 'jabatan');
+    }
 }

@@ -136,6 +136,9 @@ class AsessmentController extends Controller
 
             $pic_email=$request->pic_email;
             $organisasi_id = $request->organisasi_id;
+            $pic_jabatan_id = $request->pic_jabatan_id;
+            $pic_divisi_id = $request->pic_divisi_id;
+
             if ($request->filled('organisasi_nama'))
             {
                 $organisasi = new Organisasi();
@@ -152,6 +155,8 @@ class AsessmentController extends Controller
                     $jabatan->jenis = 'jabatan';
                     $jabatan->organisasi_id = $organisasi_id;
                     $jabatan->save();
+
+                    $pic_jabatan_id=$jabatan->id;
                 }
 
                 if ($request->filled('pic_divisi')) {
@@ -160,11 +165,14 @@ class AsessmentController extends Controller
                     $divisi->jenis = 'divisi';
                     $divisi->organisasi_id = $organisasi_id;
                     $divisi->save();
+
+                    $pic_divisi_id = $divisi->id;
                 }
             }
 
             if(!$this->account->internal){
                 $organisasi_id=$this->account->organisasi->id;
+
             }
 
             // $verify_code=Str::random(50);
@@ -198,6 +206,8 @@ class AsessmentController extends Controller
                 $user->status='pending';
                 $user->internal=false;
                 $user->organisasi_id=$organisasi_id;
+                $user->jabatan_id = $pic_jabatan_id;
+                $user->divisi_id=$pic_divisi_id;
                 $user->token=$_token;
                 $user->password= $_token;
                 $user->username=Str::slug($request->pic_nama, '.');

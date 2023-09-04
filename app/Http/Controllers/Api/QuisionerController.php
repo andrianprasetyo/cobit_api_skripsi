@@ -22,6 +22,7 @@ use App\Models\QuisionerJawaban;
 use App\Models\QuisionerPertanyaan;
 use App\Models\AssessmentUsers;
 use App\Traits\JsonResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -38,6 +39,16 @@ class QuisionerController extends Controller
         if(!$responden)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        if(Carbon::now()->gte($responden->assesment->start_date))
+        {
+            return $this->errorResponse('Assesment quisoner dimulai pada '. $responden->assesment->start_date, 404);
+        }
+
+        if (Carbon::now()->gte($responden->assesment->end_date))
+        {
+            return $this->errorResponse('Assesment quisoner sudah selesai pada ' . $responden->assesment->end_date, 404);
         }
 
         return $this->successResponse($responden);

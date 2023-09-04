@@ -19,17 +19,14 @@ class OrganisasiJabatanController extends Controller
         $sortBy = $request->get('sortBy', 'created_at');
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
-        $organisasi_id = $request->organisasi_id;
-        $jenis = $request->jenis;
+        $organisasi_divisi_id = $request->organisasi_divisi_id;
 
-        $list = OrganisasiJabatan::with(['organisasi']);
-        if($request->filled('organisasi_id'))
+        $list = OrganisasiJabatan::with(['divisi']);
+        if($request->filled('organisasi_divisi_id'))
         {
-            $list->where('organisasi_id',$organisasi_id);
+            $list->where('organisasi_divisi_id',$organisasi_divisi_id);
         }
-        if ($request->filled('jenis')) {
-            $list->where('jenis', $jenis);
-        }
+
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }
@@ -50,14 +47,13 @@ class OrganisasiJabatanController extends Controller
         return $this->successResponse($data);
     }
 
-    public function add(JabatanDivisiRequest $request)
+    public function add(Request $request)
     {
-        $request->validated();
+        // $request->validated();
 
         $jabatan = new OrganisasiJabatan();
         $jabatan->nama = $request->nama;
-        $jabatan->jenis = $request->jenis;
-        $jabatan->organisasi_id = $request->organisasi_id;
+        $jabatan->organisasi_divisi_id = $request->organisasi_divisi_id;
         $jabatan->save();
 
         return $this->successResponse();
@@ -84,8 +80,7 @@ class OrganisasiJabatanController extends Controller
         }
 
         $jabatan->nama = $request->nama;
-        $jabatan->jenis = $request->jenis;
-        $jabatan->organisasi_id = $request->organisasi_id;
+        $jabatan->organisasi_divisi_id = $request->organisasi_divisi_id;
         $jabatan->save();
 
         return $this->successResponse();

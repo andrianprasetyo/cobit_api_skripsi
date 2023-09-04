@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('users_id');
             $table->foreignUuid('assesment_id');
             $table->boolean('default')->default(false);
+            $table->date('expire_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

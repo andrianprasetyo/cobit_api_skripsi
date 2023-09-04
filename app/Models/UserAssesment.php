@@ -14,7 +14,7 @@ class UserAssesment extends Model
     public $incrementing = false;
     protected $table = 'users_assesment';
     protected $keyType = 'string';
-    protected $fillable = ['assesment_id', 'users_id', 'default'];
+    protected $fillable = ['assesment_id', 'users_id', 'default','pic_expire_at'];
 
     protected $hidden = [
         'deleted_at',

@@ -105,7 +105,12 @@ class AsessmentController extends Controller
         $validate_msg['pic_nama.required']='Nama PIC harus di isi';
         $validate_msg['pic_email.required'] = 'Email PIC harus di isi';
         $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
+
         // $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
+        $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
+        $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
+        $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
+        $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
         if ($request->filled('organisasi_id')) {
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
@@ -172,7 +177,6 @@ class AsessmentController extends Controller
 
             if(!$this->account->internal){
                 $organisasi_id=$this->account->organisasi->id;
-
             }
 
             // $verify_code=Str::random(50);
@@ -237,6 +241,7 @@ class AsessmentController extends Controller
             $user_ass->users_id= $user_id;
             $user_ass->assesment_id=$assesment->id;
             $user_ass->default=$default_ass;
+            $user_ass->pic_expire_at=$request->pic_expire_at;
             $user_ass->save();
 
             // $user->assesment=$user_ass;

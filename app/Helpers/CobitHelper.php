@@ -301,7 +301,7 @@ class CobitHelper
         foreach($dataCanvas as $dc){
             if($dc->step3_init_value>=0){
                 $step3Value=$maxValue !=0?100*$dc->step3_init_value/$maxValue:0;
-                $step3Value=5*round($step3Value/5);
+                $step3Value=5*round(floor($step3Value)/5);
             }else{
                 $step3Value=$maxValue !=0?100*$dc->step3_init_value/$maxValue:0;
                 $step3Value=5*round($step3Value/5);

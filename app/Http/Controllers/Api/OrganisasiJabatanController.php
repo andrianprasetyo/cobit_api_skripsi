@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organisasi\JabatanDivisiRequest;
-use App\Models\OrganisasiJabatan;
+use App\Models\OrganisasiDivisiJabatan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,7 +21,7 @@ class OrganisasiJabatanController extends Controller
         $search = $request->search;
         $organisasi_divisi_id = $request->organisasi_divisi_id;
 
-        $list = OrganisasiJabatan::with(['divisi']);
+        $list = OrganisasiDivisiJabatan::with(['divisi']);
         if($request->filled('organisasi_divisi_id'))
         {
             $list->where('organisasi_divisi_id',$organisasi_divisi_id);
@@ -39,7 +39,7 @@ class OrganisasiJabatanController extends Controller
 
     public function detailByID($id)
     {
-        $data = OrganisasiJabatan::with('organisasi')->find($id);
+        $data = OrganisasiDivisiJabatan::with('divisi')->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
@@ -51,7 +51,7 @@ class OrganisasiJabatanController extends Controller
     {
         // $request->validated();
 
-        $jabatan = new OrganisasiJabatan();
+        $jabatan = new OrganisasiDivisiJabatan();
         $jabatan->nama = $request->nama;
         $jabatan->organisasi_divisi_id = $request->organisasi_divisi_id;
         $jabatan->save();
@@ -66,17 +66,17 @@ class OrganisasiJabatanController extends Controller
                 'nama' => 'required'
             ],
             [
-                'nama.required' => 'Nama jabatan/divisi harus di isi'
+                'nama.required' => 'Nama Jabatan harus di isi'
             ]
         );
-        $jabatan = OrganisasiJabatan::find($id);
+        $jabatan = OrganisasiDivisiJabatan::find($id);
         if (!$jabatan) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $_check_exists = OrganisasiJabatan::where('id', '!=', $id)->where('nama', $request->nama)->exists();
+        $_check_exists = OrganisasiDivisiJabatan::where('id', '!=', $id)->where('nama', $request->nama)->exists();
         if ($_check_exists) {
-            return $this->errorResponse('Jabatan/Divisi organisasi sudah digunakan', 400);
+            return $this->errorResponse('Jabatan organisasi sudah digunakan', 400);
         }
 
         $jabatan->nama = $request->nama;
@@ -88,7 +88,7 @@ class OrganisasiJabatanController extends Controller
 
     public function deleteByID($id)
     {
-        $data = OrganisasiJabatan::find($id);
+        $data = OrganisasiDivisiJabatan::find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

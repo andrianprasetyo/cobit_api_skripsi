@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Organisasi;
 
-use App\Models\OrganisasiJabatan;
+use App\Models\OrganisasiDivisi;
 use Illuminate\Foundation\Http\FormRequest;
 
 class JabatanDivisiRequest extends FormRequest
@@ -27,7 +27,7 @@ class JabatanDivisiRequest extends FormRequest
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
-                    $_chekc_ = OrganisasiJabatan::where('nama', $value)
+                    $_chekc_ = OrganisasiDivisi::where('nama', $value)
                         ->where('organisasi_id', $this->organisasi_id)
                         ->exists();
 

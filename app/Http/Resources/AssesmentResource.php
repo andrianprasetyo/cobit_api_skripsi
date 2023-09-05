@@ -29,6 +29,8 @@ class AssesmentResource extends JsonResource
             'users_id' => $this->users_id,
             'organisasi'=>$this->organisasi,
             'pic' => $this->pic,
+            'start_date_quisioner' => $this->start_date_quisioner,
+            'end_date_quisioner' => $this->end_date_quisioner,
         ];
     }
 }

@@ -4,6 +4,8 @@ namespace App\Imports;
 
 use App\Models\Assesment;
 use App\Models\AssessmentUsers;
+use App\Models\OrganisasiDivisi;
+use App\Models\OrganisasiDivisiJabatan;
 use App\Notifications\InviteRespondenNotif;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -40,6 +42,37 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
                     }
                 }
             ],
+            'divisi'=>[
+                function($attribute,$value,$fail){
+                    if($value !=''){
+                        $_ass=Assesment::find($this->assesment_id);
+                        $_check_divisi=OrganisasiDivisi::where('organisasi_id',$_ass->organisasi_id)
+                            ->where('nama',$value)
+                            ->exists();
+                        if(!$_check_divisi)
+                        {
+                            return $fail('Nama divisi tidak terdaftar '.$value);
+                        }
+                    }
+                }
+            ],
+            'jabatan' => [
+                function ($attribute, $value, $fail) {
+                    if ($value != '') {
+                        $_ass = Assesment::find($this->assesment_id);
+                        $_org=$_ass->organisasi_id;
+
+                        $_check_jabatan=OrganisasiDivisiJabatan::whereIn('organisasi_divisi_id',function($q) use($_org){
+                            $q->select('id')
+                                ->from('organisasi_divisi')
+                                ->where('organisasi_id',$_org);
+                        });
+                        if (!$_check_jabatan) {
+                            return $fail('Nama divisi tidak terdaftar ' . $value);
+                        }
+                    }
+                }
+            ]
             // 'email' => 'required|email|unique:assesment_users,email',
         ];
     }
@@ -68,12 +101,14 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
     public function model(array $row)
     {
 
+        $assesment = Assesment::with('organisasi')->find($this->assesment_id);
         $responden = new AssessmentUsers();
         $responden->email = $row['email'];
         if(isset($row['nama']) && $row['nama'] !='')
         {
             $responden->nama = $row['nama'];
         }
+
         if (isset($row['divisi']) && $row['divisi'] != '') {
             $responden->divisi = $row['divisi'];
         }
@@ -87,7 +122,6 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
         $responden->code = Str::random(50);
         $responden->save();
 
-        $assesment = Assesment::with('organisasi')->find($this->assesment_id);
         $organisasi = $assesment->organisasi;
         Notification::send($responden, new InviteRespondenNotif($organisasi));
     }

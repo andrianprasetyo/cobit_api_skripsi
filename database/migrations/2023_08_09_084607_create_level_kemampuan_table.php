@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('level_kemampuan', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->text('kegiatan');
-            $table->text('translate');
-            $table->integer('bobot');
-            $table->string('level');
+            $table->string('kegiatan');
+            $table->string('kode',50)->nullable();
+            $table->text('translate')->nullable();
+            $table->integer('bobot')->nullable();
+            $table->string('level')->nullable();
+            $table->integer('urutan')->nullable();
+            $table->foreignUuid('domain_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

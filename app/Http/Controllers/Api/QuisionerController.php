@@ -9,12 +9,16 @@ use App\Http\Requests\Quisioner\QuisionerSaveAnswerRequest;
 use App\Http\Requests\Quisioner\QuisionerStartRequest;
 use App\Http\Resources\Answer\GrupAnswerResource;
 use App\Http\Resources\AssesmentUsersResource;
+use App\Http\Resources\Ref\DivisiRefResource;
+use App\Http\Resources\Ref\JabatanRefResource;
 use App\Jobs\SetCanvasHasilDataJob;
 use App\Jobs\SetProsesQuisionerHasilQueue;
 use App\Models\Assesment;
 use App\Models\AssessmentQuisioner;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
+use App\Models\OrganisasiDivisi;
+use App\Models\OrganisasiDivisiJabatan;
 use App\Models\Quisioner;
 use App\Models\QuisionerGrupJawaban;
 use App\Models\QuisionerHasil;
@@ -31,7 +35,7 @@ class QuisionerController extends Controller
     use JsonResponse;
     public function detailRespondenByCode(Request $request)
     {
-        $responden = AssessmentUsers::with(['assesment.organisasi'])
+        $responden = AssessmentUsers::with(['assesment.organisasi','divisi','jabatan'])
             ->withCount('assesmentquisionerhasil')
             ->where('code',$request->get('code'))
             ->first();
@@ -75,9 +79,8 @@ class QuisionerController extends Controller
         DB::beginTransaction();
         try {
             $responden->nama = $request->nama;
-            $responden->divisi = $request->divisi;
-            $responden->jabatan = $request->jabatan;
-            $responden->jabatan = $request->jabatan;
+            $responden->jabatan_id = $request->jabatan_id;
+            $responden->divisi_id = $request->divisi_id;
             $responden->status = 'active';
             // $responden->code=null;
             $responden->save();
@@ -412,6 +415,48 @@ class QuisionerController extends Controller
         $data['pertanyaan']=$list_pertanyaan;
         $data['meta']=$meta;
 
+        return $this->successResponse($data);
+    }
+
+    public function listDivisi(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+        $sortBy = $request->get('sortBy', 'nama');
+        $sortType = $request->get('sortType', 'ASC');
+        $search = $request->search;
+        $organisasi_id = $request->organisasi_id;
+
+        $list = OrganisasiDivisi::where('organisasi_id', $organisasi_id);
+
+        if ($request->filled('search')) {
+            $list->where('nama', 'ilike', '%' . $search . '%');
+        }
+
+        $list->orderBy($sortBy, $sortType);
+
+        $data = $this->paging($list, $limit, $page, DivisiRefResource::class);
+        return $this->successResponse($data);
+    }
+
+    public function listJabatan(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+        $sortBy = $request->get('sortBy', 'nama');
+        $sortType = $request->get('sortType', 'asc');
+        $search = $request->search;
+        $organisasi_divisi_id = $request->divisi_id;
+
+        $list = OrganisasiDivisiJabatan::where('organisasi_divisi_id', $organisasi_divisi_id);
+
+        if ($request->filled('search')) {
+            $list->where('nama', 'ilike', '%' . $search . '%');
+        }
+
+        $list->orderBy($sortBy, $sortType);
+
+        $data = $this->paging($list, $limit, $page, JabatanRefResource::class);
         return $this->successResponse($data);
     }
 }

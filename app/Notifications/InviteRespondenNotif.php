@@ -12,7 +12,7 @@ class InviteRespondenNotif extends Notification implements ShouldQueue
     use Queueable;
 
     private $data=null;
-    private $subject = 'Undangan Kuisioner Responden';
+    private $subject = 'Undangan Kuesioner Responden';
 
     /**
      * Create a new notification instance.

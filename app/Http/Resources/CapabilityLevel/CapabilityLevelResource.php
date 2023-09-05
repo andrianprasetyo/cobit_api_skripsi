@@ -23,7 +23,7 @@ class CapabilityLevelResource extends JsonResource
             'level'=>$this->level,
             // 'domain_id'=>$this->domain_id,
             'urutan' => $this->urutan,
-            'kode' => $this->kode,
+            'kode' => $this->domain->kode.'.'.$this->kode,
             'domain' => new DomainResource($this->domain),
         ];
     }

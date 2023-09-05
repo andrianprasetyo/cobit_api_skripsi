@@ -16,13 +16,13 @@
         <p style="margin: 20px 0 10px 0;">
             Sehubungan dengan adanya Assesment Cobit 19 pada <b>{{$data->organisasi}}</b>,
             <br/>
-            mohon sedianya Bapak/Ibu untuk mengisi Kuisioner yang telah kami sediakan, silahkan klik tombol dibawah ini untuk melakukan pengisian kuisioner
+            mohon sedianya Bapak/Ibu untuk mengisi Kuesioner  yang telah kami sediakan, silahkan klik tombol dibawah ini untuk melakukan pengisian Kuesioner
         </p>
 
         <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
             <td style="mso-padding-alt: 16px 24px; background-color: #0e45ce; border-radius: 4px; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;">
-                <a href="{{$data->url}}" target="_blank" style="display: block; font-weight: 600; font-size: 14px; line-height: 100%; padding: 16px 24px; color: #ffffff; text-decoration: none;">Isi Kuisioner &rarr;</a>
+                <a href="{{$data->url}}" target="_blank" style="display: block; font-weight: 600; font-size: 14px; line-height: 100%; padding: 16px 24px; color: #ffffff; text-decoration: none;">Isi Kuesioner  &rarr;</a>
             </td>
             </tr>
         </table>

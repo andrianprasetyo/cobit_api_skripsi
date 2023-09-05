@@ -20,4 +20,9 @@ class OrganisasiDivisiJabatan extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function divisi()
+    {
+        return $this->belongsTo(OrganisasiDivisi::class, 'organisasi_divisi_id');
+    }
 }

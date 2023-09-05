@@ -19,15 +19,12 @@ class OrganisasiDivisiController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
         $organisasi_id = $request->organisasi_id;
-        $jenis = $request->jenis;
 
-        $list = OrganisasiDivisi::with(['organisasi']);
+        $list = OrganisasiDivisi::with(['organisasi','jabatans']);
         if ($request->filled('organisasi_id')) {
             $list->where('organisasi_id', $organisasi_id);
         }
-        if ($request->filled('jenis')) {
-            $list->where('jenis', $jenis);
-        }
+
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }
@@ -50,11 +47,10 @@ class OrganisasiDivisiController extends Controller
 
     public function add(Request $request)
     {
-        $request->validated();
+        // $request->validated();
 
         $jabatan = new OrganisasiDivisi();
         $jabatan->nama = $request->nama;
-        $jabatan->jenis = $request->jenis;
         $jabatan->organisasi_id = $request->organisasi_id;
         $jabatan->save();
 
@@ -68,23 +64,25 @@ class OrganisasiDivisiController extends Controller
                 'nama' => 'required'
             ],
             [
-                'nama.required' => 'Nama jabatan/divisi harus di isi'
+                'nama.required' => 'Nama divisi harus di isi'
             ]
         );
-        $jabatan = OrganisasiDivisi::find($id);
-        if (!$jabatan) {
+        $divisi = OrganisasiDivisi::find($id);
+        if (!$divisi) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
         $_check_exists = OrganisasiDivisi::where('id', '!=', $id)->where('nama', $request->nama)->exists();
         if ($_check_exists) {
-            return $this->errorResponse('Jabatan/Divisi organisasi sudah digunakan', 400);
+            return $this->errorResponse('divisi organisasi sudah digunakan', 400);
         }
 
-        $jabatan->nama = $request->nama;
-        $jabatan->jenis = $request->jenis;
-        $jabatan->organisasi_id = $request->organisasi_id;
-        $jabatan->save();
+        $divisi->nama = $request->nama;
+        if($request->filled('organisasi_id'))
+        {
+            $divisi->organisasi_id = $request->organisasi_id;
+        }
+        $divisi->save();
 
         return $this->successResponse();
     }

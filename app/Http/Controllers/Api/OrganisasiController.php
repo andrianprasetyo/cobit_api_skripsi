@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organisasi;
-use App\Models\OrganisasiJabatan;
+use App\Models\OrganisasiDivisi;
+use App\Models\OrganisasiDivisiJabatan;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -62,22 +63,32 @@ class OrganisasiController extends Controller
                 ]
             );
 
+            $divisi = $request->divisi;
+            $divisi_jabatan=$request->divisi_jabatan;
+
             $organisasi = new Organisasi();
             $organisasi->nama = $request->nama;
             $organisasi->deskripsi = $request->deskripsi;
             $organisasi->save();
 
-            $divisi_jabatan=$request->divisi_jabatan;
             $_lsit_jabdiv=[];
-            if ($request->filled('divisi_jabatan')) {
-                foreach ($divisi_jabatan as $_item) {
-                    $_lsit_jabdiv[]=array(
-                        'nama'=>$_item['nama'],
-                        'jenis' => $_item['jenis'],
-                        'organisasi_id' => $organisasi->id,
-                    );
+            if ($request->filled('divisi')) {
+
+                $_divisi=new OrganisasiDivisi();
+                $_divisi->nama=$request->divisi_nama;
+                $_divisi->organisasi_id=$organisasi->id;
+                $_divisi->save();
+
+                if($request->filled('divisi_jabatan'))
+                {
+                    foreach ($divisi_jabatan as $_item) {
+                        $_lsit_jabdiv[]=array(
+                            'nama'=>$_item['nama'],
+                            'organisasi_id' => $_divisi->id,
+                        );
+                    }
+                    OrganisasiDivisiJabatan::insert($_lsit_jabdiv);
                 }
-                OrganisasiJabatan::insert($_lsit_jabdiv);
             }
 
             DB::commit();

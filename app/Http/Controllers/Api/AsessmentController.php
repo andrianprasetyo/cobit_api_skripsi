@@ -11,7 +11,8 @@ use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
 use App\Models\Organisasi;
-use App\Models\OrganisasiJabatan;
+use App\Models\OrganisasiDivisi;
+use App\Models\OrganisasiDivisiJabatan;
 use App\Models\Quisioner;
 use App\Models\Roles;
 use App\Models\RoleUsers;
@@ -86,15 +87,15 @@ class AsessmentController extends Controller
         $validate['asessment']='required';
         // $validate['tahun'] = 'required|date_format:Y-m';
 
-        $validate['start_date'] = 'required|date_format:Y-m-d|before:end_date';
+        $validate['start_date'] = 'required|date_format:Y-m-d|after:today';
         $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
 
         $validate_msg['start_date.required']='Tanggal mulai harus di isi';
         $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
-        $validate_msg['start_date.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
+        $validate_msg['start_date.after'] = 'Tanggal mulai harus setelah tanggal sekarang';
         $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
         $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
-        $validate_msg['end_date.before'] = 'Tanggal selesai harus sesudah tanggal mulai';
+        $validate_msg['end_date.after'] = 'Tanggal selesai harus sesudah tanggal mulai';
 
         $validate_msg['asessment.required']='Nama assesment harus di isi';
         // $validate_msg['tahun.required'] = 'Tahun assesment harus di isi';
@@ -112,16 +113,26 @@ class AsessmentController extends Controller
         $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
         $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
+        $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after:start_date';
+        $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
+        $validate_msg['start_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['start_date_quisioner.after'] = 'Tanggal mulai harus setelah tanggal mulai';
+
+        $validate['end_date_quisioner'] = 'required|date_format:Y-m-d|before:end_date';
+        $validate_msg['end_date_quisioner.required'] = 'Tanggal mulai harus di isi';
+        $validate_msg['end_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
+        $validate_msg['end_date_quisioner.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
+
         if ($request->filled('organisasi_id')) {
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
             $validate_msg['organisasi_id.uuid']='Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
 
-            $validate['pic_divisi_id'] = 'uuid|exists:organisasi_jabatan,id';
+            $validate['pic_divisi_id'] = 'uuid|exists:organisasi_divisi,id';
             $validate_msg['pic_divisi_id.uuid'] = 'Jabatan ID tidak valid';
             $validate_msg['pic_divisi_id.exists'] = 'Jabatan tidak terdaftar';
 
-            $validate['pic_jabatan_id'] = 'uuid|exists:organisasi_jabatan,id';
+            $validate['pic_jabatan_id'] = 'uuid|exists:organisasi_divisi_jabatan,id';
             $validate_msg['pic_jabatan_id.uuid'] = 'Divisi ID tidak valid';
             $validate_msg['pic_jabatan_id.exists'] = 'Divisi tidak terdaftar';
 
@@ -144,39 +155,34 @@ class AsessmentController extends Controller
             $pic_jabatan_id = $request->pic_jabatan_id;
             $pic_divisi_id = $request->pic_divisi_id;
 
-            if ($request->filled('organisasi_nama'))
-            {
-                $organisasi = new Organisasi();
-                $organisasi->nama = $request->organisasi_nama;
-                $organisasi->deskripsi = $request->organisasi_deskripsi;
-                $organisasi->save();
-
-                $organisasi_id=$organisasi->id;
-
-                if($request->filled('pic_jabatan'))
-                {
-                    $jabatan = new OrganisasiJabatan();
-                    $jabatan->nama = $request->pic_jabatan;
-                    $jabatan->jenis = 'jabatan';
-                    $jabatan->organisasi_id = $organisasi_id;
-                    $jabatan->save();
-
-                    $pic_jabatan_id=$jabatan->id;
-                }
-
-                if ($request->filled('pic_divisi')) {
-                    $divisi = new OrganisasiJabatan();
-                    $divisi->nama = $request->pic_divisi;
-                    $divisi->jenis = 'divisi';
-                    $divisi->organisasi_id = $organisasi_id;
-                    $divisi->save();
-
-                    $pic_divisi_id = $divisi->id;
-                }
-            }
-
             if(!$this->account->internal){
                 $organisasi_id=$this->account->organisasi->id;
+
+                if ($request->filled('organisasi_nama')) {
+                    $organisasi = new Organisasi();
+                    $organisasi->nama = $request->organisasi_nama;
+                    $organisasi->deskripsi = $request->organisasi_deskripsi;
+                    $organisasi->save();
+
+                    $organisasi_id = $organisasi->id;
+
+                    if ($request->filled('pic_divisi')) {
+                        $divisi = new OrganisasiDivisi();
+                        $divisi->nama = $request->pic_divisi;
+                        $divisi->organisasi_id = $organisasi_id;
+                        $divisi->save();
+                        $pic_divisi_id = $divisi->id;
+                    }
+
+                    if ($request->filled('pic_jabatan')) {
+                        $jabatan = new OrganisasiDivisiJabatan();
+                        $jabatan->nama = $request->pic_jabatan;
+                        $jabatan->organisasi_divisi_id = $pic_divisi_id;
+                        $jabatan->save();
+
+                        $pic_jabatan_id = $jabatan->id;
+                    }
+                }
             }
 
             // $verify_code=Str::random(50);
@@ -233,6 +239,8 @@ class AsessmentController extends Controller
             $assesment->organisasi_id = $organisasi_id;
             $assesment->start_date = $request->start_date;
             $assesment->end_date = $request->end_date;
+            $assesment->start_date_quisioner = $request->start_date_quisioner;
+            $assesment->end_date_quisioner=$request->end_date_quisioner;
             $assesment->status = 'ongoing';
             $assesment->users_id=$user_id;
             $assesment->save();
@@ -260,15 +268,36 @@ class AsessmentController extends Controller
     }
     public function edit(Request $request,$id)
     {
-        $validate['start_date'] = 'required|date_format:Y-m-d|before:end_date';
-        $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
 
-        $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
-        $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
-        $validate_msg['start_date.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
-        $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
-        $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
-        $validate_msg['end_date.before'] = 'Tanggal selesai harus sesudah tanggal mulai';
+        if($request->filled('start_date')){
+            $validate['start_date'] = 'required|date_format:Y-m-d|after:today';
+            $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
+            $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
+            $validate_msg['start_date.after'] = 'Tanggal mulai harus setelah tanggal sekarang';
+        }
+
+        if($request->filled('end_date')){
+            $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
+
+            $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
+            $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
+            $validate_msg['end_date.after'] = 'Tanggal selesai harus sesudah tanggal mulai';
+        }
+
+        if($request->filled('start_date_quisioner')){
+            $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after:start_date';
+            $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
+            $validate_msg['start_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
+            $validate_msg['start_date_quisioner.after'] = 'Tanggal mulai harus setelah tanggal mulai';
+        }
+
+        if ($request->filled('end_date_quisioner')) {
+            $validate['end_date_quisioner'] = 'required|date_format:Y-m-d|before:end_date';
+            $validate_msg['end_date_quisioner.required'] = 'Tanggal mulai harus di isi';
+            $validate_msg['end_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
+            $validate_msg['end_date_quisioner.before'] = 'Tanggal mulai harus sebelum tanggal selesai';
+        }
+
         $request->validate($validate, $validate_msg);
 
         $data = Assesment::with(['organisasi','pic'])->find($id);
@@ -278,8 +307,19 @@ class AsessmentController extends Controller
 
         $data->nama=$request->nama;
         $data->deskripsi = $request->deskripsi;
-        $data->start_date = $request->start_date;
-        $data->end_date = $request->end_date;
+        if($request->filled('start_date')){
+            $data->start_date = $request->start_date;
+        }
+        if($request->filled('end_date')){
+            $data->end_date = $request->end_date;
+        }
+
+        if($request->filled('start_date_quisioner')){
+            $data->start_date_quisioner = $request->start_date_quisioner;
+        }
+        if ($request->filled('end_date_quisioner')) {
+            $data->end_date_quisioner = $request->end_date_quisioner;
+        }
         $data->save();
 
         return $this->successResponse();

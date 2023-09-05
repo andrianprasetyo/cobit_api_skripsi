@@ -29,11 +29,6 @@ class Organisasi extends Model
 
     public function divisi()
     {
-        return $this->belongsTo(OrganisasiJabatan::class, 'organisasi_id')->where('jenis','divisi');
-    }
-
-    public function jabatan()
-    {
-        return $this->belongsTo(OrganisasiJabatan::class, 'organisasi_id')->where('jenis', 'jabatan');
+        return $this->belongsTo(OrganisasiDivisi::class, 'organisasi_id')->where('jenis','divisi');
     }
 }

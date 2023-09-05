@@ -20,4 +20,14 @@ class OrganisasiDivisi extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function organisasi()
+    {
+        return $this->belongsTo(Organisasi::class, 'organisasi_id');
+    }
+
+    public function jabatans()
+    {
+        return $this->hasMany(OrganisasiDivisiJabatan::class,'organisasi_divisi_id','id');
+    }
 }

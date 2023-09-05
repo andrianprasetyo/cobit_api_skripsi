@@ -25,7 +25,9 @@ class QuisionerStartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'=> 'required|uuid|exists:assesment_users,id',
+            'id' => 'required|uuid|exists:assesment_users,id',
+            'divisi_id' => 'required|uuid|exists:organisasi_divisi,id',
+            'jabatan_id'=> 'required|uuid|exists:organisasi_divisi_jabatan,id',
             'assesment_id' => [
                 'required',
                 'uuid',
@@ -78,6 +80,14 @@ class QuisionerStartRequest extends FormRequest
         $validate['assesment_id.required'] = 'Assesment ID harus di isi';
         $validate['assesment_id.uuid'] = 'Assesment ID tidak valid';
         $validate['assesment_id.exists'] = 'Assesment ID tidak terdaftar';
+
+        $validate['divisi_id.required'] = 'Divisi ID harus di isi';
+        $validate['divisi_id.uuid'] = 'Divisi ID tidak valid';
+        $validate['divisi_id.exists'] = 'Divisi ID tidak terdaftar';
+
+        $validate['jabatan_id.required'] = 'Jabatan ID harus di isi';
+        $validate['jabatan_id.uuid'] = 'Jabatan ID tidak valid';
+        $validate['jabatan_id.exists'] = 'Jabatan ID tidak terdaftar';
 
         // $validate['quisioner_id.required'] = 'Quisioner ID harus di isi';
         // $validate['quisioner_id.uuid'] = 'Quisioner ID tidak valid';

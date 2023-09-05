@@ -16,7 +16,7 @@ class AssessmentUsers extends Model
     protected $table = 'assesment_users';
     protected $keyType = 'string';
 
-    protected $fillable = ['assesment_id', 'nama','email','divisi','jabatan','code','status','is_proses'];
+    protected $fillable = ['assesment_id', 'nama','email','code','status','is_proses','divisi_id','jabatan_id'];
 
     protected $hidden = [
         'deleted_at',
@@ -36,5 +36,15 @@ class AssessmentUsers extends Model
     public function assesmentquisionerhasil()
     {
         return $this->hasMany(QuisionerHasil::class, 'assesment_users_id', 'id');
+    }
+
+    public function divisi()
+    {
+        return $this->belongsTo(OrganisasiDivisi::class, 'divisi_id');
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(OrganisasiDivisiJabatan::class, 'jabatan_id');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Capability\CapabilityAddRequest;
+use App\Http\Resources\CapabilityLevel\CapabilityLevelResource;
 use App\Models\CapabilityLevel;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class CapabilityLevelController extends Controller
         }
 
         $list->orderBy($sortBy, $sortType);
-        $data = $this->paging($list, $limit, $page);
+        $data = $this->paging($list, $limit, $page, CapabilityLevelResource::class);
         return $this->successResponse($data);
     }
 
@@ -37,7 +38,7 @@ class CapabilityLevelController extends Controller
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        return $this->successResponse($data);
+        return $this->successResponse(new CapabilityLevelResource($data));
     }
 
     public function add(CapabilityAddRequest $request)
@@ -50,6 +51,7 @@ class CapabilityLevelController extends Controller
         $data->translate = $request->translate;
         $data->level = $request->level;
         $data->bobot = $request->bobot;
+        $data->domain_id = $request->domain_id;
         $data->save();
 
         return $this->successResponse();

@@ -91,8 +91,8 @@ class UsersController extends Controller
         $user->nama = $request->nama;
         $user->username = $username;
         $user->email = $request->email;
-        $user->divisi = $request->divisi;
-        $user->posisi = $request->posisi;
+        // $user->divisi = $request->divisi;
+        // $user->posisi = $request->posisi;
         $user->status='active';
         $user->password='admin';
         $user->save();

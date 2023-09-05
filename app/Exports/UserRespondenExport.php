@@ -19,8 +19,8 @@ class UserRespondenExport implements FromArray
                 $list[]=array(
                     $no,
                     $_item->nama,
-                    $_item->divisi,
-                    $_item->jabatan,
+                    $_item->divisi->nama?$_item->divisi->nama:'',
+                    $_item->jabatan->nama? $_item->jabatan->nama:'',
                 );
 
                 $no++;

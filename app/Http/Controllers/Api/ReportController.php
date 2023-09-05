@@ -188,7 +188,7 @@ class ReportController extends Controller
                 ->orderBy('design_faktor_komponen.urutan','ASC')
                 // ->limit(3)
                 ->get();
-            dd($list);
+            // dd($list);
             $users = [];
             $komponens = [];
             $pertanyaans=[];
@@ -197,8 +197,8 @@ class ReportController extends Controller
             foreach ($list as $_item_user) {
                 $users[]=array(
                     'nama'=>$_item_user->nama,
-                    'jabatan' => $_item_user->jabatan,
-                    'divisi' => $_item_user->divisi,
+                    // 'jabatan' => $_item_user->jabatan,
+                    // 'divisi' => $_item_user->divisi,
                     'komponen' => $_item_user->jabatan,
                 );
                 $jawabans[]=array(

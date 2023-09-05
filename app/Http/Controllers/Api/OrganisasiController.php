@@ -63,7 +63,6 @@ class OrganisasiController extends Controller
                 ]
             );
 
-            $divisi = $request->divisi;
             $divisi_jabatan=$request->divisi_jabatan;
 
             $organisasi = new Organisasi();
@@ -75,7 +74,7 @@ class OrganisasiController extends Controller
             if ($request->filled('divisi')) {
 
                 $_divisi=new OrganisasiDivisi();
-                $_divisi->nama=$request->divisi_nama;
+                $_divisi->nama=$request->divisi;
                 $_divisi->organisasi_id=$organisasi->id;
                 $_divisi->save();
 

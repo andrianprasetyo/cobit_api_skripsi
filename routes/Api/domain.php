@@ -9,6 +9,7 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/domain/assesment/capability-level/list', 'DomainController@listDomainByAssesmentCapable');
     Route::get('/domain/chart/list', 'DomainController@chartDomainResult');
     Route::get('/domain/chart/list-adjustment', 'DomainController@chartDomainAdjustmentResult');
+    Route::get('/domain/assesment/capability-level/list-by-domain', 'DomainController@listLevelByDomainCapable');
 });
 
 Route::get('/domain/assesment/download', 'DomainController@exportDomainByAssesment');

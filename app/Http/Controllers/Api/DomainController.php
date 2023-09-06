@@ -9,6 +9,7 @@ use App\Http\Resources\Chart\ChartDomainResource;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
+use App\Models\CapabilityLevel;
 use App\Models\DesignFaktor;
 use App\Models\Domain;
 use App\Traits\JsonResponse;
@@ -305,6 +306,17 @@ class DomainController extends Controller
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page);
+        return $this->successResponse($data);
+    }
+
+    public function listLevelByDomainCapable(Request $request)
+    {
+        $data=CapabilityLevel::select('level')
+            ->where('domain_id',$request->domain_id)
+            ->groupBy('level')
+            // ->orderBy('urutan', 'ASC')
+            ->get();
+
         return $this->successResponse($data);
     }
 }

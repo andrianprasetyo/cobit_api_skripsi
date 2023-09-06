@@ -24,4 +24,9 @@ class CapabilityAssesmentController extends Controller
         $data['answer']=CapabilityAnswer::orderBy('nama','asc')->get();
         return $this->successResponse($data);
     }
+
+    public function createAnswer(Request $request)
+    {
+        return $this->successResponse($request->all());
+    }
 }

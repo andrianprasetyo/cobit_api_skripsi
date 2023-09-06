@@ -41,17 +41,8 @@ class AsessmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = Assesment::with(['organisasi','pic']);
+        $list = Assesment::with(['organisasi','pic'])->expire();
 
-        if($this->assesment != null)
-        {
-            $account=$this->account;
-            $list->whereIn('id',function($q) use($account){
-                $q->select('assesment_id')
-                    ->from('users_assesment')
-                    ->where('users_id',$account->id);
-            });
-        }
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }
@@ -108,10 +99,10 @@ class AsessmentController extends Controller
         $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
 
         // $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
-        $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
-        $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
-        $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
-        $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
+        // $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
+        // $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
+        // $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
+        // $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
         $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
         $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
@@ -270,32 +261,32 @@ class AsessmentController extends Controller
     {
         $today=Carbon::today()->format('Y-m-d');
         if($request->filled('start_date')){
-            $validate['start_date'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
+            $validate['start_date'] = 'required|date_format:Y-m-d';
             $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
             $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
-            $validate_msg['start_date.after_or_equal'] = 'Tanggal mulai harus setelah tanggal sekarang';
+            // $validate_msg['start_date.after_or_equal'] = 'Tanggal mulai harus setelah tanggal sekarang';
         }
 
         if($request->filled('end_date')){
-            $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
+            $validate['end_date'] = 'required|date_format:Y-m-d';
 
             $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
             $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
-            $validate_msg['end_date.after'] = 'Tanggal selesai assesment harus setelah tanggal mulai assesment';
+            // $validate_msg['end_date.after'] = 'Tanggal selesai assesment harus setelah tanggal mulai assesment';
         }
 
         if($request->filled('start_date_quisioner')){
-            $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after:start_date';
+            $validate['start_date_quisioner'] = 'required|date_format:Y-m-d';
             $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
             $validate_msg['start_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
-            $validate_msg['start_date_quisioner.after'] = 'Tanggal mulai quisioner harus setelah tanggal mulai assesment';
+            // $validate_msg['start_date_quisioner.after'] = 'Tanggal mulai quisioner harus setelah tanggal mulai assesment';
         }
 
         if ($request->filled('end_date_quisioner')) {
-            $validate['end_date_quisioner'] = 'required|date_format:Y-m-d|before:end_date';
+            $validate['end_date_quisioner'] = 'required|date_format:Y-m-d';
             $validate_msg['end_date_quisioner.required'] = 'Tanggal mulai harus di isi';
             $validate_msg['end_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
-            $validate_msg['end_date_quisioner.before'] = 'Tanggal mulai quisioner harus sebelum tanggal selesai assesment';
+            // $validate_msg['end_date_quisioner.before'] = 'Tanggal mulai quisioner harus sebelum tanggal selesai assesment';
         }
 
         $request->validate($validate, $validate_msg);

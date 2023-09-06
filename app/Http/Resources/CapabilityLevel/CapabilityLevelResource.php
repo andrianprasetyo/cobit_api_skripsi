@@ -21,9 +21,9 @@ class CapabilityLevelResource extends JsonResource
             'translate'=>$this->translate,
             'bobot'=>$this->bobot,
             'level'=>$this->level,
-            // 'domain_id'=>$this->domain_id,
             'urutan' => $this->urutan,
-            'kode' => $this->domain->kode.'.'.$this->kode,
+            'kode' => $this->kode,
+            'subkode' => $this->domain->kode.'.'.$this->kode,
             'domain' => new DomainResource($this->domain),
         ];
     }

@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CapabilityLevel extends Model
+class CapabilityLevelAssesment extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
     public $incrementing = false;
-    protected $table = 'capability_level';
+    protected $table = 'capability_level_assesment';
     protected $keyType = 'string';
-    protected $fillable = ['kegiatan', 'translate', 'bobot', 'level', 'domain_id','urutan','kode'];
+    // protected $fillable = ['kegiatan'];
 
     protected $hidden = [
         'deleted_at',

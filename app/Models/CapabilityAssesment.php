@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CapabilityAnswer extends Model
+class CapabilityAssesment extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
     public $incrementing = false;
-    protected $table = 'capability_answer';
+    protected $table = 'capability_assesment';
     protected $keyType = 'string';
     // protected $fillable = ['kegiatan'];
 
@@ -19,4 +19,8 @@ class CapabilityAnswer extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function files(){
+        return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
+    }
 }

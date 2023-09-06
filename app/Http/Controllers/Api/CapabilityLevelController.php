@@ -24,7 +24,8 @@ class CapabilityLevelController extends Controller
 
         $list = CapabilityLevel::with('domain');
         if ($request->filled('search')) {
-            $list->where('kegiatan', 'ilike', '%' . $search . '%');
+            $list->where('kode', 'ilike', '%' . $search . '%');
+            $list->orWhere('kegiatan', 'ilike', '%' . $search . '%');
         }
         if ($request->filled('domain_id')){
             $list->where('domain_id',$domain_id);
@@ -69,7 +70,7 @@ class CapabilityLevelController extends Controller
             return $this->errorResponse('Data tidak ditemukan',404);
         }
 
-        // $data->kode = $request->kode;
+        $data->kode = $request->kode;
         $data->kegiatan = $request->kegiatan;
         $data->translate = $request->translate;
         $data->level = $request->level;

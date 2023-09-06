@@ -284,4 +284,27 @@ class DomainController extends Controller
 
         return $this->successResponse($data);
     }
+
+    public function listDomainByAssesmentCapable(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+        $sortBy = $request->get('sortBy', 'domain.urutan');
+        $sortType = $request->get('sortType', 'asc');
+        $search = $request->search;
+        $assesment_id = $request->assesment_id;
+
+        // $list = AssesmentCanvas::with(['domain'])
+        //     ->where('assesment_id', $assesment_id);
+
+        $list = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('domain.id','domain.kode')
+            ->where('assesment_canvas.assesment_id', $assesment_id)
+            ->where('assesment_canvas.aggreed_capability_level','>=',3);
+
+        $list->orderBy($sortBy, $sortType);
+        $data = $this->paging($list, $limit, $page);
+        return $this->successResponse($data);
+    }
 }

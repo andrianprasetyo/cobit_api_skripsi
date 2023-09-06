@@ -24,7 +24,7 @@ class CapabilityAddRequest extends FormRequest
         return [
             'kode'=>[
                 'required',
-                'unique:level_kemampuan,kode'
+                // 'unique:capability_level,kode'
             ],
             'level' => 'required',
             'bobot' => 'required',
@@ -45,7 +45,7 @@ class CapabilityAddRequest extends FormRequest
     {
         return [
             'kode.required' => 'kode harus di isi',
-            'kode.unique' => 'Kode sudah digunakan',
+            // 'kode.unique' => 'Kode sudah digunakan',
             'domain_id.required' => 'Domain harus di isi',
             'domain_id.exists' => 'Domain tidak terdaftar',
             'level.required' => 'Level harus di isi',

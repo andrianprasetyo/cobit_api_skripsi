@@ -311,11 +311,19 @@ class DomainController extends Controller
 
     public function listLevelByDomainCapable(Request $request)
     {
-        $data=CapabilityLevel::select('level')
+        $list=CapabilityLevel::select('level')
             ->where('domain_id',$request->domain_id)
             ->groupBy('level')
             // ->orderBy('urutan', 'ASC')
             ->get();
+
+
+        $data=[];
+        if(!$list->isEmpty()){
+
+            $collect=collect($list);
+            $data=$collect->sortBy('level')->values()->all();
+        }
 
         return $this->successResponse($data);
     }

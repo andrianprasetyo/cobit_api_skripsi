@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class Assesment extends Model
 {
@@ -21,6 +22,19 @@ class Assesment extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function scopeExpire(Builder $query):void
+    {
+        if (Auth::check() && auth()->user()->assesment != null) {
+            $user_id = auth()->user()->id;
+            $query->whereIn('id', function ($q) use ($user_id) {
+                $q->select('assesment_id')
+                    ->from('users_assesment')
+                    ->where('users_id', $user_id);
+            })
+            ->where('end_date', '>', date('Y-m-d'));
+        }
+    }
 
     public function organisasi()
     {

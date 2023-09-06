@@ -29,8 +29,8 @@
             <tr>
                 <td>{{++$key}}</td>
                 <td>{{$item->nama}}</td>
-                <td>{{$item->jabatan}}</td>
-                <td>{{$item->divisi}}</td>
+                <td>{{$item->jabatan->nama}}</td>
+                <td>{{$item->divisi->nama}}</td>
                 @foreach ($jawaban as $j)
                     @if ($j->jawaban->jenis=='pilgan')
                         <td>{{$j->jawaban->jawaban}}</td>

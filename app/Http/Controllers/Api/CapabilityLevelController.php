@@ -20,10 +20,14 @@ class CapabilityLevelController extends Controller
         $sortBy = $request->get('sortBy', 'created_at');
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
+        $domain_id = $request->domain_id;
 
         $list = CapabilityLevel::with('domain');
         if ($request->filled('search')) {
             $list->where('kegiatan', 'ilike', '%' . $search . '%');
+        }
+        if ($request->filled('domain_id')){
+            $list->where('domain_id',$domain_id);
         }
 
         $list->orderBy($sortBy, $sortType);

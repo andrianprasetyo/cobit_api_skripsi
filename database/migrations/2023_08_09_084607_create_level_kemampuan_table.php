@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('level_kemampuan', function (Blueprint $table) {
+        Schema::create('capability_level', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('kegiatan');
             $table->string('kode',50)->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-        DB::statement('ALTER TABLE level_kemampuan ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        DB::statement('ALTER TABLE capability_level ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('level_kemampuan');
+        Schema::dropIfExists('capability_level');
     }
 };

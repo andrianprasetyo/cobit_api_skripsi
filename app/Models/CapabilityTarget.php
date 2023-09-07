@@ -7,21 +7,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CapabilityTargetLevel extends Model
+class CapabilityTarget extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
     public $incrementing = false;
-    protected $table = 'capability_target_level';
+    protected $table = 'capability_target';
     protected $keyType = 'string';
-    protected $fillable = ['domain_id','capability_target_id','target'];
+    protected $fillable = ['nama','assesment_id'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
     ];
 
-    public function domain()
+    public function assesment()
     {
-        return $this->belongsTo(Domain::class,'domain_id');
+        return $this->belongsTo(Assesment::class,'assesment_id');
+    }
+
+    public function capabilitytargetlevel()
+    {
+        return $this->hasMany(CapabilityTargetLevel::class,'capability_target_id','id');
     }
 }

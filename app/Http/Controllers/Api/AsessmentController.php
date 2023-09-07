@@ -219,7 +219,7 @@ class AsessmentController extends Controller
                 $role_user->default=true;
                 $role_user->save();
 
-                if(!$this->account->internal){
+                if($this->account->internal){
                     $user_id=$user->id;
                 }
                 $default_ass=false;

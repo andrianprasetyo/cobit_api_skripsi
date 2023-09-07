@@ -38,7 +38,7 @@ class AuthController extends Controller
         );
 
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
-        $auth = User::select(
+        $_auth = User::select(
                 'id',
                 'username',
                 'nama',
@@ -51,15 +51,11 @@ class AuthController extends Controller
                 'organisasi_id',
                 'avatar'
                 )
-            ->with([
-                'organisasi',
-                'roleaktif.role',
-                'assesment'
-            ])
             ->where('username', $request->username)
-            ->orWhere('email',$request->username)
-            ->first();
+            ->orWhere('email',$request->username);
 
+
+        $auth=$_auth->first();
         if(!$auth || !Hash::check($request->password, $auth->password)){
             return $this->errorResponse('Username atau password anda salah', 401);
         }
@@ -88,6 +84,15 @@ class AuthController extends Controller
         // $auth->assesment_id=$auth->assesment != null?$auth->assesment->id : null;
         // $auth->organisasi_id = $auth->organisasi != null ? $auth->organisasi->id:null;
 
+        $relation=['roleaktif.role'];
+        if(!$auth->internal)
+        {
+            array_push($relation, 'organisasi');
+            array_push($relation,'assesment');
+        }
+        $auth->with($relation);
+
+        // return $this->successResponse($auth);
         $token=Auth::login($auth);
         $role_users=RoleUsers::with(['role'])->where('users_id',$auth->id)->get();
         $user = $auth;

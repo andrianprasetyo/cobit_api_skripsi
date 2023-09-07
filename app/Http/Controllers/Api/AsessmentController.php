@@ -58,7 +58,7 @@ class AsessmentController extends Controller
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page,AssesmentResource::class);
-        return $this->successResponse($data);
+        return $this->successResponse(auth()->user()->assesment);
     }
 
     public function detailByID($id)
@@ -146,34 +146,33 @@ class AsessmentController extends Controller
             $pic_jabatan_id = $request->pic_jabatan_id;
             $pic_divisi_id = $request->pic_divisi_id;
 
+            if ($request->filled('organisasi_nama')) {
+                $organisasi = new Organisasi();
+                $organisasi->nama = $request->organisasi_nama;
+                $organisasi->deskripsi = $request->organisasi_deskripsi;
+                $organisasi->save();
+
+                $organisasi_id = $organisasi->id;
+
+                if ($request->filled('pic_divisi')) {
+                    $divisi = new OrganisasiDivisi();
+                    $divisi->nama = $request->pic_divisi;
+                    $divisi->organisasi_id = $organisasi_id;
+                    $divisi->save();
+                    $pic_divisi_id = $divisi->id;
+                }
+
+                if ($request->filled('pic_jabatan')) {
+                    $jabatan = new OrganisasiDivisiJabatan();
+                    $jabatan->nama = $request->pic_jabatan;
+                    $jabatan->organisasi_divisi_id = $pic_divisi_id;
+                    $jabatan->save();
+
+                    $pic_jabatan_id = $jabatan->id;
+                }
+            }
             if(!$this->account->internal){
                 $organisasi_id=$this->account->organisasi->id;
-
-                if ($request->filled('organisasi_nama')) {
-                    $organisasi = new Organisasi();
-                    $organisasi->nama = $request->organisasi_nama;
-                    $organisasi->deskripsi = $request->organisasi_deskripsi;
-                    $organisasi->save();
-
-                    $organisasi_id = $organisasi->id;
-
-                    if ($request->filled('pic_divisi')) {
-                        $divisi = new OrganisasiDivisi();
-                        $divisi->nama = $request->pic_divisi;
-                        $divisi->organisasi_id = $organisasi_id;
-                        $divisi->save();
-                        $pic_divisi_id = $divisi->id;
-                    }
-
-                    if ($request->filled('pic_jabatan')) {
-                        $jabatan = new OrganisasiDivisiJabatan();
-                        $jabatan->nama = $request->pic_jabatan;
-                        $jabatan->organisasi_divisi_id = $pic_divisi_id;
-                        $jabatan->save();
-
-                        $pic_jabatan_id = $jabatan->id;
-                    }
-                }
             }
 
             // $verify_code=Str::random(50);

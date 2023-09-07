@@ -49,6 +49,7 @@ class CapabilityAnswerController extends Controller
             {
                 $_data=CapabilityAnswer::find($_item_jawaban['id']);
             }
+            $_data->label= strtoupper($_item_jawaban['label']);
             $_data->nama=$_item_jawaban['nama'];
             $_data->bobot = $_item_jawaban['bobot'];
             $_data->save();

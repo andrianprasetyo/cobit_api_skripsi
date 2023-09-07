@@ -26,6 +26,11 @@ class CapabilityAnswerAddRequest extends FormRequest
                 'required',
                 'array',
             ],
+            'jawaban.*.label' => [
+                'required',
+                'string',
+                // 'unique:capability_answer,label'
+            ],
             'jawaban.*.nama'=>[
                 'required',
                 'string',

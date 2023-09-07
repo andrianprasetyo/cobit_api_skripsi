@@ -25,14 +25,14 @@ class Assesment extends Model
 
     public function scopeExpire(Builder $query):void
     {
-        if (Auth::check() && auth()->user()->assesment != null) {
+        if (auth()->user()->assesment != null) {
             $user_id = auth()->user()->id;
             $query->whereIn('id', function ($q) use ($user_id) {
                 $q->select('assesment_id')
                     ->from('users_assesment')
                     ->where('users_id', $user_id);
             })
-            ->where('end_date', '>', date('Y-m-d'));
+            ->where('end_date', '>=', date('Y-m-d'));
         }
     }
 

@@ -6,7 +6,7 @@
             <th rowspan="3">Jabatan</th>
             <th rowspan="3">Divisi</th>
             @foreach ($header as $item)
-                <th colspan="2">{{$item->sorting}}.{{$item->pertanyaan}}</th>
+                <th colspan="2">{{$item->sorting}}.{{strip_tags($item->pertanyaan)}}</th>
             @endforeach
         </tr>
         <tr>
@@ -28,9 +28,9 @@
             @endphp
             <tr>
                 <td>{{++$key}}</td>
-                <td>{{$item->nama}}</td>
-                <td>{{$item->jabatan->nama}}</td>
-                <td>{{$item->divisi->nama}}</td>
+                <td>{{$item->nama_responden}}</td>
+                <td>{{$item->nama_jabatan}}</td>
+                <td>{{$item->nama_divisi}}</td>
                 @foreach ($jawaban as $j)
                     @if ($j->jawaban->jenis=='pilgan')
                         <td>{{$j->jawaban->jawaban}}</td>

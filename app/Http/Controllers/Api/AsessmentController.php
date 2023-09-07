@@ -219,7 +219,9 @@ class AsessmentController extends Controller
                 $role_user->default=true;
                 $role_user->save();
 
-                $user_id=$user->id;
+                if(!$this->account->internal){
+                    $user_id=$user->id;
+                }
                 $default_ass=false;
             }
 
@@ -235,12 +237,15 @@ class AsessmentController extends Controller
             $assesment->users_id=$user_id;
             $assesment->save();
 
-            $user_ass=new UserAssesment();
-            $user_ass->users_id= $user_id;
-            $user_ass->assesment_id=$assesment->id;
-            $user_ass->default=$default_ass;
-            $user_ass->expire_at=$request->pic_expire_at;
-            $user_ass->save();
+            if(!$this->account->internal){
+            {
+                $user_ass=new UserAssesment();
+                $user_ass->users_id= $user_id;
+                $user_ass->assesment_id=$assesment->id;
+                $user_ass->default=$default_ass;
+                $user_ass->expire_at=$request->pic_expire_at;
+                $user_ass->save();
+            }
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());

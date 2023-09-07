@@ -1,14 +1,19 @@
 <?php
 namespace App\Helpers;
 
+use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDesignFaktorWeight;
+use App\Models\AssesmentDomain;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentUsers;
 use App\Models\AssessmentUsersHasil;
+use App\Models\CapabilityTarget;
+use App\Models\CapabilityTargetLevel;
 use App\Models\DesignFaktor;
 use App\Models\DesignFaktorMapAdditional;
 use App\Models\Domain;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CobitHelper
@@ -714,5 +719,75 @@ class CobitHelper
 
         AssesmentHasil::insert($result);
         return true;
+    }
+
+    public static function generateTargetLevelDomain($assesment_id,$nama_target='organisasi',$default=false)
+    {
+        $_check_target=CapabilityTarget::where('assesment_id',$assesment_id)
+            ->where('nama',$nama_target)
+            ->first();
+
+        $target_id=null;
+        if(!$_check_target)
+        {
+            $_target=new CapabilityTarget();
+            $_target->nama=$nama_target;
+            $_target->assesment_id=$assesment_id;
+            $_target->default=$default;
+            $_target->save();
+
+            $target_id=$_target->id;
+        }else{
+            $target_id = $_check_target->id;
+        }
+
+        if($target_id != null)
+        {
+            $ass = Assesment::find($assesment_id);
+            if ($ass) {
+                $canvas = AssesmentCanvas::where('assesment_id', $assesment_id)
+                    ->where('aggreed_capability_level', '>=', $ass->minimum_target)
+                    ->get();
+
+                if (!$canvas->isEmpty()) {
+                    $ass_domain = [];
+                    $target_level = [];
+
+                    foreach ($canvas as $_item_canvas) {
+
+                        $_ass_domain=AssesmentDomain::where('assesment_id', $assesment_id)
+                            ->where('domain_id', $_item_canvas->domain_id)
+                            ->exists();
+
+                        if(!$_ass_domain)
+                        {
+                            $ass_domain[]=array(
+                                'domain_id'=>$_item_canvas->domain_id,
+                                'assesment_id' => $assesment_id,
+                                'created_at' => Carbon::now()->toDateTimeString(),
+                                'updated_at' => Carbon::now()->toDateTimeString()
+                            );
+                        }
+
+                        $_cap_target = CapabilityTargetLevel::where('domain_id', $_item_canvas->domain_id)
+                            ->where('capability_target_id',$target_id)
+                            ->exists();
+
+
+                        if (!$_cap_target) {
+                            $target_level[] = array(
+                                'domain_id' => $_item_canvas->domain_id,
+                                'capability_target_id' => $target_id,
+                                'created_at' => Carbon::now()->toDateTimeString(),
+                                'updated_at' => Carbon::now()->toDateTimeString()
+                            );
+                        }
+                    }
+
+                    AssesmentDomain::insert($ass_domain);
+                    CapabilityTargetLevel::insert($target_level);
+                }
+            }
+        }
     }
 }

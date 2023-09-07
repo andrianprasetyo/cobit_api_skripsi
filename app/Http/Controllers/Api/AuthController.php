@@ -51,6 +51,11 @@ class AuthController extends Controller
                 'organisasi_id',
                 'avatar'
                 )
+            ->with([
+                'roleaktif.role',
+                'organisasi',
+                'assesment'
+            ])
             ->where('username', $request->username)
             ->orWhere('email',$request->username);
 
@@ -84,13 +89,13 @@ class AuthController extends Controller
         // $auth->assesment_id=$auth->assesment != null?$auth->assesment->id : null;
         // $auth->organisasi_id = $auth->organisasi != null ? $auth->organisasi->id:null;
 
-        $relation=['roleaktif.role'];
-        if(!$auth->internal)
-        {
-            array_push($relation, 'organisasi');
-            array_push($relation,'assesment');
-        }
-        $auth->with($relation);
+        // $relation=['roleaktif.role'];
+        // if(!$auth->internal)
+        // {
+        //     array_push($relation, 'organisasi');
+        //     array_push($relation,'assesment');
+        // }
+        // $auth->with($relation);
 
         // return $this->successResponse($auth);
         $token=Auth::login($auth);

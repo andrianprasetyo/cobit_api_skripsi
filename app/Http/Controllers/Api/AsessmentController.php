@@ -237,7 +237,7 @@ class AsessmentController extends Controller
             $assesment->users_id=$user_id;
             $assesment->save();
 
-            if(!$this->account->internal){
+            if(!$this->account->internal)
             {
                 $user_ass=new UserAssesment();
                 $user_ass->users_id= $user_id;

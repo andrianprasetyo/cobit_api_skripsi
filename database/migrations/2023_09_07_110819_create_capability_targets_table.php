@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('capability_assesment_evident', function (Blueprint $table) {
+        Schema::create('capability_target', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('capability_assesment_id');
-            $table->string('tipe');
-            $table->json('files')->nullable();
-            $table->text('url')->nullable();
+            $table->string('nama');
+            $table->foreignUuid('assesment_id');
             $table->timestamps();
             $table->softDeletes();
         });
-        DB::statement('ALTER TABLE capability_assesment_evident ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        DB::statement('ALTER TABLE capability_target ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('capability_assesment_evident');
+        Schema::dropIfExists('capability_target');
     }
 };

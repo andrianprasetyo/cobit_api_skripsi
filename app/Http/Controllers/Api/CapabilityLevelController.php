@@ -21,6 +21,7 @@ class CapabilityLevelController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
         $domain_id = $request->domain_id;
+        $level = $request->level;
 
         $list = CapabilityLevel::with('domain');
         if ($request->filled('search')) {
@@ -29,6 +30,9 @@ class CapabilityLevelController extends Controller
         }
         if ($request->filled('domain_id')){
             $list->where('domain_id',$domain_id);
+        }
+        if ($request->filled('level')) {
+            $list->where('level', $level);
         }
 
         $list->orderBy($sortBy, $sortType);

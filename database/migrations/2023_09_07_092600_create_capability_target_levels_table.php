@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('capability_target_level', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('assesment_id');
+            // $table->foreignUuid('assesment_id');
             $table->foreignUuid('domain_id');
-            $table->integer('agreed')->nullable();
+            $table->foreignUuid('capability_target_id');
+            $table->double('target',1,2)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
+        DB::statement('ALTER TABLE capability_target_level ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('capability_assesment_evident', function (Blueprint $table) {
+        Schema::create('media_repositories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('capability_assesment_id');
-            $table->string('tipe');
-            $table->json('files')->nullable();
-            $table->text('url')->nullable();
+            $table->foreignUuid('assesment_id');
+            $table->foreignUuid('users_id');
+            $table->json('files');
+            $table->text('desktipsi')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
-        DB::statement('ALTER TABLE capability_assesment_evident ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
+        DB::statement('ALTER TABLE media_repositories ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('capability_assesment_evident');
+        Schema::dropIfExists('media_repositories');
     }
 };

@@ -34,5 +34,6 @@ class SetCanvasHasilDataJob implements ShouldQueue
         CobitHelper::setCanvasStep2Value($this->id);
         CobitHelper::setCanvasStep3Value($this->id);
         CobitHelper::updateCanvasAdjust($this->id);
+        CobitHelper::generateTargetLevelDomain($this->id);
     }
 }

@@ -32,7 +32,7 @@ class Assesment extends Model
                     ->from('users_assesment')
                     ->where('users_id', $user_id);
             })
-            ->where('end_date', '>=', date('Y-m-d'));
+            ->where('end_date', '>', date('Y-m-d'));
         }
     }
 

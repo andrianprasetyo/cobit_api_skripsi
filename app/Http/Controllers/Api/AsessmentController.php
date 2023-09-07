@@ -58,7 +58,7 @@ class AsessmentController extends Controller
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page,AssesmentResource::class);
-        return $this->successResponse(auth()->user()->assesment);
+        return $this->successResponse($data);
     }
 
     public function detailByID($id)

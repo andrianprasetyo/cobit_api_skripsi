@@ -95,6 +95,9 @@ class ReportController extends Controller
         $hasilQuesioner=DB::select("
             SELECT
                 *,
+                odj.nama as nama_jabatan,
+                od.nama as nama_divisi,
+                au.nama as nama_responden,
                 (
                     select json_agg(tbl2) from (
                         select
@@ -144,6 +147,8 @@ class ReportController extends Controller
                 ) as jawaban_quesioner
             FROM
                 assesment_users au
+                LEFT JOIN organisasi_divisi_jabatan odj on odj.id=au.jabatan_id
+                LEFT JOIN organisasi_divisi od on od.id=odj.organisasi_divisi_id
             WHERE
                 au.status = 'done'
                 and au.assesment_id=:assesment_id

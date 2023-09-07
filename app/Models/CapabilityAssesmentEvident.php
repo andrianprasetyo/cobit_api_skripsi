@@ -19,4 +19,8 @@ class CapabilityAssesmentEvident extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    protected $casts = [
+        'files' => 'array'
+    ];
 }

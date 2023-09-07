@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('capability_answer', function (Blueprint $table) {
+        Schema::create('capability_target_level', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('nama');
-            $table->double('bobot',1,2);
-            $table->string('label',5)->nullable();
-            // $table->foreignUuid('assesment_id_id');
+            $table->foreignUuid('assesment_id');
+            $table->foreignUuid('domain_id');
+            $table->integer('agreed')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
-        DB::statement('ALTER TABLE capability_answer ALTER COLUMN id SET DEFAULT uuid_generate_v4();');
     }
 
     /**
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('capability_answer');
+        Schema::dropIfExists('capability_target_level');
     }
 };

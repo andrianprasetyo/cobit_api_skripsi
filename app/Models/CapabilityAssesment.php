@@ -13,14 +13,14 @@ class CapabilityAssesment extends Model
     public $incrementing = false;
     protected $table = 'capability_assesment';
     protected $keyType = 'string';
-    // protected $fillable = ['kegiatan'];
+    protected $fillable = ['capability_level_id','capability_answer_id','note','ofi'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
     ];
 
-    public function files(){
-        return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
-    }
+    // public function files(){
+    //     return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
+    // }
 }

@@ -17,7 +17,7 @@ class CapabilityAssesmentResource extends JsonResource
     {
         $capabilityass=array(
             'id'=>null,
-            'capability_level_id' => null,
+            'capability_level_id' => $this->id,
             'capability_answer_id' => null,
             'note' => null,
             'ofi' => null,

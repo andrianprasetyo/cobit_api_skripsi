@@ -193,7 +193,10 @@ class AsessmentController extends Controller
             }
 
             $_check_mail_exists = User::where('email', $pic_email)->exists();
-            $user_id=$this->account->id;
+            $user_id=null;
+            if (!$this->account->internal) {
+                $user_id = $this->account->id;
+            }
             $default_ass=true;
             if(!$_check_mail_exists)
             {

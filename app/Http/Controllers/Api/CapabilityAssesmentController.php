@@ -12,6 +12,7 @@ use App\Models\CapabilityLevel;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CapabilityAssesmentController extends Controller
 {
@@ -31,9 +32,11 @@ class CapabilityAssesmentController extends Controller
 
     public function createAnswer(Request $request)
     {
+        $jawaban = $request->jawaban;
         DB::beginTransaction();
         try {
-            $jawaban = $request->jawaban;
+
+            $ev=[];
             foreach ($jawaban as $_item_payload) {
                 $capabilityass = $_item_payload['capabilityass'];
 
@@ -48,7 +51,7 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->capability_answer_id = $capabilityass['capability_answer_id'];
                 $capability_ass->note = $capabilityass['note'];
                 $capability_ass->ofi = $capabilityass['ofi'];
-                // $ass->save();
+                $capability_ass->save();
 
                 if(isset($_item_payload['evident']))
                 {
@@ -59,18 +62,20 @@ class CapabilityAssesmentController extends Controller
                         foreach ($evident as $_item_evident) {
                             // $evident_doc=
                             $_evident[] = array(
+                                'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
                                 'url' => $_item_evident['url'],
                                 'media_repositories_id' => $_item_evident['media_repositories_id'],
                             );
                         }
+                        $ev=$_evident;
                         CapabilityAssesmentEvident::insert($_evident);
                     }
                 }
             }
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($ev);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

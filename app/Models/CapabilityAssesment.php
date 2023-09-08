@@ -20,7 +20,7 @@ class CapabilityAssesment extends Model
         'updated_at'
     ];
 
-    // public function files(){
-    //     return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
-    // }
+    public function evident(){
+        return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
+    }
 }

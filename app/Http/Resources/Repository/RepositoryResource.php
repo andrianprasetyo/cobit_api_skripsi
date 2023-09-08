@@ -21,7 +21,7 @@ class RepositoryResource extends JsonResource
             'docs'=>$this->docs,
             'deskripsi' => $this->deskripsi,
             'assesment'=>new RepositoryAssesmentResource($this->assesment),
-            'auhtor' => new RepositoryUserResource($this->auhtor),
+            'author' => new RepositoryUserResource($this->author),
             'created_at'=>$this->created_at,
         ];
     }

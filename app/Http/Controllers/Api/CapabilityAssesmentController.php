@@ -32,9 +32,8 @@ class CapabilityAssesmentController extends Controller
     {
         $jawaban=$request->jawaban;
 
-        $tes=[];
         foreach ($jawaban as $_item_payload) {
-            $capabilityass=$_item_payload['capabilityass'];
+            $capabilityass = $_item_payload['capabilityass'];
 
             $ass = new CapabilityAssesment();
             if($capabilityass['id'] != null){
@@ -50,9 +49,20 @@ class CapabilityAssesmentController extends Controller
             $ass->ofi = $capabilityass['ofi'];
             $ass->save();
 
-            $tes[] = $capabilityass;
+            $evident = $_item_payload['evident'];
+            if(count($evident) > 0)
+            {
+                foreach ($evident as $_item_evident) {
+                    $_evident=[]=array(
+                        'capability_assesment_id'=>$ass->id,
+                        'url'=>$_item_evident['url'],
+                        'media_repositories_id' => $_item_evident['media_repositories_id'],
+                    );
+                }
+                CapabilityAssesmentEvident::insert($_evident);
+            }
         }
-        return $this->successResponse($tes);
+        return $this->successResponse();
     }
 
     public function uploadEvident(Request $request,$id)

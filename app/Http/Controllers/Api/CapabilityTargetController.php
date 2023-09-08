@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AssesmentDomain;
 use App\Models\CapabilityTarget;
+use App\Models\CapabilityTargetLevel;
 use App\Traits\JsonResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CapabilityTargetController extends Controller
@@ -59,19 +62,60 @@ class CapabilityTargetController extends Controller
             [
                 'nama'=>'required',
                 'assesment_id' => 'required|exists:assesment,id',
+                'target' => 'required|array',
             ],
             [
                 'nama.required'=>'Target harus di isi',
                 'assesment_id.required' => 'Assesment harus di isi',
                 'assesment_id.exists' => 'Assesment tidak terdaftar',
+                'target.required' => 'Target harus di isi',
+                'target.array' => 'Target harus dalam bentuk array/list',
             ]
         );
-        $data=new CapabilityTarget();
-        $data->nama=$request->nama;
-        $data->assesment_id = $request->assesment_id;
-        $data->save();
+        $assesment_id = $request->assesment_id;
+        $listtarget=$request->target;
 
-        return $this->successResponse();
+        $_check_target = CapabilityTarget::where('assesment_id', $assesment_id)
+            ->where('nama', $request->nama)
+            ->first();
+
+        if($_check_target)
+        {
+            return $this->errorResponse('Nama target sudah digunakan',400);
+        }
+
+        $target=new CapabilityTarget();
+        $target->nama=$request->nama;
+        $target->assesment_id = $request->assesment_id;
+        $target->default=false;
+        $target->save();
+
+        $ass_domain = [];
+        $target_level = [];
+
+        foreach ($listtarget as $_item_target) {
+            $ass_domain[] = array(
+                'domain_id' => $_item_target['domain']['id'],
+                'assesment_id' => $assesment_id,
+                'created_at' => Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+
+            $target_level[] = array(
+                'domain_id' => $_item_target['domain']['id'],
+                'capability_target_id' => $target->id,
+                'created_at' => Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon::now()->toDateTimeString()
+            );
+        }
+
+        AssesmentDomain::insert($ass_domain);
+        CapabilityTargetLevel::insert($target_level);
+
+        $list['ass_domain']=$ass_domain;
+        $list['target_level'] = $target_level;
+
+        return $this->successResponse($list);
     }
 
     public function edit(Request $request,$id)

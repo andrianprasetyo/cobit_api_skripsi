@@ -44,9 +44,9 @@ class CapabilityTargetLevelController extends Controller
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain_id')
             ->where('assesment_canvas.assesment_id',$assesment_id)
-            ->where('aggreed_capability_level', '>=', $ass->minimum_target)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target)
             ->select('domain.id','domain.kode','domain.ket','domain.urutan')
-            ->groupBy('domain.id','domain.kode','domain.ket','domain.urutan')
+            ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')
             ->orderBy('domain.urutan','asc');
 
         $data = $this->paging($list);

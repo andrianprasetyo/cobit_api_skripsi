@@ -10,6 +10,7 @@ use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MediaRepositoryController extends Controller
 {
@@ -44,7 +45,7 @@ class MediaRepositoryController extends Controller
     {
         $docs = $request->file('docs');
         $assesment_id=$request->assesment_id;
-        $path = config('filesystems.path.repository') . '/'.$assesment_id;
+        $path = config('filesystems.path.repository') .$assesment_id.'/';
         $deskripsi=$request->deskripsi;
         if(is_array($docs))
         {
@@ -84,12 +85,23 @@ class MediaRepositoryController extends Controller
         return $this->successResponse();
     }
 
+    public function detailByID($id)
+    {
+        $data = MediaRepository::find($id);
+        return $this->successResponse(new RepositoryResource($data));
+    }
+
     public function remove($id)
     {
         $data=MediaRepository::find($id);
         if(!$data)
         {
             return $this->errorResponse('Data tidak tersedia',404);
+        }
+
+        if($data->docs != null && Storage::exists($data->docs['path']))
+        {
+            Storage::delete($data->docs['path']);
         }
 
         $data->delete();

@@ -88,6 +88,7 @@ return [
     'path'=>[
         'avatar'=>'media/avatar/',
         'evident' => 'media/evident/',
+        'repository' => 'media/repository/',
     ]
 
 ];

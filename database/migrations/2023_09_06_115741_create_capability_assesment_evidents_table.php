@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('capability_assesment_id');
             $table->string('tipe');
-            $table->json('files')->nullable();
+            $table->foreignUuid('media_repositories_id')->nullable();
             $table->text('url')->nullable();
             $table->timestamps();
             $table->softDeletes();

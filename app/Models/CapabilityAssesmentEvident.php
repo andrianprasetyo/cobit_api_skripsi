@@ -13,14 +13,10 @@ class CapabilityAssesmentEvident extends Model
     public $incrementing = false;
     protected $table = 'capability_assesment_evident';
     protected $keyType = 'string';
-    protected $fillable = ['capability_assesment_id','tipe','files','url'];
+    protected $fillable = ['capability_assesment_id','tipe','media_repositories_id','url'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
-    ];
-
-    protected $casts = [
-        'files' => 'array'
     ];
 }

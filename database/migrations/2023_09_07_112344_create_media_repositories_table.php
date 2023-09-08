@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('media_repositories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('assesment_id');
-            $table->foreignUuid('users_id');
-            $table->json('files');
-            $table->text('desktipsi')->nullable();
+            $table->foreignUuid('upload_by');
+            $table->json('docs');
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

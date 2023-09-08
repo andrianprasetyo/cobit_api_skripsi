@@ -50,19 +50,22 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->ofi = $capabilityass['ofi'];
                 // $ass->save();
 
-                $evident = $_item_payload['evident'];
-                if (count($evident) > 0) {
-                    CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
-                    $_evident = [];
-                    foreach ($evident as $_item_evident) {
-                        // $evident_doc=
-                        $_evident[] = array(
-                            'capability_assesment_id' => $capability_ass->id,
-                            'url' => $_item_evident['url'],
-                            'media_repositories_id' => $_item_evident['media_repositories_id'],
-                        );
+                if(isset($_item_payload['evident']))
+                {
+                    $evident = $_item_payload['evident'];
+                    if (count($evident) > 0) {
+                        CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
+                        $_evident = [];
+                        foreach ($evident as $_item_evident) {
+                            // $evident_doc=
+                            $_evident[] = array(
+                                'capability_assesment_id' => $capability_ass->id,
+                                'url' => $_item_evident['url'],
+                                'media_repositories_id' => $_item_evident['media_repositories_id'],
+                            );
+                        }
+                        CapabilityAssesmentEvident::insert($_evident);
                     }
-                    CapabilityAssesmentEvident::insert($_evident);
                 }
             }
 

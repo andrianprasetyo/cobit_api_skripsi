@@ -26,7 +26,7 @@ class MediaRepositoryController extends Controller
         $type = $request->type;
         $assesment_id = $request->assesment_id;
 
-        $list = MediaRepository::with(['auhtor','assesment']);
+        $list = MediaRepository::with(['author','assesment']);
         if ($request->filled('search')) {
             $list->where('deskripsi', 'ilike', '%' . $search . '%');
             $list->orWhere('docs','ilike', '%' . $search . '%');

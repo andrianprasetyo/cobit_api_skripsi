@@ -55,6 +55,17 @@ class CapabilityTargetController extends Controller
 
     public function add(Request $request)
     {
+        $request->validate(
+            [
+                'nama'=>'required',
+                'assesment_id' => 'required|exists:assesment,id',
+            ],
+            [
+                'nama.required'=>'Target harus di isi',
+                'assesment_id.required' => 'Assesment harus di isi',
+                'assesment_id.exists' => 'Assesment tidak terdaftar',
+            ]
+        );
         $data=new CapabilityTarget();
         $data->nama=$request->nama;
         $data->assesment_id = $request->assesment_id;

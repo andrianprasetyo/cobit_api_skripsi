@@ -24,6 +24,7 @@ class MediaRepositoryController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
         $type = $request->type;
+        $assesment_id = $request->assesment_id;
 
         $list = MediaRepository::with(['auhtor','assesment']);
         if ($request->filled('search')) {
@@ -34,6 +35,11 @@ class MediaRepositoryController extends Controller
         if($request->filled('type'))
         {
             $list->whereJsonContains('docs->ext',$type);
+        }
+
+        if ($request->filled('assesment_id'))
+        {
+            $list->where('assesment_id',$assesment_id);
         }
 
         $list->orderBy($sortBy, $sortType);

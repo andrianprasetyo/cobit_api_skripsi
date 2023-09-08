@@ -25,7 +25,7 @@ class MediaRepository extends Model
         'docs' => 'json'
     ];
 
-    public function auhtor()
+    public function author()
     {
         return $this->belongsTo(User::class,'upload_by');
     }

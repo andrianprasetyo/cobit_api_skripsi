@@ -11,6 +11,7 @@ use App\Models\CapabilityAssesmentEvident;
 use App\Models\CapabilityLevel;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CapabilityAssesmentController extends Controller
 {
@@ -30,39 +31,47 @@ class CapabilityAssesmentController extends Controller
 
     public function createAnswer(Request $request)
     {
-        $jawaban=$request->jawaban;
+        DB::beginTransaction();
+        try {
+            $jawaban = $request->jawaban;
+            foreach ($jawaban as $_item_payload) {
+                $capabilityass = $_item_payload['capabilityass'];
 
-        foreach ($jawaban as $_item_payload) {
-            $capabilityass = $_item_payload['capabilityass'];
+                $capability_ass = new CapabilityAssesment();
+                if ($capabilityass['id'] != null) {
+                    $capability_ass = CapabilityAssesment::find($capabilityass['id']);
+                    if (!$capability_ass) {
+                        return $this->errorResponse('Capbility asesment ID tidak ditemukan', 404);
+                    }
+                }
+                $capability_ass->capability_level_id = $capabilityass['capability_level_id'];
+                $capability_ass->capability_answer_id = $capabilityass['capability_answer_id'];
+                $capability_ass->note = $capabilityass['note'];
+                $capability_ass->ofi = $capabilityass['ofi'];
+                // $ass->save();
 
-            $ass = new CapabilityAssesment();
-            if($capabilityass['id'] != null){
-                $ass=CapabilityAssesment::find($capabilityass['id']);
-                if(!$ass)
-                {
-                    return $this->errorResponse('Capbility asesment ID tidak ditemukan',404);
+                $evident = $_item_payload['evident'];
+                if (count($evident) > 0) {
+                    CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
+                    $_evident = [];
+                    foreach ($evident as $_item_evident) {
+                        // $evident_doc=
+                        $_evident[] = array(
+                            'capability_assesment_id' => $capability_ass->id,
+                            'url' => $_item_evident['url'],
+                            'media_repositories_id' => $_item_evident['media_repositories_id'],
+                        );
+                    }
+                    CapabilityAssesmentEvident::insert($_evident);
                 }
             }
-            $ass->capability_level_id = $capabilityass['capability_level_id'];
-            $ass->capability_answer_id = $capabilityass['capability_answer_id'];
-            $ass->note = $capabilityass['note'];
-            $ass->ofi = $capabilityass['ofi'];
-            $ass->save();
 
-            // $evident = $_item_payload['evident'];
-            // if(count($evident) > 0)
-            // {
-            //     foreach ($evident as $_item_evident) {
-            //         $_evident=[]=array(
-            //             'capability_assesment_id'=>$ass->id,
-            //             'url'=>$_item_evident['url'],
-            //             'media_repositories_id' => $_item_evident['media_repositories_id'],
-            //         );
-            //     }
-            //     CapabilityAssesmentEvident::insert($_evident);
-            // }
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
         }
-        return $this->successResponse();
     }
 
     public function uploadEvident(Request $request,$id)

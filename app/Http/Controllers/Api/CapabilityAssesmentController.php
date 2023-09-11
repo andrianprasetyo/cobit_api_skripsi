@@ -115,7 +115,7 @@ class CapabilityAssesmentController extends Controller
                                 'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
                                 'url' => isset($evident[$r]['url'])?$evident[$r]['url']:null,
-                                'deskripsi'=>$evident[$r]['deskripsi'],
+                                'deskripsi'=>isset($evident[$r]['deskripsi'])?$evident[$r]['deskripsi']:null,
                                 'media_repositories_id' => isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null,
                             );
                         }

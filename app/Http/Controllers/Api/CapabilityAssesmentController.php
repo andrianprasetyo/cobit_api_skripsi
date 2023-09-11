@@ -68,11 +68,14 @@ class CapabilityAssesmentController extends Controller
         // dd($_POST);
         $request->validate(
             [
-                'jawaban' => 'required|array',
+                'capability_assesment_id' => 'required|array',
+                'capability_level_id' => 'required|array',
+                'capability_answer_id' => 'required|array',
             ],
             [
-                'jawaban.required'=>'Jawaban harus di isi',
-                'jawaban.array' => 'Jawaban harus dalam bentuk attay/list',
+                'capability_assesment_id.required'=>'Capability Assesment ID harus di isi',
+                'capability_level_id.required' => 'Capability Level ID harus di isi',
+                'capability_answer_id.required' => 'Capability Answer ID harus di isi',
             ]
         );
         $jawaban = $request->jawaban;
@@ -106,8 +109,8 @@ class CapabilityAssesmentController extends Controller
                             $_evident[] = array(
                                 'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
-                                'url' => $_item_evident['url'],
-                                'media_repositories_id' => $_item_evident['media_repositories_id'],
+                                'url' => isset($_item_evident['url'])?$_item_evident['url']:null,
+                                'media_repositories_id' => isset($_item_evident['media_repositories_id']) ? $_item_evident['media_repositories_id'] : null,
                             );
                         }
                         CapabilityAssesmentEvident::insert($_evident);

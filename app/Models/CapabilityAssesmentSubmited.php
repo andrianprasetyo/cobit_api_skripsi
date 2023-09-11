@@ -11,7 +11,7 @@ class CapabilityAssesmentSubmited extends Model
 {
     use HasFactory, SoftDeletes, HasUuids;
     public $incrementing = false;
-    protected $table = 'capability_level';
+    protected $table = 'capability_assesment_submited';
     protected $keyType = 'string';
     protected $fillable = ['assesment_id', 'domain_id', 'level', 'submited'];
 

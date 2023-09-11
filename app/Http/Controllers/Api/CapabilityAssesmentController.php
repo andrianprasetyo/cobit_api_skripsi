@@ -87,14 +87,12 @@ class CapabilityAssesmentController extends Controller
 
         DB::beginTransaction();
         try {
-
-
             for ($i = 0; $i < count($capability_assesment); $i++) {
                 // $capabilityass = $_item_payload['capabilityass'];
 
                 $capability_ass = new CapabilityAssesment();
                 if ($capability_assesment[$i] != null) {
-                    $capability_ass = CapabilityAssesment::find($capability_assesment['id']);
+                    $capability_ass = CapabilityAssesment::find($capability_assesment[$i]);
                     if (!$capability_ass) {
                         return $this->errorResponse('Capbility asesment ID tidak ditemukan', 404);
                     }

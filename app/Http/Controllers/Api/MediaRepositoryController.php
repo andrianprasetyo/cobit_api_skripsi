@@ -49,6 +49,7 @@ class MediaRepositoryController extends Controller
 
     public function add(Request $request)
     {
+        $data=null;
         $docs = $request->file('docs');
         $assesment_id=$request->assesment_id;
         $path = config('filesystems.path.repository') .$assesment_id.'/';
@@ -71,6 +72,7 @@ class MediaRepositoryController extends Controller
             }
 
             MediaRepository::insert($media_payload);
+            $data=$media_payload;
         }
         else
         {
@@ -85,10 +87,12 @@ class MediaRepositoryController extends Controller
                 $doc->deskripsi=$deskripsi;
                 $doc->upload_by=Auth::user()->id;
                 $doc->save();
+
+                $data=$doc;
             }
         }
 
-        return $this->successResponse();
+        return $this->successResponse($data);
     }
 
     public function detailByID($id)

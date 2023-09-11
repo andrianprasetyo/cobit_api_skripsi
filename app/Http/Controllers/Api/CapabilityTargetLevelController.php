@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Capability\CapabilityTargetLevel\CapabilityTargetLevelResource;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\CapabilityTarget;
@@ -20,15 +21,17 @@ class CapabilityTargetLevelController extends Controller
 
     public function list(Request $request)
     {
-        $sortBy = $request->get('sortBy', 'created_at');
-        $sortType = $request->get('sortType', 'desc');
         $target_id=$request->target_id;
-        $list = CapabilityTargetLevel::with(['domain'])
-            ->where('capability_target_id',$target_id);
+        // $list = CapabilityTargetLevel::with(['domain'])
+        //     ->where('capability_target_id',$target_id);
 
-        $list->orderBy($sortBy, $sortType);
+        $list=DB::table('capability_target_level')
+            ->join('domain','capability_target_level.domain_id','=','domain.id')
+            ->where('capability_target_id',$target_id)
+            ->select('capability_target_level.*')
+            ->orderBy('domain.urutan','asc');
 
-        $data = $this->paging($list);
+        $data = $this->paging($list,null,null, CapabilityTargetLevelResource::class);
         return $this->successResponse($data);
     }
 
@@ -98,7 +101,7 @@ class CapabilityTargetLevelController extends Controller
             $id = $request->id;
             $default=true;
             $cap_target = new CapabilityTarget();
-            if ($request->id != null) {
+            if ($request->filled('id')) {
                 $cap_target = CapabilityTarget::find($id);
                 if(!$cap_target)
                 {

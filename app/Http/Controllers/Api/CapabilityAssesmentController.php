@@ -78,39 +78,46 @@ class CapabilityAssesmentController extends Controller
                 'capability_answer_id.required' => 'Capability Answer ID harus di isi',
             ]
         );
-        $jawaban = $request->jawaban;
+        $capability_assesment = $request->capability_assesment_id;
+        $capability_level_id = $request->capability_level_id;
+        $capability_answer_id = $request->capability_answer_id;
+        $note = $request->note;
+        $ofi = $request->ofi;
+        $evident = $request->evident;
+
         DB::beginTransaction();
         try {
 
-            foreach ($jawaban as $_item_payload) {
-                $capabilityass = $_item_payload['capabilityass'];
+
+            for ($i = 0; $i < count($capability_assesment); $i++) {
+                // $capabilityass = $_item_payload['capabilityass'];
 
                 $capability_ass = new CapabilityAssesment();
-                if ($capabilityass['id'] != null) {
-                    $capability_ass = CapabilityAssesment::find($capabilityass['id']);
+                if ($capability_assesment[$i] != null) {
+                    $capability_ass = CapabilityAssesment::find($capability_assesment['id']);
                     if (!$capability_ass) {
                         return $this->errorResponse('Capbility asesment ID tidak ditemukan', 404);
                     }
                 }
-                $capability_ass->capability_level_id = $capabilityass['capability_level_id'];
-                $capability_ass->capability_answer_id = $capabilityass['capability_answer_id'];
-                $capability_ass->note = $capabilityass['note'];
-                $capability_ass->ofi = $capabilityass['ofi'];
+                $capability_ass->capability_level_id = $capability_level_id[$i];
+                $capability_ass->capability_answer_id = $capability_answer_id[$i];
+                $capability_ass->note = $note[$i];
+                $capability_ass->ofi = $ofi[$i];
                 $capability_ass->save();
 
-                if(isset($_item_payload['evident']))
+                if(isset($evident[$i]) && count($evident[$i]) > 0)
                 {
-                    $evident = $_item_payload['evident'];
+                    $evident = $evident[$i];
                     if (count($evident) > 0) {
                         CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                         $_evident = [];
-                        foreach ($evident as $_item_evident) {
+                        for ($r = 0; $r < count($evident); $r++) {
                             // $evident_doc=
                             $_evident[] = array(
                                 'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
-                                'url' => isset($_item_evident['url'])?$_item_evident['url']:null,
-                                'media_repositories_id' => isset($_item_evident['media_repositories_id']) ? $_item_evident['media_repositories_id'] : null,
+                                'url' => isset($evident[$r]['url'])?$evident[$r]['url']:null,
+                                'media_repositories_id' => isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null,
                             );
                         }
                         CapabilityAssesmentEvident::insert($_evident);

@@ -91,33 +91,45 @@ class CapabilityTargetLevelController extends Controller
 
     public function saveUpdateTarget(Request $request)
     {
-        $_target=$request->target;
+        DB::beginTransaction();
+        try {
+            $_target = $request->target;
 
-        $id=$request->id;
-
-        $cap_target=new CapabilityTarget();
-        if($request->id != null)
-        {
-            $cap_target=CapabilityTarget::find($id);
-        }
-        $cap_target->nama=$request->nama;
-        $cap_target->save();
-
-        foreach ($_target as $_item_target) {
-            $target=null;
-            if($_item_target['id'] != null)
-            {
-                $target=CapabilityTargetLevel::find($_item_target['id']);
+            $id = $request->id;
+            $default=true;
+            $cap_target = new CapabilityTarget();
+            if ($request->id != null) {
+                $cap_target = CapabilityTarget::find($id);
+                if(!$cap_target)
+                {
+                    return $this->errorResponse('Target capability ID tidak terdaftar',404);
+                }
+                $default=false;
             }
-            if(!$target){
-                $target = new CapabilityTargetLevel();
-                $target->domain_id= $_item_target['domain_id'];
-            }
-            $target->capability_target_id = $cap_target->id;
-            $target->target = $_item_target['target'];
-            $target->save();
-        }
+            $cap_target->nama = $request->nama;
+            $cap_target->assesment_id = $request->assesment_id;
+            $cap_target->default=$default;
+            $cap_target->save();
 
-        return $this->successResponse();
+            foreach ($_target as $_item_target) {
+                $target = null;
+                if ($_item_target['id'] != null) {
+                    $target = CapabilityTargetLevel::find($_item_target['id']);
+                }
+                if (!$target) {
+                    $target = new CapabilityTargetLevel();
+                    $target->domain_id = $_item_target['domain_id'];
+                }
+                $target->capability_target_id = $cap_target->id;
+                $target->target = $_item_target['target'];
+                $target->save();
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

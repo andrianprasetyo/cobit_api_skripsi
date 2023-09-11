@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('tipe');
             $table->foreignUuid('media_repositories_id')->nullable();
             $table->text('url')->nullable();
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

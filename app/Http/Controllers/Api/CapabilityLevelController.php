@@ -8,6 +8,7 @@ use App\Http\Resources\CapabilityLevel\CapabilityLevelResource;
 use App\Models\CapabilityLevel;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CapabilityLevelController extends Controller
 {
@@ -17,22 +18,27 @@ class CapabilityLevelController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'created_at');
-        $sortType = $request->get('sortType', 'desc');
+        $sortBy = $request->get('sortBy', 'domain.urutan');
+        $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
         $domain_id = $request->domain_id;
         $level = $request->level;
 
-        $list = CapabilityLevel::with('domain');
+        // $list = CapabilityLevel::with('domain');
+        $list=DB::table('capability_level')
+            ->join('domain','capability_level.domain_id','=','domain.id')
+            ->select('capability_level.*');
+
+
         if ($request->filled('search')) {
-            $list->where('kode', 'ilike', '%' . $search . '%');
-            $list->orWhere('kegiatan', 'ilike', '%' . $search . '%');
+            $list->where('capability_level.kode', 'ilike', '%' . $search . '%');
+            $list->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%');
         }
         if ($request->filled('domain_id')){
-            $list->where('domain_id',$domain_id);
+            $list->where('capability_level.domain_id',$domain_id);
         }
         if ($request->filled('level')) {
-            $list->where('level', $level);
+            $list->where('capability_level.level', $level);
         }
 
         $list->orderBy($sortBy, $sortType);

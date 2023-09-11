@@ -3,6 +3,7 @@
 namespace App\Http\Resources\CapabilityLevel;
 
 use App\Http\Resources\Domain\DomainResource;
+use App\Models\Domain;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +16,12 @@ class CapabilityLevelResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $domain=Domain::find($this->domain_id);
+        $subcode='.'.$this->kode;
+        if($domain)
+        {
+            $subcode=$domain->kode.'.'.$this->kode;
+        }
         return [
             'id'=>$this->id,
             'kegiatan'=>$this->kegiatan,
@@ -23,8 +30,8 @@ class CapabilityLevelResource extends JsonResource
             'level'=>$this->level,
             'urutan' => $this->urutan,
             'kode' => $this->kode,
-            'subkode' => $this->domain->kode.'.'.$this->kode,
-            'domain' => new DomainResource($this->domain),
+            'subkode' => $subcode,
+            'domain' => $domain,
         ];
     }
 }

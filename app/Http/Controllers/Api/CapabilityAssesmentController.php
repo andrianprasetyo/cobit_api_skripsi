@@ -52,6 +52,14 @@ class CapabilityAssesmentController extends Controller
             'answer' => $total_bobot_answer,
             'result' => round($total_result,2)
         );
+
+        $submited=CapabilityAssesmentSubmited::where('assesment_id',$request->assesment_id)
+            ->where('domain_id',$request->domain_id)
+            ->where('level',$request->level)
+            ->where('submited',true)
+            ->exists();
+
+        $data['submited']=$submited;
         return $this->successResponse($data);
     }
 
@@ -107,11 +115,12 @@ class CapabilityAssesmentController extends Controller
                 }
             }
 
-            // CapabilityAssesmentSubmited::create([
-            //     'assesment_id'=>$request->assesment_id,
-            //     'domain_id' => $request->domain_id,
-            //     'level' => $request->level,
-            // ]);
+            CapabilityAssesmentSubmited::firstOrCreate([
+                'assesment_id'=>$request->assesment_id,
+                'domain_id' => $request->domain_id,
+                'level' => $request->level,
+                'submited'=>true
+            ]);
 
             DB::commit();
             return $this->successResponse();

@@ -6,6 +6,7 @@ use App\Exports\AssesmentDomain2Export;
 use App\Exports\AssesmentDomainExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Chart\ChartDomainResource;
+use App\Http\Resources\Domain\DomainByAssesmentResource;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
@@ -121,7 +122,8 @@ class DomainController extends Controller
             ->where('assesment_canvas.assesment_id',$assesment_id);
 
         $list->orderBy($sortBy, $sortType);
-        $data = $this->paging($list, $limit, $page);
+
+        $data = $this->paging($list, $limit, $page, DomainByAssesmentResource::class);
         return $this->successResponse($data);
     }
 

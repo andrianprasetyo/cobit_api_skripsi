@@ -23,4 +23,9 @@ class CapabilityAssesment extends Model
     public function evident(){
         return $this->hasMany(CapabilityAssesmentEvident::class,'capability_assesment_id','id');
     }
+
+    public function capability_answer()
+    {
+        return $this->belongsTo(CapabilityAnswer::class, 'capability_answer_id');
+    }
 }

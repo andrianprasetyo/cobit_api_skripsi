@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CapabilityAssesment\CapabilityAssesmentResource;
+use App\Http\Resources\CapabilityAssesment\CapabilityAssesmentLevelResource;
 use App\Models\CapabilityAnswer;
 use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentEvident;
+use App\Models\CapabilityAssesmentSubmited;
 use App\Models\CapabilityLevel;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,23 +21,56 @@ class CapabilityAssesmentController extends Controller
 
     public function list(Request $request)
     {
-        $list=CapabilityLevel::with(['domain','capabilityass'])
+        $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer'])
             ->where('level',$request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan','asc');
 
-        $data= $this->paging($list, null, null, CapabilityAssesmentResource::class);
+        $_data_ass=$list->get();
+        $data_ass=CapabilityAssesmentLevelResource::collection($_data_ass);
+        $_total_bobot_level = [];
+        $_total_bobot_answer=[];
+        if(!$_data_ass->isEmpty())
+        {
+            foreach ($_data_ass as $_item_ass) {
+                $_total_bobot_level[] = $_item_ass->bobot;
+                if(isset($_item_ass->capabilityass->capability_answer->bobot))
+                {
+                    $_total_bobot_answer[]= (float)$_item_ass->capabilityass->capability_answer->bobot;
+                }
+            }
+        }
+        // $data = $this->paging($list, null, null, CapabilityAssesmentLevelResource::class);
+        $data['list']= $data_ass;
         $data['answer']=CapabilityAnswer::orderBy('bobot','asc')->get();
+
+        $total_bobot_answer = array_sum($_total_bobot_answer);
+        $total_bobot_level=array_sum($_total_bobot_level);
+        $total_result = $total_bobot_answer/ $total_bobot_level;
+        $data['total_bobot']=array(
+            'level'=>$total_bobot_level,
+            'answer' => $total_bobot_answer,
+            'result' => round($total_result,2)
+        );
         return $this->successResponse($data);
     }
 
     public function createAnswer(Request $request)
     {
+        // dd($_POST);
+        $request->validate(
+            [
+                'jawaban' => 'required|array',
+            ],
+            [
+                'jawaban.required'=>'Jawaban harus di isi',
+                'jawaban.array' => 'Jawaban harus dalam bentuk attay/list',
+            ]
+        );
         $jawaban = $request->jawaban;
         DB::beginTransaction();
         try {
 
-            $ev=[];
             foreach ($jawaban as $_item_payload) {
                 $capabilityass = $_item_payload['capabilityass'];
 
@@ -68,11 +102,16 @@ class CapabilityAssesmentController extends Controller
                                 'media_repositories_id' => $_item_evident['media_repositories_id'],
                             );
                         }
-                        $ev=$_evident;
                         CapabilityAssesmentEvident::insert($_evident);
                     }
                 }
             }
+
+            // CapabilityAssesmentSubmited::create([
+            //     'assesment_id'=>$request->assesment_id,
+            //     'domain_id' => $request->domain_id,
+            //     'level' => $request->level,
+            // ]);
 
             DB::commit();
             return $this->successResponse($ev);
@@ -116,5 +155,50 @@ class CapabilityAssesmentController extends Controller
         }
 
         return $this->successResponse($payload);
+    }
+
+    public function kalkukasiDomainByLevel(Request $request)
+    {
+        $list_level=CapabilityLevel::select('level')
+            ->where('domain_id', $request->domain_id)
+            ->groupBy('level')
+            ->orderBy('level','ASC')
+            ->get();
+
+
+        $result = [];
+        $total=0;
+        if(!$list_level->isEmpty())
+        {
+            $_total=[];
+            foreach ($list_level as $_item_level) {
+                $_sum_bobot = DB::table('capability_assesment')
+                    ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                    ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                    ->join('assesment_domain','capability_level.domain_id','=','assesment_domain.domain_id')
+                    ->where('assesment_domain.assesment_id', $request->asesment_id)
+                    ->where('capability_level.level', $_item_level->level)
+                    ->where('capability_level.domain_id', $request->domain_id)
+                    ->select(
+                        // 'capability_assesment.id',
+                        // 'capability_assesment.capability_level_id',
+                        // 'capability_level.bobot as bobot_level',
+                        'capability_answer.bobot as bobot_answer',
+                    )
+                    ->sum('capability_answer.bobot');
+
+                $result[]=array(
+                    'level'=>(float)$_item_level->level,
+                    'kompilasi' => (float)$_sum_bobot,
+                );
+                $_total[]=(float)$_sum_bobot;
+            }
+            $total=round(array_sum($_total),2) + 1;
+        }
+
+
+        $data['list'] = $result;
+        $data['total']=$total;
+        return $this->successResponse($data);
     }
 }

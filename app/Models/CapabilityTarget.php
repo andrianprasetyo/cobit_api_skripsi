@@ -13,7 +13,7 @@ class CapabilityTarget extends Model
     public $incrementing = false;
     protected $table = 'capability_target';
     protected $keyType = 'string';
-    protected $fillable = ['nama','assesment_id'];
+    protected $fillable = ['nama','assesment_id','default'];
 
     protected $hidden = [
         'deleted_at',

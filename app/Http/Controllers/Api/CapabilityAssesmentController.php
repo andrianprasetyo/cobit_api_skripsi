@@ -114,7 +114,7 @@ class CapabilityAssesmentController extends Controller
             // ]);
 
             DB::commit();
-            return $this->successResponse($ev);
+            return $this->successResponse();
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

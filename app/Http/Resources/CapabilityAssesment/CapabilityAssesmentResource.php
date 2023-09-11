@@ -22,6 +22,7 @@ class CapabilityAssesmentResource extends JsonResource
             'note' => $this->note,
             'ofi' => $this->ofi,
             'capability_answer' => new CapabilityAnswerResource($this->capability_answer),
+            'evident'=>$this->evident,
         ];
     }
 }

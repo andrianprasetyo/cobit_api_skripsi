@@ -21,7 +21,7 @@ class CapabilityAssesmentController extends Controller
 
     public function list(Request $request)
     {
-        $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer'])
+        $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer','capabilityass.evident', 'capabilityass.evident.docs'])
             ->where('level',$request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan','asc');
@@ -115,6 +115,7 @@ class CapabilityAssesmentController extends Controller
                                 'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
                                 'url' => isset($evident[$r]['url'])?$evident[$r]['url']:null,
+                                'deskripsi'=>$evident[$r]['deskripsi'],
                                 'media_repositories_id' => isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null,
                             );
                         }

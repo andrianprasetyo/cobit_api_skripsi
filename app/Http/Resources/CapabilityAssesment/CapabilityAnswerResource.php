@@ -16,10 +16,9 @@ class CapabilityAnswerResource extends JsonResource
     {
         return [
             'id'=>$this->id,
-            'capability_level_id' => $this->capability_level_id,
-            'capability_answer_id' => $this->capability_answer_id,
-            'note' => $this->note,
-            'ofi' => $this->ofi,
+            'nama' => $this->nama,
+            'bobot' => (float)$this->bobot,
+            'label' => $this->label,
         ];
     }
 }

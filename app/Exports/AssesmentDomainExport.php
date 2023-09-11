@@ -21,11 +21,12 @@ class AssesmentDomainExport implements FromArray, WithColumnWidths, WithStyles
         if (!$data->isEmpty()) {
             $no = 1;
             foreach ($data as $_item) {
+
                 $list[] = array(
                     $no,
                     $_item->kode.'-'.strip_tags($_item->ket),
                     $_item->aggreed_capability_level,
-                    $_item->suggest_capability_level >= 3?'Ya':'Tidak'
+                    $_item->suggest_capability_level >= $_item->minimum_target?'Ya':'Tidak'
                 );
                 $no++;
             }

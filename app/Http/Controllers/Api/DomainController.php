@@ -132,7 +132,8 @@ class DomainController extends Controller
         // $data=AssesmentCanvas::with(['assesment','domain'])->where('assesment_id',$id)->get();
         $data = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
+            ->join('assesment', 'assesment_canvas.assesment_id', '=', 'assesment.id')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','assesment.minimum_target')
             ->where('assesment_canvas.assesment_id', $id)
             ->orderBy('domain.urutan','ASC')
             ->get();

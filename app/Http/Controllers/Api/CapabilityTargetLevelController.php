@@ -43,6 +43,10 @@ class CapabilityTargetLevelController extends Controller
         $assesment_id = $request->assesment_id;
 
         $ass = Assesment::find($assesment_id);
+        if(!$ass)
+        {
+            return $this->errorResponse('Assesment tidak terdafatar',404);
+        }
 
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain_id')
@@ -53,7 +57,6 @@ class CapabilityTargetLevelController extends Controller
             ->orderBy('domain.urutan','asc');
 
         $data = $this->paging($list);
-
         return $this->successResponse($data);
     }
 

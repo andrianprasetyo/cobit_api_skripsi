@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Assesment\AddPICRequest;
 use App\Http\Resources\AssesmentResource;
@@ -640,6 +641,33 @@ class AsessmentController extends Controller
         $user->save();
 
         Notification::send($user, new InviteUserNotif($user));
+        return $this->successResponse();
+    }
+
+    public function uploadReport(Request $request)
+    {
+        $request->validate(
+            [
+                'id'=>'required|exists:assesment,id',
+                'docs'=>'required'
+            ],
+            [
+                'id.required'=>'ID assement harus di isi',
+                'id.exists' => 'Assement ID tidak terdaftar',
+                'docs.required' => 'file laporan harus di isi',
+            ]
+        );
+        $assesment=Assesment::find($request->id);
+        if($request->hasFile('docs'))
+        {
+            $path = config('filesystems.path.report').'assesment/'. $assesment->id . '/report/';
+            $docs = $request->file('docs');
+            $filename = date('Ymdhis') . '-' . $assesment->id . '-' . $docs->hashName();
+            $docs->storeAs($path, $filename);
+            $filedocs = CobitHelper::Media($filename, $path, $docs);
+            $assesment->docs=$filedocs;
+            $assesment->save();
+        }
         return $this->successResponse();
     }
 }

@@ -238,6 +238,7 @@ class AsessmentController extends Controller
             $assesment->end_date_quisioner=$request->end_date_quisioner;
             $assesment->status = 'ongoing';
             $assesment->users_id=$user_id;
+            $assesment->minimum_target=$request->filled('minimum_target')?$request->minimum_target:3;
             $assesment->save();
 
             if(!$this->account->internal)

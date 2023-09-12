@@ -16,11 +16,15 @@ class Assesment extends Model
     public $incrementing = false;
     protected $table = 'assesment';
     protected $keyType = 'string';
-    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','users_id','start_date','end_date','start_date_quisioner','end_date_quisioner'];
+    protected $fillable = ['nama', 'deskripsi','organisasi_id','status','deskripsi','users_id','start_date','end_date','start_date_quisioner','end_date_quisioner','docs'];
 
     protected $hidden = [
         'deleted_at',
         'updated_at'
+    ];
+
+    protected $casts = [
+        'docs' => 'json'
     ];
 
     public function scopeExpire(Builder $query):void

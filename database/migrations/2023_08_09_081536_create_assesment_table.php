@@ -20,8 +20,9 @@ return new class extends Migration
             $table->text('deskripsi')->nullable();
             $table->foreignUuid('users_id')->nullable();
             $table->timestamps();
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->json('docs')->nullable();
             $table->softDeletes();
         });
         DB::statement('ALTER TABLE assesment ALTER COLUMN id SET DEFAULT uuid_generate_v4();');

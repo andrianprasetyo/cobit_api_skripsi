@@ -28,6 +28,7 @@
     cd {{ $new_release_dir }}
     composer install --no-plugins
     php artisan route:cache
+    php artisan storage:link
 @endtask
 
 @task('update_symlinks')

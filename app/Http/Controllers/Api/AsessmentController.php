@@ -8,6 +8,7 @@ use App\Http\Requests\Assesment\AddPICRequest;
 use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
+use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
@@ -669,5 +670,33 @@ class AsessmentController extends Controller
             $assesment->save();
         }
         return $this->successResponse();
+    }
+
+    public function reportHasil(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+        $sortBy = $request->get('sortBy', 'created_at');
+        $sortType = $request->get('sortType', 'desc');
+        $search = $request->search;
+
+        $list = AssesmentCanvas::with(['assesment','domain'])
+            ->where('assesment_id',$request->assesment_id);
+
+        // if ($request->filled('search')) {
+        //     $list->where('nama', 'ilike', '%' . $search . '%');
+        // }
+
+        // if ($request->filled('status')) {
+        //     $list->where('status', $request->status);
+        // }
+
+        // if ($request->filled('organisasi_id')) {
+        //     $list->where('organisasi_id', $request->organisasi_id);
+        // }
+
+        $list->orderBy($sortBy, $sortType);
+        $data = $this->paging($list, $limit, $page);
+        return $this->successResponse($data);
     }
 }

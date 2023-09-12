@@ -177,7 +177,7 @@ class CapabilityAssesmentController extends Controller
         return $this->successResponse($payload);
     }
 
-    public function kalkukasiDomainByLevel(Request $request)
+    public function kalkukasiDomainByLevelBACKUP(Request $request)
     {
         $list_level=CapabilityLevel::select('level')
             ->where('domain_id', $request->domain_id)
@@ -222,113 +222,72 @@ class CapabilityAssesmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function summaryAssesmentBACKUP(Request $request)
+    public function kalkukasiDomainByLevel(Request $request)
     {
-        $assesment=Assesment::find($request->assesment_id);
-        if(!$assesment)
-        {
-            return $this->errorResponse('Assesment tidak terdafter',404);
+
+        $domain_id=$request->domain_id;
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
         }
 
-        $list_level=CapabilityLevel::select('level')
-            ->groupBy('level')
-            ->orderBy('level','asc')
-            ->get();
-
-        $list_domain = DB::table('assesment_canvas')
+        $domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('domain.id', 'domain.kode')
+            ->select('domain.id', 'domain.kode', 'domain.ket')
+            ->where('domain.id', $domain_id)
             ->where('assesment_canvas.assesment_id', $assesment->id)
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->orderBy('domain.urutan','asc')
-            ->get();
+            ->first();
 
 
-        $list=[];
-        if(!$list_domain->isEmpty())
+        $_list_level = [];
+        $_total_all = [];
+        if($domain)
         {
-            $_list_level=[];
-            foreach ($list_domain as $_item_domain) {
 
 
-                $level=DB::table('capability_level')
-                    ->where('domain_id',$_item_domain->id)
-                    ->select('level')
-                    ->groupBy('level')
-                    ->orderBy('level','asc')
-                    ->get();
+            $list_levels = DB::table('capability_level')
+                ->where('domain_id', $domain->id)
+                ->select('level')
+                ->groupBy('level')
+                ->orderBy('level', 'asc')
+                ->get();
 
-                $_total_all=[];
-
-                if(!$level->isEmpty())
+            if(!$list_levels->isEmpty())
+            {
+                foreach ($list_levels as $_item_level)
                 {
-                    foreach ($level as $_item_level) {
-                        // $_level=$_item_level;
+                    $_level = DB::table('capability_assesment')
+                        ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                        ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                        ->where('capability_level.domain_id', $domain->id)
+                        ->where('capability_level.level', $_item_level->level)
+                        ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                        ->first();
 
-                        $_level=DB::table('capability_assesment')
-                            ->join('capability_level','capability_assesment.capability_level_id','=','capability_level.id')
-                            ->join('capability_answer','capability_assesment.capability_answer_id','=','capability_answer.id')
-                            ->where('capability_level.domain_id',$_item_domain->id)
-                            ->where('capability_level.level',$_item_level->level)
-                            // ->select('capability_answer.*')
-                            ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
-                            ->first();
+                    $_bobot = DB::table('capability_level')
+                        ->where('domain_id', $domain->id)
+                        ->where('level', $_item_level->level)
+                        ->select(DB::raw("SUM(bobot) as bobot_level"))
+                        ->first();
 
-                        $_bobot=DB::table('capability_level')
-                            ->where('domain_id', $_item_domain->id)
-                            ->where('level', $_item_level->level)
-                            ->select(DB::raw("SUM(bobot) as bobot_level"))
-                            ->first();
+                    $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+                    $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
 
-                        $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
-                        // $_total_sum_compilance = $_level->compilance;
-                        // $_total_compilance=0;
-                        $sts=null;
-
-                        // if($_total_sum_compilance !=null)
-                        // {
-
-                        // }
-
-                        $_total_sum_compilance = (float) $_level->compilance;
-                        $_total_compilance = round($_total_sum_compilance / $_bobot->bobot_level, 2);
-
-                        if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
-                            $sts = 'N';
-                        } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
-                            $sts = 'P';
-                        } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
-                            $sts = 'L';
-                        } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
-                            $sts = 'F';
-                        } else {
-                            $sts = 'N/A';
-                        }
-
-                        $_total_all[] = $_total_compilance;
-
-                        $_list_level[]=array(
-                            'level'=> $_item_level->level,
-                            // 'bobot_level'=> $_bobot->bobot_level
-                            'total_compilance'=>$_total_compilance,
-                            'label'=>$sts,
-                        );
+                    $_total_compilance = 0;
+                    if ($_total_sum_compilance != 0) {
+                        $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                     }
+
+                    $_total_all[] = $_total_compilance;
+                    $_list_level[] = array(
+                        'level' => $_item_level->level,
+                        'compilance' => $_total_compilance,
+                    );
                 }
-
-
-                $list[]=array(
-                    'id'=>$_item_domain->id,
-                    'kode' => $_item_domain->kode,
-                    'level'=>$_list_level,
-                    'total' => $_total_all
-                );
             }
         }
-
-        // $data = $this->paging($list);
-        $data['list']=$list;
-        $data['level']=$list_level;
+        $data['list'] = $_list_level;
+        $data['total'] = array_sum($_total_all);
         return $this->successResponse($data);
     }
 
@@ -368,54 +327,56 @@ class CapabilityAssesmentController extends Controller
                     ->orderBy('level', 'asc')
                     ->get();
 
-                foreach ($list_levels as $_item_level) {
+                if(!$list_levels->isEmpty())
+                {
+                    foreach ($list_levels as $_item_level) {
 
-                    $daftar_level[]=$_item_level->level;
-                    $_level = DB::table('capability_assesment')
-                        ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
-                        ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
-                        ->where('capability_level.domain_id', $_item_domain->id)
-                        ->where('capability_level.level', $_item_level->level)
-                        // ->select('capability_answer.*')
-                        ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
-                        ->first();
+                        $daftar_level[]=$_item_level->level;
+                        $_level = DB::table('capability_assesment')
+                            ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                            ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                            ->where('capability_level.domain_id', $_item_domain->id)
+                            ->where('capability_level.level', $_item_level->level)
+                            ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                            ->first();
 
-                    $_bobot = DB::table('capability_level')
-                        ->where('domain_id', $_item_domain->id)
-                        ->where('level', $_item_level->level)
-                        ->select(DB::raw("SUM(bobot) as bobot_level"))
-                        ->first();
+                        $_bobot = DB::table('capability_level')
+                            ->where('domain_id', $_item_domain->id)
+                            ->where('level', $_item_level->level)
+                            ->select(DB::raw("SUM(bobot) as bobot_level"))
+                            ->first();
 
-                    $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
-                    // $_total_sum_compilance = (float) $_level->compilance;
-                    $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
+                        $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+                        // $_total_sum_compilance = (float) $_level->compilance;
+                        $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
 
-                    $_total_compilance=0;
-                    if($_total_sum_compilance != 0)
-                    {
-                        $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                        $_total_compilance=0;
+                        if($_total_sum_compilance != 0)
+                        {
+                            $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                        }
+                        $sts = null;
+
+                        if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
+                            $sts = 'N';
+                        } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
+                            $sts = 'P';
+                        } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
+                            $sts = 'L';
+                        } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
+                            $sts = 'F';
+                        } else {
+                            $sts = 'N/A';
+                        }
+
+                        $_total_all[] = $_total_compilance;
+
+                        $_list_level[] = array(
+                            'level' => $_item_level->level,
+                            'total_compilance' => $_total_compilance,
+                            'label' => $sts,
+                        );
                     }
-                    $sts = null;
-
-                    if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
-                        $sts = 'N';
-                    } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
-                        $sts = 'P';
-                    } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
-                        $sts = 'L';
-                    } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
-                        $sts = 'F';
-                    } else {
-                        $sts = 'N/A';
-                    }
-
-                    $_total_all[] = $_total_compilance;
-
-                    $_list_level[] = array(
-                        'level' => $_item_level->level,
-                        'total_compilance' => $_total_compilance,
-                        'label' => $sts,
-                    );
                 }
                 $list[] = array(
                     'id' => $_item_domain->id,

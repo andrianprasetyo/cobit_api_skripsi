@@ -281,7 +281,7 @@ class CapabilityAssesmentController extends Controller
                     $_total_all[] = $_total_compilance;
                     $_list_level[] = array(
                         'level' => $_item_level->level,
-                        'compilance' => $_total_compilance,
+                        'compliance' => $_total_compilance,
                     );
                 }
             }

@@ -103,6 +103,8 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->capability_answer_id = $capability_answer_id[$i];
                 $capability_ass->note = $note[$i];
                 $capability_ass->ofi = $ofi[$i];
+                $capability_ass->assesment_id=$request->assesment_id;
+                $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
 
                 if(isset($evident[$i]) && count($evident[$i]) > 0)

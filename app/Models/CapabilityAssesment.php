@@ -13,7 +13,7 @@ class CapabilityAssesment extends Model
     public $incrementing = false;
     protected $table = 'capability_assesment';
     protected $keyType = 'string';
-    protected $fillable = ['capability_level_id','capability_answer_id','note','ofi'];
+    protected $fillable = ['capability_level_id','capability_answer_id','note','ofi','assesment_id','domain_id'];
 
     protected $hidden = [
         'deleted_at',

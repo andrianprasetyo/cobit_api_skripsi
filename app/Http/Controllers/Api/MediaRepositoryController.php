@@ -64,7 +64,7 @@ class MediaRepositoryController extends Controller
                 $media_payload[]=array(
                     'assesment_id'=>$assesment_id,
                     'upload_by'=>Auth::user()->id,
-                    'deskripsi'=>$deskripsi[$i],
+                    'deskripsi'=>isset($deskripsi[$i]) && $deskripsi[$i] !=''?$deskripsi[$i]: $filedocs['originalname'],
                     'docs'=>json_encode($filedocs),
                     'created_at' => Carbon::now()->toDateTimeString(),
                     'updated_at' => Carbon::now()->toDateTimeString()

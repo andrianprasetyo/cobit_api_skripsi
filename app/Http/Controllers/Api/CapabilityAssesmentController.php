@@ -110,7 +110,7 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
 
-                $tes_evi2[]= $evidents[$i];
+                $tes_evi2[]= isset($evidents[$i])?$evidents[$i]:[];
                 if(isset($evidents[$i]) && count($evidents[$i]) > 0)
                 {
                     $evident = $evidents[$i];

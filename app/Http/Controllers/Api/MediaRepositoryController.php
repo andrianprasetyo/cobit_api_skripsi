@@ -106,6 +106,27 @@ class MediaRepositoryController extends Controller
         return $this->successResponse(new RepositoryResource($data));
     }
 
+    public function edit(Request $request,$id)
+    {
+        $request->validate(
+            [
+                'deskripsi'=>'required'
+            ],
+            [
+                'deskripsi'=>'Deskripsi harus di isi'
+            ]
+        );
+
+        $data = MediaRepository::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak tersedia', 404);
+        }
+
+        $data->deskripsi=$request->deskripsi;
+        $data->save();
+        return $this->successResponse();
+    }
+
     public function remove($id)
     {
         $data=MediaRepository::find($id);

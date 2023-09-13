@@ -691,9 +691,18 @@ class AsessmentController extends Controller
 
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->join('capability_target','assesment_canvas.assesment_id','=', 'capability_target.assesment_id')
+            ->leftJoin('capability_target_level', 'capability_target.id', '=','capability_target_level.capability_target_id')
+            ->where('capability_target.default',true)
             ->where('assesment_canvas.assesment_id', $assesment->id)
             // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket')
+            ->select(
+                'assesment_canvas.*',
+                'domain.kode',
+                'domain.ket',
+                'capability_target.nama as nama_target',
+                'capability_target_level.target as target_organisasi'
+                )
             ->orderBy($sortBy, $sortType);
 
         $total = $list_domain->count();
@@ -716,6 +725,7 @@ class AsessmentController extends Controller
         {
             foreach ($list_domains as $_item_domain) {
                 $_result=$_item_domain;
+                $_result->target_organisasi=(int)$_result->target_organisasi;
 
                 $_level = DB::table('capability_assesment')
                     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
@@ -737,7 +747,15 @@ class AsessmentController extends Controller
                     $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                 }
 
-                $_result->total_compilance= $_total_compilance;
+                $_result->hasil_assesment = $_total_compilance;
+                $_result->gap_deskripsi='Terdapata kesenjangan antara nilai saat ini dengan target Manajemen KCI';
+                $_result->potensi = 'Improvment pada area';
+                if($_total_compilance > $_result->target_organisasi)
+                {
+                    $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
+                    $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                }
+
                 $result[]=$_result;
             }
         }

@@ -236,6 +236,7 @@ class CapabilityAssesmentController extends Controller
             ->select('domain.id', 'domain.kode', 'domain.ket')
             ->where('domain.id', $domain_id)
             ->where('assesment_canvas.assesment_id', $assesment->id)
+            // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->first();
 
 
@@ -243,7 +244,6 @@ class CapabilityAssesmentController extends Controller
         $_total_all = [];
         if($domain)
         {
-
 
             $list_levels = DB::table('capability_level')
                 ->where('domain_id', $domain->id)

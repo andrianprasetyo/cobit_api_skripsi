@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Assesment\AddPICRequest;
+use App\Http\Resources\Assesment\AssesmentGapReportResource;
 use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
@@ -676,27 +677,74 @@ class AsessmentController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'created_at');
-        $sortType = $request->get('sortType', 'desc');
+        $sortBy = $request->get('sortBy', 'domain.urutan');
+        $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
 
-        $list = AssesmentCanvas::with(['assesment','domain'])
-            ->where('assesment_id',$request->assesment_id);
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
 
-        // if ($request->filled('search')) {
-        //     $list->where('nama', 'ilike', '%' . $search . '%');
-        // }
+        // $listx = AssesmentCanvas::with(['assesment','domain'])
+        //     ->where('assesment_id',$request->assesment_id);
 
-        // if ($request->filled('status')) {
-        //     $list->where('status', $request->status);
-        // }
+        $list_domain = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->where('assesment_canvas.assesment_id', $assesment->id)
+            // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket')
+            ->orderBy($sortBy, $sortType);
 
-        // if ($request->filled('organisasi_id')) {
-        //     $list->where('organisasi_id', $request->organisasi_id);
-        // }
+        $total = $list_domain->count();
 
-        $list->orderBy($sortBy, $sortType);
-        $data = $this->paging($list, $limit, $page);
+        if ($limit != null || $page != null) {
+            $page = ($page * $limit) - $limit;
+            $list_domain->limit($limit);
+            $list_domain->skip($page);
+            // $list->skip($offset);
+
+            $meta['per_page'] = (int) $limit;
+            $meta['total_page'] = ceil($total / $limit);
+            // $meta['current_page'] = ceil($offset / $limit) + 1;
+            $meta['current_page'] = (int) $page;
+        }
+
+        $list_domains=$list_domain->get();
+        $result=[];
+        if(!$list_domains->isEmpty())
+        {
+            foreach ($list_domains as $_item_domain) {
+                $_result=$_item_domain;
+
+                $_level = DB::table('capability_assesment')
+                    ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                    ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                    ->where('capability_level.domain_id', $_item_domain->domain_id)
+                    ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                    ->first();
+
+                $_bobot = DB::table('capability_level')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->select(DB::raw("SUM(bobot) as bobot_level"))
+                    ->first();
+
+                $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
+                $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
+
+                $_total_compilance = 0;
+                if ($_total_sum_compilance != null) {
+                    $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                }
+
+                $_result->total_compilance= $_total_compilance;
+                $result[]=$_result;
+            }
+        }
+
+        $data['list']=$result;
+        $meta['total'] = $total;
+        $data['meta'] = $meta;
         return $this->successResponse($data);
     }
 }

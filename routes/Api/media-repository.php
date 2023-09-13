@@ -4,4 +4,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/repository/detail/{id}', 'MediaRepositoryController@detailByID');
     Route::post('/repository/add', 'MediaRepositoryController@add');
     Route::delete('/repository/remove/{id}', 'MediaRepositoryController@remove');
+    Route::post('/repository/edit/{id}', 'MediaRepositoryController@edit');
 });

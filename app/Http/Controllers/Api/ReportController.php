@@ -180,6 +180,10 @@ class ReportController extends Controller
                 ->join('design_faktor_komponen', 'quisioner_hasil.design_faktor_komponen_id', '=', 'design_faktor_komponen.id')
                 ->join('quisioner_jawaban','quisioner_hasil.jawaban_id','=','quisioner_jawaban.id')
                 ->where('assesment_users.assesment_id',$assesment_id)
+                ->whereNull('quisioner_hasil.deleted_at')
+                ->whereNull('assesment_users.deleted_at')
+                ->whereNull('quisioner_pertanyaan.deleted_at')
+                ->whereNull('quisioner_jawaban.deleted_at')
                 ->select(
                         'quisioner_hasil.*',
                         'assesment_users.*',

@@ -118,8 +118,9 @@ class DomainController extends Controller
 
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain.id')
-            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan')
-            ->where('assesment_canvas.assesment_id',$assesment_id);
+            ->where('assesment_canvas.assesment_id',$assesment_id)
+            ->whereNull('domain.deleted_at')
+            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan');
 
         $list->orderBy($sortBy, $sortType);
 
@@ -137,6 +138,8 @@ class DomainController extends Controller
             ->join('assesment', 'assesment_canvas.assesment_id', '=', 'assesment.id')
             ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','assesment.minimum_target')
             ->where('assesment_canvas.assesment_id', $id)
+            ->whereNull('domain.deleted_at')
+            ->whereNull('assesment.deleted_at')
             ->orderBy('domain.urutan','ASC')
             ->get();
 
@@ -158,6 +161,7 @@ class DomainController extends Controller
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
             ->where('assesment_canvas.assesment_id', $id)
+            ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'ASC')
             ->get();
 
@@ -305,7 +309,8 @@ class DomainController extends Controller
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id','domain.kode')
             ->where('assesment_canvas.assesment_id', $assesment_id)
-            ->where('assesment_canvas.aggreed_capability_level','>=',3);
+            ->where('assesment_canvas.aggreed_capability_level','>=',3)
+            ->whereNull('domain.deleted_at');
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page);

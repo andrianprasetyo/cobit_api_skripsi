@@ -29,4 +29,9 @@ class CapabilityTargetLevel extends Model
     {
         return $this->hasMany(CapabilityAssesment::class, 'capability_level_id', 'id');
     }
+
+    public function target()
+    {
+        return $this->belongsTo(CapabilityTarget::class, 'capability_target_id');
+    }
 }

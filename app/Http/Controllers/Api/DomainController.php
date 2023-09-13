@@ -305,11 +305,16 @@ class DomainController extends Controller
         // $list = AssesmentCanvas::with(['domain'])
         //     ->where('assesment_id', $assesment_id);
 
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+
         $list = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id','domain.kode')
             ->where('assesment_canvas.assesment_id', $assesment_id)
-            ->where('assesment_canvas.aggreed_capability_level','>=',3)
+            ->where('assesment_canvas.aggreed_capability_level','>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at');
 
         $list->orderBy($sortBy, $sortType);

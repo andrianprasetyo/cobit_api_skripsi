@@ -24,4 +24,9 @@ class CapabilityTargetLevel extends Model
     {
         return $this->belongsTo(Domain::class,'domain_id');
     }
+
+    public function capabilityassesments()
+    {
+        return $this->hasMany(CapabilityAssesment::class, 'capability_level_id', 'id');
+    }
 }

@@ -73,16 +73,20 @@ class CapabilityAssesmentController extends Controller
                 'capability_assesment_id' => 'required|array',
                 'capability_level_id' => 'required|array',
                 'capability_answer_id' => 'required|array',
+                // 'capability_target_id' => 'required|array',
             ],
             [
                 'capability_assesment_id.required'=>'Capability Assesment ID harus di isi',
                 'capability_level_id.required' => 'Capability Level ID harus di isi',
                 'capability_answer_id.required' => 'Capability Answer ID harus di isi',
+                // 'capability_target_id.required' => 'Capability Answer ID harus di isi',
             ]
         );
         $capability_assesment = $request->capability_assesment_id;
         $capability_level_id = $request->capability_level_id;
         $capability_answer_id = $request->capability_answer_id;
+        // $capability_target_id = $request->capability_answer_id;
+
         $note = $request->note;
         $ofi = $request->ofi;
         $evidents = $request->evident;
@@ -102,6 +106,7 @@ class CapabilityAssesmentController extends Controller
                         return $this->errorResponse('Capbility asesment ID tidak ditemukan', 404);
                     }
                 }
+                // $capability_ass->capability_target_id = $capability_target_id[$i];
                 $capability_ass->capability_level_id = $capability_level_id[$i];
                 $capability_ass->capability_answer_id = $capability_answer_id[$i];
                 $capability_ass->note = $note[$i];

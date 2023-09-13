@@ -13,7 +13,10 @@ use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
+use App\Models\CapabilityAssesment;
+use App\Models\CapabilityTarget;
 use App\Models\CapabilityTargetLevel;
+use App\Models\Domain;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiJabatan;
@@ -795,6 +798,22 @@ class AsessmentController extends Controller
         $data['list']=$result;
         $meta['total'] = $total;
         $data['meta'] = $meta;
+        return $this->successResponse($data);
+    }
+
+    public function RefortDetailOfi(Request $request)
+    {
+        $data=Domain::find($request->domain_id);
+        // $data=CapabilityTarget::with(['targetlevel.domain','targetlevel.capabilityassesments'])
+        //     ->whereRelation('targetlevel','domain_id','=',$request->domain_id)
+        //     ->find($id);
+
+        $cap_ass=CapabilityAssesment::where('domain_id',$request->domain_id)
+            ->where('assesment_id',$request->assesment_id)
+            ->get();
+
+
+        $data->capabilityassesments=$cap_ass;
         return $this->successResponse($data);
     }
 }

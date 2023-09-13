@@ -85,7 +85,7 @@ class CapabilityAssesmentController extends Controller
         $capability_answer_id = $request->capability_answer_id;
         $note = $request->note;
         $ofi = $request->ofi;
-        $evident = $request->evident;
+        $evidents = $request->evident;
 
         DB::beginTransaction();
         try {
@@ -110,10 +110,10 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
 
-                $tes_evi2[]=isset($evident[$i])?$evident[$i]:[];
-                if(isset($evident[$i]) && count($evident[$i]) > 0)
+                $tes_evi2[]= $evidents[$i];
+                if(isset($evidents[$i]) && count($evidents[$i]) > 0)
                 {
-                    $evident = $evident[$i];
+                    $evident = $evidents[$i];
                     $tes_evi1[] = $evident;
                     if (count($evident) > 0) {
                         CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
@@ -143,6 +143,7 @@ class CapabilityAssesmentController extends Controller
 
             DB::commit();
 
+            $data['all_ev']=$evidents;
             $data['tes_evi1']=$tes_evi1;
             $data['tes_evi2'] = $tes_evi2;
             return $this->successResponse($data);

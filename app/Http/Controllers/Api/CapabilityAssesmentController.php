@@ -90,7 +90,8 @@ class CapabilityAssesmentController extends Controller
         DB::beginTransaction();
         try {
 
-            $tes_evi=[];
+            $tes_evi1 = [];
+            $tes_evi2=[];
             for ($i = 0; $i < count($capability_assesment); $i++) {
                 // $capabilityass = $_item_payload['capabilityass'];
 
@@ -109,9 +110,11 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
 
+                $tes_evi2[]=isset($evident[$i])?$evident[$i]:[];
                 if(isset($evident[$i]) && count($evident[$i]) > 0)
                 {
                     $evident = $evident[$i];
+                    $tes_evi1[] = $evident;
                     if (count($evident) > 0) {
                         CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                         $_evident = [];
@@ -126,7 +129,7 @@ class CapabilityAssesmentController extends Controller
                             );
                         }
                         CapabilityAssesmentEvident::insert($_evident);
-                        $tes_evi[]=$_evident;
+                        // $tes_evi[]=$_evident;
                     }
                 }
             }
@@ -139,7 +142,10 @@ class CapabilityAssesmentController extends Controller
             // ]);
 
             DB::commit();
-            return $this->successResponse($tes_evi);
+
+            $data['tes_evi1']=$tes_evi1;
+            $data['tes_evi2'] = $tes_evi2;
+            return $this->successResponse($data);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

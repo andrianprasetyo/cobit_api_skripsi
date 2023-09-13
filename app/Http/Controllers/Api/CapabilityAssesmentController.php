@@ -363,6 +363,7 @@ class CapabilityAssesmentController extends Controller
                         $_bobot = DB::table('capability_level')
                             ->where('domain_id', $_item_domain->id)
                             ->where('level', $_item_level->level)
+                            ->whereNull('capability_level.deleted_at')
                             ->select(DB::raw("SUM(bobot) as bobot_level"))
                             ->first();
 

@@ -55,13 +55,13 @@ class CapabilityAssesmentController extends Controller
             'result' => round($total_result,2)
         );
 
-        $submited=CapabilityAssesmentSubmited::where('assesment_id',$request->assesment_id)
-            ->where('domain_id',$request->domain_id)
-            ->where('level',$request->level)
-            ->where('submited',true)
-            ->exists();
+        // $submited=CapabilityAssesmentSubmited::where('assesment_id',$request->assesment_id)
+        //     ->where('domain_id',$request->domain_id)
+        //     ->where('level',$request->level)
+        //     ->where('submited',true)
+        //     ->exists();
 
-        $data['submited']=$submited;
+        // $data['submited']=$submited;
         return $this->successResponse($data);
     }
 
@@ -89,6 +89,8 @@ class CapabilityAssesmentController extends Controller
 
         DB::beginTransaction();
         try {
+
+            $tes_evi=[];
             for ($i = 0; $i < count($capability_assesment); $i++) {
                 // $capabilityass = $_item_payload['capabilityass'];
 
@@ -124,19 +126,20 @@ class CapabilityAssesmentController extends Controller
                             );
                         }
                         CapabilityAssesmentEvident::insert($_evident);
+                        $tes_evi[]=$_evident;
                     }
                 }
             }
 
-            CapabilityAssesmentSubmited::firstOrCreate([
-                'assesment_id'=>$request->assesment_id,
-                'domain_id' => $request->domain_id,
-                'level' => $request->level,
-                'submited'=>true
-            ]);
+            // CapabilityAssesmentSubmited::firstOrCreate([
+            //     'assesment_id'=>$request->assesment_id,
+            //     'domain_id' => $request->domain_id,
+            //     'level' => $request->level,
+            //     'submited'=>true
+            // ]);
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($tes_evi);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

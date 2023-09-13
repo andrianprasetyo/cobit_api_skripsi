@@ -355,18 +355,22 @@ class CapabilityAssesmentController extends Controller
                         {
                             $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                         }
-                        $sts = null;
+                        $sts = 'N/A';
 
-                        if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
-                            $sts = 'N';
-                        } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
-                            $sts = 'P';
-                        } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
-                            $sts = 'L';
-                        } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
-                            $sts = 'F';
-                        } else {
-                            $sts = 'N/A';
+                        if($_level->compilance != null)
+                        {
+
+                            if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
+                                $sts = 'N';
+                            } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
+                                $sts = 'P';
+                            } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
+                                $sts = 'L';
+                            } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
+                                $sts = 'F';
+                            } else {
+                                $sts = 'N/A';
+                            }
                         }
 
                         $_total_all[] = $_total_compilance;

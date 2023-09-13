@@ -84,7 +84,12 @@ class MediaRepositoryController extends Controller
                 $doc=new MediaRepository();
                 $doc->assesment_id = $assesment_id;
                 $doc->docs = $filedocs;
-                $doc->deskripsi=$deskripsi;
+
+                $doc->deskripsi = $filedocs['originalname'];
+                if($request->filled('deskripsi'))
+                {
+                    $doc->deskripsi=$deskripsi;
+                }
                 $doc->upload_by=Auth::user()->id;
                 $doc->save();
 

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignUuid('capability_answer_id');
             $table->text('note')->nullable();
             $table->text('ofi')->nullable();
+            $table->foreignUuid('assesment_id')->nullable();
+            $table->foreignUuid('domain_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

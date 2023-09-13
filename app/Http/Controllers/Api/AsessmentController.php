@@ -13,6 +13,7 @@ use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
+use App\Models\CapabilityTargetLevel;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiJabatan;
@@ -689,38 +690,55 @@ class AsessmentController extends Controller
         // $listx = AssesmentCanvas::with(['assesment','domain'])
         //     ->where('assesment_id',$request->assesment_id);
 
+        // $list_domain = DB::table('assesment_canvas')
+        //     ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+        //     ->join('capability_target','assesment_canvas.assesment_id','=', 'capability_target.assesment_id')
+        //     ->leftJoin('capability_target_level', 'capability_target.id', '=','capability_target_level.capability_target_id')
+        //     ->where('capability_target.default',true)
+        //     ->where('assesment_canvas.assesment_id', $assesment->id)
+        //     ->whereNull('domain.deleted_at')
+        //     ->whereNull('capability_target.deleted_at')
+        //     ->whereNull('capability_target_level.deleted_at')
+        //     ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+        //     ->select(
+        //         'assesment_canvas.*',
+        //         'domain.kode',
+        //         'domain.ket',
+        //         'capability_target.nama as nama_target',
+        //         'capability_target_level.target as target_organisasi'
+        //         )
+        //     ->orderBy($sortBy, $sortType);
+
+
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->join('capability_target','assesment_canvas.assesment_id','=', 'capability_target.assesment_id')
-            ->leftJoin('capability_target_level', 'capability_target.id', '=','capability_target_level.capability_target_id')
-            ->where('capability_target.default',true)
+            ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
+            // ->join('capability_target_level', 'capability_target.id', '=', 'capability_target_level.capability_target_id')
             ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->where('capability_target.default', true)
             ->whereNull('domain.deleted_at')
             ->whereNull('capability_target.deleted_at')
-            ->whereNull('capability_target_level.deleted_at')
-            // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->select(
-                'assesment_canvas.*',
-                'domain.kode',
-                'domain.ket',
-                'capability_target.nama as nama_target',
-                'capability_target_level.target as target_organisasi'
-                )
+            ->whereNull('domain.deleted_at')
+                ->select(
+                    'assesment_canvas.*',
+                    'domain.kode',
+                    'domain.ket',
+                    'capability_target.nama as nama_target',
+                    'capability_target.id as capability_target_id',
+                    )
             ->orderBy($sortBy, $sortType);
 
         $total = $list_domain->count();
 
-        if ($limit != null || $page != null) {
-            $page = ($page * $limit) - $limit;
-            $list_domain->limit($limit);
-            $list_domain->skip($page);
-            // $list->skip($offset);
+        $offset = ($page * $limit) - $limit;
+        $list_domain->limit($limit);
+        $list_domain->skip($offset);
+        // $list->skip($offset);
 
-            $meta['per_page'] = (int) $limit;
-            $meta['total_page'] = ceil($total / $limit);
-            // $meta['current_page'] = ceil($offset / $limit) + 1;
-            $meta['current_page'] = (int) $page;
-        }
+        $meta['per_page'] = (int) $limit;
+        $meta['total_page'] = ceil($total / $limit);
+        $meta['current_page'] = (int) $page;
 
         $list_domains=$list_domain->get();
         $result=[];
@@ -728,7 +746,13 @@ class AsessmentController extends Controller
         {
             foreach ($list_domains as $_item_domain) {
                 $_result=$_item_domain;
-                $_result->target_organisasi=(int)$_result->target_organisasi;
+
+                $target_org=CapabilityTargetLevel::where('domain_id',$_item_domain->domain_id)
+                    ->where('capability_target_id',$_item_domain->capability_target_id)
+                    ->first();
+
+                // $_result->target_level=$target_org;
+                $_result->target_level = $target_org && $target_org->target != null? (int)$target_org->target:0;
 
                 $_level = DB::table('capability_assesment')
                     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
@@ -756,7 +780,7 @@ class AsessmentController extends Controller
                 $_result->hasil_assesment = $_total_compilance;
                 $_result->gap_deskripsi='Terdapata kesenjangan antara nilai saat ini dengan target Manajemen KCI';
                 $_result->potensi = 'Improvment pada area';
-                if($_total_compilance > $_result->target_organisasi)
+                if($_total_compilance > $_result->target_level)
                 {
                     $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
                     $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';

@@ -28,6 +28,8 @@ class CapabilityTargetLevelController extends Controller
         $list=DB::table('capability_target_level')
             ->join('domain','capability_target_level.domain_id','=','domain.id')
             ->where('capability_target_id',$target_id)
+            ->whereNull('capability_target_level.deleted_at')
+            ->whereNull('domain.deleted_at')
             ->select('capability_target_level.*')
             ->orderBy('domain.urutan','asc');
 
@@ -52,6 +54,7 @@ class CapabilityTargetLevelController extends Controller
             ->join('domain','assesment_canvas.domain_id','=','domain_id')
             ->where('assesment_canvas.assesment_id',$assesment_id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target)
+            ->whereNull('domain.deleted_at')
             ->select('domain.id','domain.kode','domain.ket','domain.urutan')
             ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')
             ->orderBy('domain.urutan','asc');

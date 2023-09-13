@@ -695,6 +695,9 @@ class AsessmentController extends Controller
             ->leftJoin('capability_target_level', 'capability_target.id', '=','capability_target_level.capability_target_id')
             ->where('capability_target.default',true)
             ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->whereNull('domain.deleted_at')
+            ->whereNull('capability_target.deleted_at')
+            ->whereNull('capability_target_level.deleted_at')
             // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->select(
                 'assesment_canvas.*',
@@ -731,6 +734,9 @@ class AsessmentController extends Controller
                     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
                     ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
                     ->where('capability_level.domain_id', $_item_domain->domain_id)
+                    ->whereNull('capability_assesment.deleted_at')
+                    ->whereNull('capability_level.deleted_at')
+                    ->whereNull('capability_answer.deleted_at')
                     ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
                     ->first();
 

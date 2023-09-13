@@ -204,6 +204,10 @@ class CapabilityAssesmentController extends Controller
                     ->where('assesment_domain.assesment_id', $request->asesment_id)
                     ->where('capability_level.level', $_item_level->level)
                     ->where('capability_level.domain_id', $request->domain_id)
+                    ->whereNull('capability_assesment.deleted_at')
+                    ->whereNull('capability_level.deleted_at')
+                    ->whereNull('capability_answer.deleted_at')
+                    ->whereNull('assesment_domain.deleted_at')
                     ->select(
                         // 'capability_assesment.id',
                         // 'capability_assesment.capability_level_id',
@@ -241,6 +245,7 @@ class CapabilityAssesmentController extends Controller
             ->select('domain.id', 'domain.kode', 'domain.ket')
             ->where('domain.id', $domain_id)
             ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->whereNull('domain.deleted_at')
             // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->first();
 
@@ -252,6 +257,7 @@ class CapabilityAssesmentController extends Controller
 
             $list_levels = DB::table('capability_level')
                 ->where('domain_id', $domain->id)
+                ->whereNull('capability_level.deleted_at')
                 ->select('level')
                 ->groupBy('level')
                 ->orderBy('level', 'asc')
@@ -266,12 +272,16 @@ class CapabilityAssesmentController extends Controller
                         ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
                         ->where('capability_level.domain_id', $domain->id)
                         ->where('capability_level.level', $_item_level->level)
+                        ->whereNull('capability_assesment.deleted_at')
+                        ->whereNull('capability_level.deleted_at')
+                        ->whereNull('capability_answer.deleted_at')
                         ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
                         ->first();
 
                     $_bobot = DB::table('capability_level')
                         ->where('domain_id', $domain->id)
                         ->where('level', $_item_level->level)
+                        ->whereNull('capability_level.deleted_at')
                         ->select(DB::raw("SUM(bobot) as bobot_level"))
                         ->first();
 
@@ -313,6 +323,7 @@ class CapabilityAssesmentController extends Controller
             ->select('domain.id', 'domain.kode','domain.ket')
             ->where('assesment_canvas.assesment_id', $assesment->id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'asc')
             ->get();
 
@@ -327,6 +338,7 @@ class CapabilityAssesmentController extends Controller
 
                 $list_levels = DB::table('capability_level')
                     ->where('domain_id', $_item_domain->id)
+                    ->whereNull('capability_level.deleted_at')
                     ->select('level')
                     ->groupBy('level')
                     ->orderBy('level', 'asc')
@@ -342,6 +354,9 @@ class CapabilityAssesmentController extends Controller
                             ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
                             ->where('capability_level.domain_id', $_item_domain->id)
                             ->where('capability_level.level', $_item_level->level)
+                            ->whereNull('capability_assesment.deleted_at')
+                            ->whereNull('capability_level.deleted_at')
+                            ->whereNull('capability_answer.deleted_at')
                             ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
                             ->first();
 

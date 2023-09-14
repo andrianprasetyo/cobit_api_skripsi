@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CapabilityAssesment\CapabilityAssesmentLevelResource;
 use App\Http\Resources\CapabilityLevel\CapabilityLevelResource;
 use App\Models\Assesment;
+use App\Models\AssesmentDomain;
 use App\Models\CapabilityAnswer;
 use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentEvident;
@@ -23,7 +24,10 @@ class CapabilityAssesmentController extends Controller
 
     public function list(Request $request)
     {
+        // $_list_domain=AssesmentDomain::where('assesment_id',$request->assesment_id)->get();
+
         $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer','capabilityass.evident', 'capabilityass.evident.docs'])
+            ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
             ->where('level',$request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan','asc');
@@ -48,7 +52,7 @@ class CapabilityAssesmentController extends Controller
 
         $total_bobot_answer = array_sum($_total_bobot_answer);
         $total_bobot_level=array_sum($_total_bobot_level);
-        $total_result = $total_bobot_answer/ $total_bobot_level;
+        $total_result = $total_bobot_answer != 0?$total_bobot_answer/ $total_bobot_level:0;
         $data['total_bobot']=array(
             'level'=>$total_bobot_level,
             'answer' => $total_bobot_answer,

@@ -11,8 +11,10 @@ use App\Models\AssesmentDomain;
 use App\Models\CapabilityAnswer;
 use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentEvident;
+use App\Models\CapabilityAssesmentOfi;
 use App\Models\CapabilityAssesmentSubmited;
 use App\Models\CapabilityLevel;
+use App\Models\CapabilityTarget;
 use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,17 +24,24 @@ class CapabilityAssesmentController extends Controller
 {
     use JsonResponse;
 
-    public function list(Request $request)
+    public function listX(Request $request)
     {
-        // $_list_domain=AssesmentDomain::where('assesment_id',$request->assesment_id)->get();
+        // $target_ass=CapabilityTarget::where('id',)->where('assesment_id',$request->assesment_id)->first();
 
-        $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer','capabilityass.evident', 'capabilityass.evident.docs'])
+        $list=CapabilityLevel::with([
+                'domain',
+                'capabilityass',
+                'capabilityass.capability_answer',
+                'capabilityass.evident',
+                'capabilityass.evident.docs'
+            ])
             // ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
             ->where('level',$request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan','asc');
 
         $_data_ass=$list->get();
+
         $data_ass=CapabilityAssesmentLevelResource::collection($_data_ass);
         $_total_bobot_level = [];
         $_total_bobot_answer=[];
@@ -69,6 +78,68 @@ class CapabilityAssesmentController extends Controller
         return $this->successResponse($data);
     }
 
+    public function list(Request $request)
+    {
+        // $target_id=$request->capability_target_id;
+        $assesment_id = $request->assesment_id;
+        $domain_id=$request->domain_id;
+        $list_level = CapabilityLevel::with([
+            'domain',
+            // 'capabilityass',
+            // 'capabilityass.capability_answer',
+            // 'capabilityass.evident',
+            // 'capabilityass.evident.docs'
+        ])
+            // ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
+            ->where('level', $request->level)
+            ->where('domain_id', $request->domain_id)
+            ->orderBy('urutan', 'asc')
+            ->get();
+
+
+        $data_list=[];
+        $_total_bobot_level = [];
+        $_total_bobot_answer = [];
+
+        if(!$list_level->isEmpty()){
+            foreach ($list_level as $_item_level) {
+                $level_item=$_item_level;
+                $target=CapabilityAssesment::with([
+                        'capability_answer',
+                        'evident.docs'
+                    ])
+                    ->where('capability_level_id',$_item_level->id)
+                    // ->where('capability_target_id', $target_id)
+                    ->where('assesment_id',$assesment_id)
+                    ->where('domain_id', $domain_id)
+                    ->first();
+
+                $level_item->subkode = $_item_level->domain->kode . '.' . $_item_level->kode;
+                $level_item->capabilityass=$target;
+
+                $_total_bobot_level[] = $_item_level->bobot;
+                if (isset($target->capability_answer->bobot)) {
+                    $_total_bobot_answer[] = (float) $target->capability_answer->bobot;
+                }
+
+                $data_list[]= $level_item;
+            }
+        }
+
+        $data['answer'] = CapabilityAnswer::orderBy('bobot', 'asc')->get();
+        $data['list']=$data_list;
+
+        $total_bobot_answer = array_sum($_total_bobot_answer);
+        $total_bobot_level = array_sum($_total_bobot_level);
+        $total_result = $total_bobot_answer != 0 ? $total_bobot_answer / $total_bobot_level : 0;
+        $data['total_bobot'] = array(
+            'level' => $total_bobot_level,
+            'answer' => $total_bobot_answer,
+            'result' => round($total_result, 2)
+        );
+        return $this->successResponse($data);
+    }
+
     public function createAnswer(Request $request)
     {
         // dd($_POST);
@@ -78,23 +149,24 @@ class CapabilityAssesmentController extends Controller
                 'capability_assesment_id' => 'required|array',
                 'capability_level_id' => 'required|array',
                 'capability_answer_id' => 'required|array',
-                'capability_target_id' => 'required|array',
+                // 'capability_target_id' => 'required',
             ],
             [
                 'capability_assesment_id.required'=>'Capability Assesment ID harus di isi',
                 'capability_level_id.required' => 'Capability Level ID harus di isi',
                 'capability_answer_id.required' => 'Capability Answer ID harus di isi',
-                'capability_target_id.required' => 'Capability Target ID harus di isi',
+                // 'capability_target_id.required' => 'Capability Target ID harus di isi',
             ]
         );
         $capability_assesment = $request->capability_assesment_id;
         $capability_level_id = $request->capability_level_id;
         $capability_answer_id = $request->capability_answer_id;
-        $capability_target_id = $request->capability_target_id;
+        // $capability_target_id = $request->capability_target_id;
 
         $note = $request->note;
         $ofi = $request->ofi;
         $evidents = $request->evident;
+        $ofi = $request->ofi;
 
         DB::beginTransaction();
         try {
@@ -116,9 +188,9 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->capability_answer_id = $capability_answer_id[$i];
                 $capability_ass->note = $note[$i];
                 $capability_ass->ofi = $ofi[$i];
-                // $capability_ass->assesment_id=$request->assesment_id;
-                // $capability_ass->domain_id = $request->domain_id;
-                $capability_ass->capability_target_id=$capability_target_id;
+                $capability_ass->assesment_id=$request->assesment_id;
+                $capability_ass->domain_id = $request->domain_id;
+                // $capability_ass->capability_target_id=$capability_target_id;
                 $capability_ass->save();
 
                 // $tes_evi2[]= isset($evidents[$i])?$evidents[$i]:[];
@@ -141,6 +213,23 @@ class CapabilityAssesmentController extends Controller
                         }
                         CapabilityAssesmentEvident::insert($_evident);
                         // $tes_evi[]=$_evident;
+                    }
+                }
+
+                if(isset($ofi[$i]) && count($ofi[$i]) > 0)
+                {
+                    if (count($ofi) > 0) {
+                        CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
+                        $_ofi = [];
+                        for ($o = 0; $o < count($ofi); $o++) {
+                            $_ofi[] = array(
+                                'id' => Str::uuid(),
+                                'capability_assesment_id' => $capability_ass->id,
+                                'ofi' => isset($_ofi[$o]['ofi']) ? $_ofi[$o]['ofi'] : null,
+                                'capability_target_id' => isset($_ofi[$o]['capability_target_id']) ? $_ofi[$o]['capability_target_id'] : null,
+                            );
+                        }
+                        CapabilityAssesmentOfi::insert($_ofi);
                     }
                 }
             }

@@ -15,6 +15,7 @@ use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
 use App\Models\CapabilityAssesment;
+use App\Models\CapabilityAssesmentOfi;
 use App\Models\CapabilityTarget;
 use App\Models\CapabilityTargetLevel;
 use App\Models\Domain;
@@ -841,23 +842,49 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function RefortDetailOfi(Request $request)
+    public function ReportDetailOfi(Request $request)
     {
-        $data=Domain::find($request->domain_id);
-        // $data=CapabilityTarget::with(['targetlevel.domain','targetlevel.capabilityassesments'])
-        //     ->whereRelation('targetlevel','domain_id','=',$request->domain_id)
-        //     ->find($id);
+        // $data=Domain::find($request->domain_id);
+        // // $data=CapabilityTarget::with(['targetlevel.domain','targetlevel.capabilityassesments'])
+        // //     ->whereRelation('targetlevel','domain_id','=',$request->domain_id)
+        // //     ->find($id);
 
-        $cap_ass=CapabilityAssesment::where('domain_id',$request->domain_id)
-            ->where('assesment_id',$request->assesment_id)
+        // $cap_ass=CapabilityAssesment::where('domain_id',$request->domain_id)
+        //     ->where('assesment_id',$request->assesment_id)
+        //     // ->where('target_id', $request->target_id)
+        //     ->get();
+
+        // $targets=CapabilityTarget::where('assesment_id',$request->assesment_id)->get();
+
+        // $list_target=[];
+        // if(!$targets->isEmpty())
+        // {
+        //     foreach ($targets as $_item_target) {
+        //         $_target=$_item_target;
+        //         $ofis=CapabilityAssesment::where('assesment_id',$request->assesment_id)
+        //             ->where('domain_id',$request->domain_id)
+        //             ->where('capability_target_id',$_item_target->id)
+        //             ->get();
+
+        //         $_target->listofi=$ofis;
+        //         $list_target=$_target;
+        //     }
+        // }
+
+        // $data->capabilityassesments=$cap_ass;
+        // $data->targets = $list_target;
+        $list_ofi=CapabilityAssesmentOfi::where('capability_assesment_id',$request->capability_assesment_id)
+            ->where('capability_target_id',$request->capability_target_id)
             ->get();
 
 
-        $data->capabilityassesments=$cap_ass;
+        $domain = Domain::find($request->domain_id);
+        $data['ofi'] = $list_ofi;
+        $data['domain']=$domain;
         return $this->successResponse($data);
     }
 
-    public function dwonloadReportCapabilityAssesment(Request $request)
+    public function downloadReportCapabilityAssesment(Request $request)
     {
         $limit = $request->limit;
         $page = $request->page;

@@ -401,13 +401,21 @@ class CapabilityAssesmentController extends Controller
                         if($_total_compilance  == $answer_val['N/A']){
                             $sts='N/A';
                         }else if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
-                            $sts='N';
+                            if($sts != 'N/A'){
+                                $sts='N';
+                            }
                         } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']){
-                            $sts = 'P';
+                            if ($sts != 'N/A') {
+                                $sts = 'P';
+                            }
                         } else if ($_total_compilance >= $answer_val['P'] && $_total_compilance < $answer_val['L']){
-                            $sts = 'L';
+                            if ($sts != 'N/A') {
+                                $sts = 'L';
+                            }
                         } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']){
-                            $sts = 'F';
+                            if ($sts != 'N/A') {
+                                $sts = 'F';
+                            }
                         }
 
                         // if($_level->compilance != null)

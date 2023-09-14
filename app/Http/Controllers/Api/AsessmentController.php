@@ -873,11 +873,12 @@ class AsessmentController extends Controller
 
         // $data->capabilityassesments=$cap_ass;
         // $data->targets = $list_target;
-        $list_ofi=CapabilityAssesmentOfi::where('capability_assesment_id',$request->capability_assesment_id)
-            ->where('capability_target_id',$request->capability_target_id)
-            ->get();
+        $list_ofi=CapabilityAssesmentOfi::where('capability_target_id',$request->capability_target_id);
 
-
+        if($request->filled('capability_assesment_id')){
+            $list_ofi->where('capability_assesment_id',$request->capability_assesment_id);
+        }
+        $list_ofi=$list_ofi->get();
         $domain = Domain::find($request->domain_id);
         $data['ofi'] = $list_ofi;
         $data['domain']=$domain;

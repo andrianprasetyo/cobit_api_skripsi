@@ -19,4 +19,9 @@ class CapabilityAssesmentOfi extends Model
         'deleted_at',
         'updated_at'
     ];
+
+    public function target()
+    {
+        return $this->belongsTo(CapabilityTarget::class, 'capability_target_id');
+    }
 }

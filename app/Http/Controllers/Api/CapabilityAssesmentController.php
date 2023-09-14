@@ -105,7 +105,7 @@ class CapabilityAssesmentController extends Controller
                 $target=CapabilityAssesment::with([
                         'capability_answer',
                         'evident.docs',
-                        'ofi'
+                        'ofi.target'
                     ])
                     ->where('capability_level_id',$_item_level->id)
                     // ->where('capability_target_id', $target_id)

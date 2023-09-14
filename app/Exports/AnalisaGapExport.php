@@ -19,7 +19,7 @@ class AnalisaGapExport implements FromView
     }
     public function view(): View
     {
-        return view('report.analisa-gap', [
+        return view('report.capability-assesment-gap', [
             // 'header' => $this->header,
             'data' => $this->data
         ]);

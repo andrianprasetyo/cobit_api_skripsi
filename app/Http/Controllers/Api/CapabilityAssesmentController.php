@@ -326,6 +326,16 @@ class CapabilityAssesmentController extends Controller
         //     ->orderBy('level', 'asc')
         //     ->get();
 
+        $cap_answer = CapabilityAnswer::all();
+        $answer_val=[];
+        if(!$cap_answer->isEmpty())
+        {
+            foreach ($cap_answer as $_item_cap) {
+                $answer_val[$_item_cap->label]=(float)$_item_cap->bobot;
+            }
+        }
+        // return $this->successResponse($answer_val);
+
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id', 'domain.kode','domain.ket')
@@ -384,23 +394,35 @@ class CapabilityAssesmentController extends Controller
                         {
                             $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                         }
-                        $sts = 'N/A';
 
-                        if($_level->compilance != null)
-                        {
-
-                            if ($_total_compilance >= 0 && $_total_compilance <= 0.15) {
-                                $sts = 'N';
-                            } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
-                                $sts = 'P';
-                            } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
-                                $sts = 'L';
-                            } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
-                                $sts = 'F';
-                            } else {
-                                $sts = 'N/A';
-                            }
+                        $sts = '-';
+                        if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
+                            $sts='N';
+                        } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']){
+                            $sts = 'P';
+                        } else if ($_total_compilance >= $answer_val['P'] && $_total_compilance < $answer_val['L']){
+                            $sts = 'L';
+                        } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']){
+                            $sts = 'F';
+                        }else{
+                            $sts = 'N/A';
                         }
+
+                        // if($_level->compilance != null)
+                        // {
+
+                        //     if ($_total_compilance > 0 && $_total_compilance < 0.15) {
+                        //         $sts = 'N';
+                        //     } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
+                        //         $sts = 'P';
+                        //     } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
+                        //         $sts = 'L';
+                        //     } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
+                        //         $sts = 'F';
+                        //     } else {
+                        //         $sts = 'N/A';
+                        //     }
+                        // }
 
                         $_total_all[] = $_total_compilance;
 

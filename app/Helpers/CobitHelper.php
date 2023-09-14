@@ -784,6 +784,7 @@ class CobitHelper
                                 'domain_id' => $_item_canvas->domain_id,
                                 'capability_target_id' => $target_id,
                                 'assesment_domain_id' => $ass_domain->id,
+                                'target' => $_item_canvas->aggreed_capability_level,
                                 'created_at' => Carbon::now()->toDateTimeString(),
                                 'updated_at' => Carbon::now()->toDateTimeString()
                             );

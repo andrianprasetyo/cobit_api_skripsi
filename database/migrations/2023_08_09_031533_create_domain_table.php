@@ -17,6 +17,7 @@ return new class extends Migration
             // $table->string('nama', 75)->nullable();
             $table->text('ket')->nullable();
             $table->integer('urutan')->nullable();
+            $table->text('translate')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

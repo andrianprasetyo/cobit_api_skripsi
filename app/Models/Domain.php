@@ -14,7 +14,7 @@ class Domain extends Model
     public $incrementing = false;
     protected $table = 'domain';
     protected $keyType = 'string';
-    protected $fillable = ['kode', 'ket'];
+    protected $fillable = ['kode', 'ket','translate'];
 
     protected $hidden = [
         'deleted_at',

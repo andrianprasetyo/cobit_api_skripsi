@@ -63,8 +63,9 @@ class DomainController extends Controller
         );
 
         $data=New Domain();
-        $data=$request->kode;
-        $data = $request->ket;
+        $data->kode =$request->kode;
+        $data->ket = $request->ket;
+        $data->translate=$request->translate;
         $data->save();
 
         return $this->successResponse();
@@ -88,6 +89,7 @@ class DomainController extends Controller
         }
         $data->kode = $request->kode;
         $data->ket = $request->ket;
+        $data->translate = $request->translate;
         $data->save();
 
         return $this->successResponse();

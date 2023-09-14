@@ -199,11 +199,11 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Role Eksternal tidak tersedia',404);
             }
 
-            $_check_mail_exists = User::where('email', $pic_email)->exists();
+            $_check_mail_exists = User::where('email', $pic_email)->first();
             $user_id=null;
-            if (!$this->account->internal) {
-                $user_id = $this->account->id;
-            }
+            // if (!$this->account->internal) {
+            //     $user_id = $this->account->id;
+            // }
             $default_ass=true;
             if(!$_check_mail_exists)
             {
@@ -229,10 +229,18 @@ class AsessmentController extends Controller
                 $role_user->default=true;
                 $role_user->save();
 
-                if($this->account->internal){
-                    $user_id=$user->id;
-                }
+                // if($this->account->internal){
+                //     $user_id=$user->id;
+                // }
                 $default_ass=false;
+            }else{
+                $user_id=$_check_mail_exists->id;
+            }
+
+            if ($this->account->internal) {
+                $user_id = $user->id;
+            }else{
+                $user_id = $this->account->id;
             }
 
             $assesment = new Assesment();
@@ -248,15 +256,12 @@ class AsessmentController extends Controller
             $assesment->minimum_target=$request->filled('minimum_target')?$request->minimum_target:3;
             $assesment->save();
 
-            if(!$this->account->internal)
-            {
-                $user_ass=new UserAssesment();
-                $user_ass->users_id= $user_id;
-                $user_ass->assesment_id=$assesment->id;
-                $user_ass->default=$default_ass;
-                $user_ass->expire_at=$request->pic_expire_at;
-                $user_ass->save();
-            }
+            $user_ass = new UserAssesment();
+            $user_ass->users_id = $user_id;
+            $user_ass->assesment_id = $assesment->id;
+            $user_ass->default = $default_ass;
+            $user_ass->expire_at = $request->pic_expire_at;
+            $user_ass->save();
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
@@ -839,4 +844,6 @@ class AsessmentController extends Controller
         $data->capabilityassesments=$cap_ass;
         return $this->successResponse($data);
     }
+
+
 }

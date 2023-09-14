@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\AnalisaGapExport;
+use App\Exports\SummaryCapabilityAssesmentExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CapabilityAssesment\CapabilityAssesmentLevelResource;
@@ -19,6 +21,7 @@ use App\Traits\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CapabilityAssesmentController extends Controller
 {
@@ -85,17 +88,12 @@ class CapabilityAssesmentController extends Controller
         $domain_id=$request->domain_id;
         $list_level = CapabilityLevel::with([
             'domain',
-            // 'capabilityass',
-            // 'capabilityass.capability_answer',
-            // 'capabilityass.evident',
-            // 'capabilityass.evident.docs'
         ])
             // ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
             ->where('level', $request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan', 'asc')
             ->get();
-
 
         $data_list=[];
         $_total_bobot_level = [];
@@ -567,5 +565,164 @@ class CapabilityAssesmentController extends Controller
         $data['list'] = $list;
         $data['level'] = collect($daftar_level)->unique()->values();
         return $this->successResponse($data);
+    }
+
+    public function downloadReportSumCapabilityAss(Request $request)
+    {
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+
+        // $list_level = CapabilityLevel::select('level')
+        //     ->groupBy('level')
+        //     ->orderBy('level', 'asc')
+        //     ->get();
+
+        $cap_answer = CapabilityAnswer::all();
+        $answer_val = [];
+        if (!$cap_answer->isEmpty()) {
+            foreach ($cap_answer as $_item_cap) {
+                $answer_val[$_item_cap->label] = (float) $_item_cap->bobot;
+            }
+        }
+        // return $this->successResponse($answer_val);
+
+        $list_domain = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('domain.id', 'domain.kode', 'domain.ket')
+            ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
+            ->orderBy('domain.urutan', 'asc')
+            ->get();
+
+
+        $list = [];
+        $daftar_level = [];
+        if (!$list_domain->isEmpty()) {
+            foreach ($list_domain as $_item_domain) {
+
+                $_list_level = [];
+                $_total_all = [];
+
+                $list_levels = DB::table('capability_level')
+                    ->where('domain_id', $_item_domain->id)
+                    ->whereNull('capability_level.deleted_at')
+                    ->select('level')
+                    ->groupBy('level')
+                    ->orderBy('level', 'asc')
+                    ->get();
+
+                if (!$list_levels->isEmpty()) {
+                    foreach ($list_levels as $_item_level) {
+
+                        $daftar_level[] = $_item_level->level;
+                        $_level = DB::table('capability_assesment')
+                            ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                            ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                            ->where('capability_level.domain_id', $_item_domain->id)
+                            ->where('capability_level.level', $_item_level->level)
+                            ->whereNull('capability_assesment.deleted_at')
+                            ->whereNull('capability_level.deleted_at')
+                            ->whereNull('capability_answer.deleted_at')
+                            ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                            ->first();
+
+                        $_bobot = DB::table('capability_level')
+                            ->where('domain_id', $_item_domain->id)
+                            ->where('level', $_item_level->level)
+                            ->whereNull('capability_level.deleted_at')
+                            ->select(DB::raw("SUM(bobot) as bobot_level"))
+                            ->first();
+
+
+
+                        // $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+                        // $_total_sum_compilance = null;
+                        // if($_level->compilance != null)
+                        // {
+                        //     $_total_sum_compilance = $_level->compilance;
+                        // }
+                        // $_total_sum_compilance = (float) $_level->compilance;
+                        // $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
+
+                        // $_total_compilance=0;
+                        // if($_total_sum_compilance != null)
+                        // {
+                        //     $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
+                        // }
+
+                        $sts = null;
+
+                        if ($_level->compilance != null) {
+
+                            $_total_sum_compilance = $_level->compilance;
+                            $_total_compilance = $_total_sum_compilance != 0 ? round($_total_sum_compilance / $_bobot->bobot_level, 2) : 0;
+
+                            if ($_total_compilance == $answer_val['N/A']) {
+                                $sts = 'N/A';
+                            } else if ($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']) {
+                                if ($sts != 'N/A') {
+                                    $sts = 'N';
+                                }
+                            } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']) {
+                                if ($sts != 'N/A') {
+                                    $sts = 'P';
+                                }
+                            } else if ($_total_compilance >= $answer_val['P'] && $_total_compilance < $answer_val['L']) {
+                                if ($sts != 'N/A') {
+                                    $sts = 'L';
+                                }
+                            } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']) {
+                                if ($sts != 'N/A') {
+                                    $sts = 'F';
+                                }
+                            }
+
+                            $_total_all[] = $_total_compilance;
+
+                            $_list_level[] = array(
+                                'level' => $_item_level->level,
+                                'total_compilance' => $_total_compilance,
+                                'label' => $sts,
+                                // '_total_sum_compilance' => $_total_sum_compilance
+                            );
+                        }
+
+                        // if($_level->compilance != null)
+                        // {
+
+                        //     if ($_total_compilance > 0 && $_total_compilance < 0.15) {
+                        //         $sts = 'N';
+                        //     } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
+                        //         $sts = 'P';
+                        //     } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
+                        //         $sts = 'L';
+                        //     } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
+                        //         $sts = 'F';
+                        //     } else {
+                        //         $sts = 'N/A';
+                        //     }
+                        // }
+
+
+                    }
+                }
+                $list[] = array(
+                    'id' => $_item_domain->id,
+                    'kode' => $_item_domain->kode,
+                    'ket' => $_item_domain->ket,
+                    'level' => $_list_level,
+                    'total' => array_sum($_total_all)
+                );
+            }
+        }
+
+        // $data = $this->paging($list);
+        $data['list'] = $list;
+        $data['level'] = collect($daftar_level)->unique()->values();
+
+        return Excel::download(new SummaryCapabilityAssesmentExport($data), 'report-summary-capabbility-assesment.xlsx');
     }
 }

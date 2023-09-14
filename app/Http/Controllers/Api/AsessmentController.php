@@ -205,7 +205,7 @@ class AsessmentController extends Controller
             // if (!$this->account->internal) {
             //     $user_id = $this->account->id;
             // }
-            $default_ass=true;
+            $default_ass=false;
             if(!$_check_mail_exists)
             {
                 $_token=Str::random(50);
@@ -233,17 +233,20 @@ class AsessmentController extends Controller
                 // if($this->account->internal){
                 //     $user_id=$user->id;
                 // }
-                $default_ass=false;
+                $user_id = $user->id;
+                $default_ass=true;
             }else{
                 $user=$_check_mail_exists;
                 $user_id=$_check_mail_exists->id;
+                $default_ass = false;
             }
 
-            if ($this->account->internal) {
-                $user_id = $user->id;
-            }else{
-                $user_id = $this->account->id;
-            }
+            // $user_id = $this->account->id;
+            // if ($this->account->internal) {
+            //     $user_id = $user->id;
+            // }else{
+            //     $user_id = $this->account->id;
+            // }
 
             $assesment = new Assesment();
             $assesment->nama = $request->asessment;

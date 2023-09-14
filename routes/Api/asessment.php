@@ -17,3 +17,4 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/assesment/report/detail-ofi', 'AsessmentController@RefortDetailOfi');
 });
 Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');
+Route::get('/assesment/analisa-gap', 'AsessmentController@cobaDownload');

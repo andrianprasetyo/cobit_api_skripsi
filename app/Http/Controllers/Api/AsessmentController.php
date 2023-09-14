@@ -455,6 +455,7 @@ class AsessmentController extends Controller
             //     // Notification::route('mail', $responden->email)->notify(new InviteRespondenNotif($organisasi));
             // }
 
+
             foreach ($request->email as $_item_email)
             {
                 $responden = new AssessmentUsers();

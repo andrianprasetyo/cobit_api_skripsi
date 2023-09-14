@@ -102,6 +102,7 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
     {
 
         $assesment = Assesment::with('organisasi')->find($this->assesment_id);
+
         $responden = new AssessmentUsers();
         $responden->email = $row['email'];
         if(isset($row['nama']) && $row['nama'] !='')
@@ -109,11 +110,24 @@ class RespondenImport implements ToModel,WithValidation, WithHeadingRow, WithSta
             $responden->nama = $row['nama'];
         }
 
+        $divisi_id=null;
         if (isset($row['divisi']) && $row['divisi'] != '') {
-            $responden->divisi = $row['divisi'];
+            $divisi = OrganisasiDivisi::where('organisasi_id', $assesment->organisasi->id)
+                ->where('nama', $row['divisi'])
+                ->first();
+
+            $divisi_id=$divisi?$divisi->id:null;
+            $responden->divisi_id = $divisi_id;
         }
         if (isset($row['jabatan']) && $row['jabatan'] != '') {
-            $responden->jabatan = $row['jabatan'];
+            if($divisi_id != null)
+            {
+                $jabatan=OrganisasiDivisiJabatan::where('organisasi_divisi_id',$divisi_id)
+                    ->where('nama',$row['jabatan'])
+                    ->first();
+
+                $responden->jabatan_id = $jabatan?$jabatan->id:null;
+            }
         }
 
 

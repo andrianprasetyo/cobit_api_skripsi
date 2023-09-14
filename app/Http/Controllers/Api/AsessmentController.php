@@ -847,9 +847,113 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function cobaDownload(Request $request)
+    public function dwonloadReportCapabilityAssesment(Request $request)
     {
-        $data=null;
-        return Excel::download(new AnalisaGapExport($data),'testing.xlsx');
+        $limit = $request->limit;
+        $page = $request->page;
+        $domain_id = $request->domain_id;
+        $target_id = $request->target_id;
+
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+
+        $list_domains = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
+            // ->join('capability_target_level', 'capability_target.id', '=', 'capability_target_level.capability_target_id')
+            ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
+            ->whereNull('capability_target.deleted_at')
+            ->whereNull('domain.deleted_at')
+            ->select(
+                'assesment_canvas.*',
+                'domain.kode',
+                'domain.ket',
+                'capability_target.nama as nama_target',
+                'capability_target.id as capability_target_id',
+            )
+            ->orderBy('domain.urutan', 'asc');
+
+
+        if ($request->filled('domain_id')) {
+            $list_domains->where('assesment_canvas.domain_id', $domain_id);
+        }
+        if ($request->filled('target_id')) {
+            $list_domains->where('capability_target.id', $target_id);
+        } else {
+            $list_domains->where('capability_target.default', true);
+        }
+
+        if($request->filled('limit') && $request->filled('page'))
+        {
+            $offset = ($page * $limit) - $limit;
+            $list_domains->limit($limit);
+            $list_domains->skip($offset);
+        }
+
+        $data = [];
+        $data_list_domain=$list_domains->get();
+        if (!$data_list_domain->isEmpty()) {
+            foreach ($data_list_domain as $_item_domain) {
+                $_result = $_item_domain;
+
+                $target_org = CapabilityTargetLevel::with('target')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->where('capability_target_id', $_item_domain->capability_target_id)
+                    ->first();
+
+                $_result->target_organisasi = $target_org;
+                $_result->target_level = $target_org && $target_org->target != null ? (int) $target_org->target : 0;
+
+                $_level = DB::table('capability_assesment')
+                    ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                    ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                    ->where('capability_level.domain_id', $_item_domain->domain_id)
+                    ->whereNull('capability_assesment.deleted_at')
+                    ->whereNull('capability_level.deleted_at')
+                    ->whereNull('capability_answer.deleted_at')
+                    ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                    ->first();
+
+                $_bobot = DB::table('capability_level')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->select(DB::raw("SUM(bobot) as bobot_level"))
+                    ->first();
+
+                $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
+                $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
+
+                $_total_compilance = 0;
+                if ($_total_sum_compilance != null) {
+                    $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                }
+
+                $_result->hasil_assesment = $_total_compilance;
+                $_result->gap_deskripsi = 'Terdapata kesenjangan antara nilai saat ini dengan target Manajemen KCI';
+                $_result->potensi = 'Improvment pada area';
+
+                $_result->gap_minus = (float) $_result->target_level - $_total_compilance;
+                if ($_total_compilance > $_result->target_level) {
+                    $_result->gap_minus = null;
+                    $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
+                    $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                }
+
+                // $_result->gap_minus = (float) $_item_domain->aggreed_capability_level - $_total_compilance;
+                // if ($_total_compilance > $_item_domain->aggreed_capability_level) {
+                //     $_result->gap_minus = null;
+                //     $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
+                //     $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                // }
+
+                $data[] = $_result;
+            }
+        }
+
+        return Excel::download(new AnalisaGapExport($data),'report-capabbility-assesment.xlsx');
+        // return $this->successResponse($data);
     }
 }

@@ -13,7 +13,7 @@ class CapabilityAnswer extends Model
     public $incrementing = false;
     protected $table = 'capability_answer';
     protected $keyType = 'string';
-    // protected $fillable = ['kegiatan'];
+    protected $fillable = ['nama','bobot','label'];
 
     protected $hidden = [
         'deleted_at',

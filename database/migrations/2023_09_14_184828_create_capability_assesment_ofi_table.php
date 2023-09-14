@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('capability_assesment_id');
             $table->foreignUuid('capability_target_id');
+            $table->foreignUuid('domain_id');
             $table->text('ofi')->nullable();
             $table->timestamps();
             $table->softDeletes();

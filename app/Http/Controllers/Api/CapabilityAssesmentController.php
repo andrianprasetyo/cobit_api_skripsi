@@ -226,6 +226,7 @@ class CapabilityAssesmentController extends Controller
                                 'capability_assesment_id' => $capability_ass->id,
                                 'ofi' => isset($_ofi[$o]['ofi']) ? $_ofi[$o]['ofi'] : null,
                                 'capability_target_id' => isset($_ofi[$o]['capability_target_id']) ? $_ofi[$o]['capability_target_id'] : null,
+                                'domain_id' => isset($_ofi[$o]['domain_id']) ? $_ofi[$o]['domain_id'] : null,
                             );
                         }
                         CapabilityAssesmentOfi::insert($_ofi);

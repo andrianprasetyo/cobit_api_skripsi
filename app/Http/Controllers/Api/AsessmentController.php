@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\AnalisaGapExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Assesment\AddPICRequest;
@@ -234,6 +235,7 @@ class AsessmentController extends Controller
                 // }
                 $default_ass=false;
             }else{
+                $user=$_check_mail_exists;
                 $user_id=$_check_mail_exists->id;
             }
 
@@ -845,5 +847,9 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-
+    public function cobaDownload(Request $request)
+    {
+        $data=null;
+        return Excel::download(new AnalisaGapExport($data),'testing.xlsx');
+    }
 }

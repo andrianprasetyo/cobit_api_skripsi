@@ -11,7 +11,7 @@ class AnalisaGapExport implements FromView
     * @return \Illuminate\Support\Collection
     */
     private $data, $header;
-    public function __construct($data, $header)
+    public function __construct($data, $header=null)
     {
         $list = [];
         $this->data = $data;
@@ -19,8 +19,8 @@ class AnalisaGapExport implements FromView
     }
     public function view(): View
     {
-        return view('report.quesionerresult', [
-            'header' => $this->header,
+        return view('report.analisa-gap', [
+            // 'header' => $this->header,
             'hasil' => $this->data
         ]);
     }

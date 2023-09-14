@@ -27,7 +27,7 @@ class CapabilityAssesmentController extends Controller
         // $_list_domain=AssesmentDomain::where('assesment_id',$request->assesment_id)->get();
 
         $list=CapabilityLevel::with(['domain','capabilityass','capabilityass.capability_answer','capabilityass.evident', 'capabilityass.evident.docs'])
-            ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
+            // ->whereRelation('capabilityass','assesment_id',$request->assesment_id)
             ->where('level',$request->level)
             ->where('domain_id', $request->domain_id)
             ->orderBy('urutan','asc');
@@ -74,22 +74,23 @@ class CapabilityAssesmentController extends Controller
         // dd($_POST);
         $request->validate(
             [
+
                 'capability_assesment_id' => 'required|array',
                 'capability_level_id' => 'required|array',
                 'capability_answer_id' => 'required|array',
-                // 'capability_target_id' => 'required|array',
+                'capability_target_id' => 'required|array',
             ],
             [
                 'capability_assesment_id.required'=>'Capability Assesment ID harus di isi',
                 'capability_level_id.required' => 'Capability Level ID harus di isi',
                 'capability_answer_id.required' => 'Capability Answer ID harus di isi',
-                // 'capability_target_id.required' => 'Capability Answer ID harus di isi',
+                'capability_target_id.required' => 'Capability Target ID harus di isi',
             ]
         );
         $capability_assesment = $request->capability_assesment_id;
         $capability_level_id = $request->capability_level_id;
         $capability_answer_id = $request->capability_answer_id;
-        // $capability_target_id = $request->capability_answer_id;
+        $capability_target_id = $request->capability_target_id;
 
         $note = $request->note;
         $ofi = $request->ofi;
@@ -115,8 +116,9 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->capability_answer_id = $capability_answer_id[$i];
                 $capability_ass->note = $note[$i];
                 $capability_ass->ofi = $ofi[$i];
-                $capability_ass->assesment_id=$request->assesment_id;
-                $capability_ass->domain_id = $request->domain_id;
+                // $capability_ass->assesment_id=$request->assesment_id;
+                // $capability_ass->domain_id = $request->domain_id;
+                $capability_ass->capability_target_id=$capability_target_id;
                 $capability_ass->save();
 
                 // $tes_evi2[]= isset($evidents[$i])?$evidents[$i]:[];
@@ -389,37 +391,58 @@ class CapabilityAssesmentController extends Controller
                             ->select(DB::raw("SUM(bobot) as bobot_level"))
                             ->first();
 
-                        $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+
+
+                        // $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+                        // $_total_sum_compilance = null;
+                        // if($_level->compilance != null)
+                        // {
+                        //     $_total_sum_compilance = $_level->compilance;
+                        // }
                         // $_total_sum_compilance = (float) $_level->compilance;
-                        $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
+                        // $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
 
-                        $_total_compilance=0;
-                        if($_total_sum_compilance != 0)
-                        {
-                            $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
-                        }
-
+                        // $_total_compilance=0;
+                        // if($_total_sum_compilance != null)
+                        // {
+                        //     $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
+                        // }
 
                         $sts = null;
 
-                        if($_total_compilance  == $answer_val['N/A']){
-                            $sts='N/A';
-                        }else if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
-                            if($sts != 'N/A'){
-                                $sts='N';
+                        if($_level->compilance != null){
+
+                            $_total_sum_compilance = $_level->compilance;
+                            $_total_compilance = $_total_sum_compilance != 0 ? round($_total_sum_compilance / $_bobot->bobot_level, 2) : 0;
+
+                            if($_total_compilance  == $answer_val['N/A']){
+                                $sts='N/A';
+                            }else if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
+                                if($sts != 'N/A'){
+                                    $sts='N';
+                                }
+                            } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']){
+                                if ($sts != 'N/A') {
+                                    $sts = 'P';
+                                }
+                            } else if ($_total_compilance >= $answer_val['P'] && $_total_compilance < $answer_val['L']){
+                                if ($sts != 'N/A') {
+                                    $sts = 'L';
+                                }
+                            } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']){
+                                if ($sts != 'N/A') {
+                                    $sts = 'F';
+                                }
                             }
-                        } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']){
-                            if ($sts != 'N/A') {
-                                $sts = 'P';
-                            }
-                        } else if ($_total_compilance >= $answer_val['P'] && $_total_compilance < $answer_val['L']){
-                            if ($sts != 'N/A') {
-                                $sts = 'L';
-                            }
-                        } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']){
-                            if ($sts != 'N/A') {
-                                $sts = 'F';
-                            }
+
+                            $_total_all[] = $_total_compilance;
+
+                            $_list_level[] = array(
+                                'level' => $_item_level->level,
+                                'total_compilance' => $_total_compilance,
+                                'label' => $sts,
+                                // '_total_sum_compilance' => $_total_sum_compilance
+                            );
                         }
 
                         // if($_level->compilance != null)
@@ -438,13 +461,7 @@ class CapabilityAssesmentController extends Controller
                         //     }
                         // }
 
-                        $_total_all[] = $_total_compilance;
 
-                        $_list_level[] = array(
-                            'level' => $_item_level->level,
-                            'total_compilance' => $_total_compilance,
-                            'label' => $sts,
-                        );
                     }
                 }
                 $list[] = array(

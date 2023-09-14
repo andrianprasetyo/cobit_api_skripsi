@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('capability_target_level', function (Blueprint $table) {
             $table->uuid('id')->primary();
             // $table->foreignUuid('assesment_id');
-            $table->foreignUuid('domain_id');
-            $table->foreignUuid('capability_target_id');
+            $table->foreignUuid('domain_id')->nullable();
+            $table->foreignUuid('capability_target_id')->nullable();
+            $table->foreignUuid('assesment_domain_id')->nullable();
             $table->double('target',1,2)->nullable();
             $table->timestamps();
             $table->softDeletes();

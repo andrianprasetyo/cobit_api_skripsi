@@ -761,12 +761,17 @@ class CobitHelper
 
                         if(!$_ass_domain)
                         {
-                            $ass_domain[]=array(
-                                'domain_id'=>$_item_canvas->domain_id,
-                                'assesment_id' => $assesment_id,
-                                'created_at' => Carbon::now()->toDateTimeString(),
-                                'updated_at' => Carbon::now()->toDateTimeString()
-                            );
+                            $ass_domain=new AssesmentDomain();
+                            $ass_domain->domain_id=$_item_canvas->domain_id;
+                            $ass_domain->assesment_id = $assesment_id;
+                            $ass_domain->save();
+
+                            // $ass_domain[]=array(
+                            //     'domain_id'=>$_item_canvas->domain_id,
+                            //     'assesment_id' => $assesment_id,
+                            //     'created_at' => Carbon::now()->toDateTimeString(),
+                            //     'updated_at' => Carbon::now()->toDateTimeString()
+                            // );
                         }
 
                         $_cap_target = CapabilityTargetLevel::where('domain_id', $_item_canvas->domain_id)
@@ -778,13 +783,14 @@ class CobitHelper
                             $target_level[] = array(
                                 'domain_id' => $_item_canvas->domain_id,
                                 'capability_target_id' => $target_id,
+                                'assesment_domain_id' => $ass_domain->id,
                                 'created_at' => Carbon::now()->toDateTimeString(),
                                 'updated_at' => Carbon::now()->toDateTimeString()
                             );
                         }
                     }
 
-                    AssesmentDomain::insert($ass_domain);
+                    // AssesmentDomain::insert($ass_domain);
                     CapabilityTargetLevel::insert($target_level);
                 }
             }

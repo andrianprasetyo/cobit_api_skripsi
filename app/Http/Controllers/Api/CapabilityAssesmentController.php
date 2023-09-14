@@ -395,8 +395,12 @@ class CapabilityAssesmentController extends Controller
                             $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                         }
 
-                        $sts = '-';
-                        if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
+
+                        $sts = null;
+
+                        if($_total_compilance  == $answer_val['N/A']){
+                            $sts='N/A';
+                        }else if($_total_compilance > $answer_val['N/A'] && $_total_compilance < $answer_val['N']){
                             $sts='N';
                         } else if ($_total_compilance >= $answer_val['N'] && $_total_compilance < $answer_val['P']){
                             $sts = 'P';
@@ -404,8 +408,6 @@ class CapabilityAssesmentController extends Controller
                             $sts = 'L';
                         } else if ($_total_compilance >= $answer_val['L'] && $_total_compilance <= $answer_val['F']){
                             $sts = 'F';
-                        }else{
-                            $sts = 'N/A';
                         }
 
                         // if($_level->compilance != null)

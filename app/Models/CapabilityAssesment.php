@@ -28,4 +28,9 @@ class CapabilityAssesment extends Model
     {
         return $this->belongsTo(CapabilityAnswer::class, 'capability_answer_id');
     }
+
+    public function ofi()
+    {
+        return $this->hasMany(CapabilityAssesmentOfi::class, 'capability_assesment_id', 'id');
+    }
 }

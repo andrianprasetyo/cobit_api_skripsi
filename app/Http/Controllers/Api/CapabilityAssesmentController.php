@@ -104,7 +104,8 @@ class CapabilityAssesmentController extends Controller
                 $level_item=$_item_level;
                 $target=CapabilityAssesment::with([
                         'capability_answer',
-                        'evident.docs'
+                        'evident.docs',
+                        'ofi'
                     ])
                     ->where('capability_level_id',$_item_level->id)
                     // ->where('capability_target_id', $target_id)
@@ -724,5 +725,14 @@ class CapabilityAssesmentController extends Controller
         $data['level'] = collect($daftar_level)->unique()->values();
 
         return Excel::download(new SummaryCapabilityAssesmentExport($data), 'report-summary-capabbility-assesment.xlsx');
+    }
+
+    public function detailOfi(Request $request)
+    {
+        $data=CapabilityAssesmentOfi::where('capability_assesment_id',$request->capability_assesment_id)
+            ->where('capability_target_id',$request->capability_target_id)
+            ->first();
+
+        return $this->successResponse($data);
     }
 }

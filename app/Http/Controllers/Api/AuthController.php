@@ -38,29 +38,19 @@ class AuthController extends Controller
         );
 
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
-        $_auth = User::select(
-                'id',
-                'username',
-                'nama',
-                'email',
-                // 'divisi',
-                // 'posisi',
-                'status',
-                'internal',
-                'password',
-                'organisasi_id',
-                'avatar'
-                )
-            ->with([
+        $_auth = User::with([
                 'roleaktif.role',
                 'organisasi',
-                'assesment'
+                'assesment',
+                'jabatan',
+                'divisi'
             ])
             ->where('username', $request->username)
             ->orWhere('email',$request->username);
 
 
         $auth=$_auth->first();
+        // return $this->successResponse($auth);
         if(!$auth || !Hash::check($request->password, $auth->password)){
             return $this->errorResponse('Username atau password anda salah', 401);
         }

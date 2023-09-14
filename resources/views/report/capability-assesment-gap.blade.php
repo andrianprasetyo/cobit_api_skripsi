@@ -17,7 +17,7 @@
             <td>{{$item->hasil_assesment}}</td>
             <td>{{$item->gap_minus}}</td>
             <td>{{$item->gap_deskripsi}}</td>
-            <td>{{$item->potensi}}</td>
+            <td>{{$item->translate}}</td>
         </tr>
         @endforeach
     </tbody>

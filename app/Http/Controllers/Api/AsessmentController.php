@@ -744,6 +744,7 @@ class AsessmentController extends Controller
                     'assesment_canvas.*',
                     'domain.kode',
                     'domain.ket',
+                    'domain.translate',
                     'capability_target.nama as nama_target',
                     'capability_target.id as capability_target_id',
                     )
@@ -881,6 +882,7 @@ class AsessmentController extends Controller
                 'assesment_canvas.*',
                 'domain.kode',
                 'domain.ket',
+                'domain.translate',
                 'capability_target.nama as nama_target',
                 'capability_target.id as capability_target_id',
             )

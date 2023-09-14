@@ -13,7 +13,7 @@ class CapabilityAssesmentOfi extends Model
     public $incrementing = false;
     protected $table = 'capability_assesment_ofi';
     protected $keyType = 'string';
-    protected $fillable = ['ofi', 'capability_assesment_id','capability_target_id'];
+    protected $fillable = ['ofi', 'capability_assesment_id','capability_target_id','domain_id'];
 
     protected $hidden = [
         'deleted_at',

@@ -23,6 +23,7 @@ use App\Models\Organisasi;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiJabatan;
 use App\Models\Quisioner;
+use App\Models\QusisionerHasilAvg;
 use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
@@ -994,5 +995,50 @@ class AsessmentController extends Controller
 
         return Excel::download(new AnalisaGapExport($data),'report-capabbility-assesment.xlsx');
         // return $this->successResponse($data);
+    }
+
+    public function dfRiskSkenario(Request $request)
+    {
+        $assesment_id = $request->assesment_id;
+        $design_faktor_id = $request->design_faktor_id;
+        $design_faktor_komponen_id=$request->design_faktor_komponen_id;
+
+
+        $in=DB::table('quisioner_hasil_avg')
+            ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
+            ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
+            ->join('quisioner_pertanyaan','quisioner_hasil_avg.quisioner_pertanyaan_id','quisioner_pertanyaan.id')
+            ->where('quisioner_hasil_avg.assesment_id',$assesment_id)
+            // ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
+            ->where('design_faktor.id',$design_faktor_id)
+            ->whereNull('design_faktor_komponen.deleted_at')
+            ->whereNull('design_faktor.deleted_at')
+            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->select(
+                'quisioner_hasil_avg.*',
+                'design_faktor.nama as df_nama',
+                'design_faktor.kode as df_kode',
+                'design_faktor_komponen.nama as dfk_nama',
+                'design_faktor_komponen.deskripsi as dfk_deskripsi',
+            )
+            ->get();
+
+
+        $out=DB::table('assesment_hasil')
+            ->join('domain', 'assesment_hasil.domain_id', 'domain.id')
+            ->where('assesment_hasil.assesment_id',$assesment_id)
+            ->whereNull('domain.deleted_at')
+            ->orderBy('domain.urutan','asc')
+            ->select(
+                'assesment_hasil.*',
+                'domain.kode as domain_kode',
+                'domain.ket as domain_ket',
+                'domain.urutan as domain_urutan',
+            )
+            ->get();
+
+        $data['in']=$in;
+        $data['out']=$out;
+        return $this->successResponse($data);
     }
 }

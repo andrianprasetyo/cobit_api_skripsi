@@ -167,6 +167,7 @@ class CapabilityAssesmentController extends Controller
         $evidents = $request->evident;
         $ofi = $request->ofi;
 
+        $_deb=[];
         DB::beginTransaction();
         try {
 
@@ -189,8 +190,8 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->ofi = $ofi[$i];
                 $capability_ass->assesment_id=$request->assesment_id;
                 $capability_ass->domain_id = $request->domain_id;
-                // $capability_ass->capability_target_id=$capability_target_id;
-                $capability_ass->save();
+
+                // $capability_ass->save();
 
                 // $tes_evi2[]= isset($evidents[$i])?$evidents[$i]:[];
                 if(isset($evidents[$i]) && count($evidents[$i]) > 0)
@@ -198,8 +199,7 @@ class CapabilityAssesmentController extends Controller
                     $evident = $evidents[$i];
                     // $tes_evi1[] = $evident;
                     if (count($evident) > 0) {
-                        CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
-                        $_evident = [];
+                        // CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                         for ($r = 0; $r < count($evident); $r++) {
                             // $evident_doc=
                             $_evident[] = array(
@@ -210,26 +210,27 @@ class CapabilityAssesmentController extends Controller
                                 'media_repositories_id' => isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null,
                             );
                         }
-                        CapabilityAssesmentEvident::insert($_evident);
-                        // $tes_evi[]=$_evident;
+                        // CapabilityAssesmentEvident::insert($_evident);
                     }
                 }
 
                 if(isset($ofi[$i]) && count($ofi[$i]) > 0)
                 {
                     if (count($ofi) > 0) {
-                        CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
+                        // CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
                         $_ofi = [];
+                        $ofi_item=$ofi[$i];
                         for ($o = 0; $o < count($ofi); $o++) {
                             $_ofi[] = array(
                                 'id' => Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
-                                'ofi' => isset($_ofi[$o]['ofi']) ? $_ofi[$o]['ofi'] : null,
-                                'capability_target_id' => isset($_ofi[$o]['capability_target_id']) ? $_ofi[$o]['capability_target_id'] : null,
-                                'domain_id' => isset($_ofi[$o]['domain_id']) ? $_ofi[$o]['domain_id'] : null,
+                                'ofi' => isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null,
+                                'capability_target_id' => isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null,
+                                'domain_id' => isset($ofi_item[$o]['domain_id']) ? $ofi_item[$o]['domain_id'] : null,
                             );
                         }
-                        CapabilityAssesmentOfi::insert($_ofi);
+                        // CapabilityAssesmentOfi::insert($_ofi);
+                        $_deb[]=$_ofi;
                     }
                 }
             }
@@ -242,7 +243,7 @@ class CapabilityAssesmentController extends Controller
             // ]);
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($_deb);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

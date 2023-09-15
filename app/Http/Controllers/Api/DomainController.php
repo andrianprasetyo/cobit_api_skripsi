@@ -26,7 +26,7 @@ class DomainController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'urutan');
+        $sortBy = $request->get('sortBy', 'kode');
         $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
 

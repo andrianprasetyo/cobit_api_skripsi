@@ -18,6 +18,7 @@ use App\Models\CapabilityAssesmentSubmited;
 use App\Models\CapabilityLevel;
 use App\Models\CapabilityTarget;
 use App\Traits\JsonResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -113,6 +114,16 @@ class CapabilityAssesmentController extends Controller
                     ->where('domain_id', $domain_id)
                     ->first();
 
+                if(!$target)
+                {
+                    $target = array(
+                        'id' => null,
+                        'capability_level_id' => $_item_level->id,
+                        'capability_answer_id' => null,
+                        'note' => null,
+                        'ofi' => null,
+                    );
+                }
                 $level_item->subkode = $_item_level->domain->kode . '.' . $_item_level->kode;
                 $level_item->capabilityass=$target;
 
@@ -144,7 +155,8 @@ class CapabilityAssesmentController extends Controller
         // dd($_POST);
         $request->validate(
             [
-
+                'assesment_id'=>'required',
+                'domain_id' => 'required',
                 'capability_assesment_id' => 'required|array',
                 'capability_level_id' => 'required|array',
                 'capability_answer_id' => 'required|array',
@@ -154,7 +166,8 @@ class CapabilityAssesmentController extends Controller
                 'capability_assesment_id.required'=>'Capability Assesment ID harus di isi',
                 'capability_level_id.required' => 'Capability Level ID harus di isi',
                 'capability_answer_id.required' => 'Capability Answer ID harus di isi',
-                // 'capability_target_id.required' => 'Capability Target ID harus di isi',
+                'assesment_id.required' => 'Assesment ID harus di isi',
+                'domain_id.required' => 'Domain ID harus di isi',
             ]
         );
         $capability_assesment = $request->capability_assesment_id;
@@ -185,7 +198,7 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->capability_level_id = $capability_level_id[$i];
                 $capability_ass->capability_answer_id = $capability_answer_id[$i];
                 $capability_ass->note = $note[$i];
-                $capability_ass->ofi = $ofi[$i];
+                // $capability_ass->ofi = $ofi[$i];
                 $capability_ass->assesment_id=$request->assesment_id;
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
@@ -220,7 +233,9 @@ class CapabilityAssesmentController extends Controller
                                 'capability_assesment_id' => $capability_ass->id,
                                 'ofi' => isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null,
                                 'capability_target_id' => isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null,
-                                'domain_id' => isset($ofi_item[$o]['domain_id']) ? $ofi_item[$o]['domain_id'] : null,
+                                'domain_id' => $request->domain_id,
+                                'created_at' => Carbon::now()->toDateTimeString(),
+                                'updated_at' => Carbon::now()->toDateTimeString()
                             );
                         }
                         CapabilityAssesmentOfi::insert($_ofi);
@@ -727,6 +742,15 @@ class CapabilityAssesmentController extends Controller
     {
         $data=CapabilityAssesmentOfi::where('capability_assesment_id',$request->capability_assesment_id)
             ->where('capability_target_id',$request->capability_target_id)
+            ->first();
+
+        return $this->successResponse($data);
+    }
+
+    public function downloadReportOfiByDomain(Request $request)
+    {
+        $data = CapabilityAssesmentOfi::where('capability_assesment_id', $request->capability_assesment_id)
+            ->where('capability_target_id', $request->capability_target_id)
             ->first();
 
         return $this->successResponse($data);

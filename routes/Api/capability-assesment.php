@@ -9,3 +9,4 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
 });
 
 Route::get('/capabilityassesment/summary-by-domain/download', 'CapabilityAssesmentController@downloadReportSumCapabilityAss');
+Route::get('/capabilityassesment/ofi-by-domain/download', 'CapabilityAssesmentController@downloadReportSumCapabilityAss');

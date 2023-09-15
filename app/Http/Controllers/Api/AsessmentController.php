@@ -1023,6 +1023,7 @@ class AsessmentController extends Controller
                 'design_faktor.kode as df_kode',
                 'design_faktor_komponen.nama as dfk_nama',
                 'design_faktor_komponen.deskripsi as dfk_deskripsi',
+                'design_faktor_komponen.baseline as dfk_baseline',
                 'quisioner_pertanyaan.pertanyaan',
             );
 

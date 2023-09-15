@@ -16,6 +16,8 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/assesment/report/list', 'AsessmentController@reportHasil');
     Route::get('/assesment/report/detail-ofi', 'AsessmentController@ReportDetailOfi');
     Route::delete('/assesment/remove/{id}', 'AsessmentController@remove');
+
+    Route::get('/assesment/report/design-faktor-risk', 'AsessmentController@dfRiskSkenario');
 });
 Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');
 Route::get('/assesment/report/capability/download', 'AsessmentController@downloadReportCapabilityAssesment');

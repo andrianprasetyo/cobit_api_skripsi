@@ -740,18 +740,7 @@ class CapabilityAssesmentController extends Controller
 
     public function detailOfi(Request $request)
     {
-        $data=CapabilityAssesmentOfi::where('capability_assesment_id',$request->capability_assesment_id)
-            ->where('capability_target_id',$request->capability_target_id)
-            ->first();
-
-        return $this->successResponse($data);
-    }
-
-    public function downloadReportOfiByDomain(Request $request)
-    {
-        $data = CapabilityAssesmentOfi::where('capability_assesment_id', $request->capability_assesment_id)
-            ->where('capability_target_id', $request->capability_target_id)
-            ->first();
+        $data = CapabilityAssesmentOfi::find($request->id);
 
         return $this->successResponse($data);
     }

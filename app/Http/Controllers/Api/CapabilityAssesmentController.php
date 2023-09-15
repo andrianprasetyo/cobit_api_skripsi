@@ -228,17 +228,24 @@ class CapabilityAssesmentController extends Controller
                         $_ofi = [];
                         $ofi_item=$ofi[$i];
                         for ($o = 0; $o < count($ofi); $o++) {
-                            $_ofi[] = array(
-                                'id' => Str::uuid(),
-                                'capability_assesment_id' => $capability_ass->id,
-                                'ofi' => isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null,
-                                'capability_target_id' => isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null,
-                                'domain_id' => $request->domain_id,
-                                'created_at' => Carbon::now()->toDateTimeString(),
-                                'updated_at' => Carbon::now()->toDateTimeString()
-                            );
+                            $new_ofi=new CapabilityAssesmentOfi();
+                            $new_ofi->capability_assesment_id=$capability_ass->id;
+                            $new_ofi->domain_id = $request->domain_id;
+                            $new_ofi->ofi= isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null;
+                            $new_ofi->capability_target_id = isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null;
+                            $new_ofi->save();
+
+                            // $_ofi[] = array(
+                            //     'id' => Str::uuid(),
+                            //     'capability_assesment_id' => $capability_ass->id,
+                            //     'ofi' => isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null,
+                            //     'capability_target_id' => isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null,
+                            //     'domain_id' => $request->domain_id,
+                            //     'created_at' => Carbon::now()->toDateTimeString(),
+                            //     'updated_at' => Carbon::now()->toDateTimeString()
+                            // );
                         }
-                        CapabilityAssesmentOfi::insert($_ofi);
+                        // CapabilityAssesmentOfi::insert($_ofi);
                         // $_deb[]=$_ofi;
                     }
                 }

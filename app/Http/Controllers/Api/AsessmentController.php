@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\AnalisaGapExport;
+use App\Exports\AssesmentOfiByDomainExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Assesment\AddPICRequest;
@@ -883,6 +884,10 @@ class AsessmentController extends Controller
         $domain = Domain::find($request->domain_id);
         $data['ofi'] = $list_ofi;
         $data['domain']=$domain;
+
+        if($request->filled('download')){
+            return Excel::download(new AssesmentOfiByDomainExport($data), 'report-OFI-detail.xlsx');
+        }
         return $this->successResponse($data);
     }
 
@@ -997,14 +1002,12 @@ class AsessmentController extends Controller
         // return $this->successResponse($data);
     }
 
-    public function dfRiskSkenario(Request $request)
+    public function dfRiskSkenarioIN(Request $request)
     {
         $assesment_id = $request->assesment_id;
         $design_faktor_id = $request->design_faktor_id;
-        $design_faktor_komponen_id=$request->design_faktor_komponen_id;
 
-
-        $in=DB::table('quisioner_hasil_avg')
+        $list=DB::table('quisioner_hasil_avg')
             ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
             ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
             ->join('quisioner_pertanyaan','quisioner_hasil_avg.quisioner_pertanyaan_id','quisioner_pertanyaan.id')
@@ -1020,25 +1023,38 @@ class AsessmentController extends Controller
                 'design_faktor.kode as df_kode',
                 'design_faktor_komponen.nama as dfk_nama',
                 'design_faktor_komponen.deskripsi as dfk_deskripsi',
-            )
-            ->get();
+                'quisioner_pertanyaan.pertanyaan',
+            );
 
+        $data = $this->paging($list);
+        return $this->successResponse($data);
+    }
 
-        $out=DB::table('assesment_hasil')
+    public function dfRiskSkenarioOUT(Request $request)
+    {
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+        $assesment_id = $request->assesment_id;
+        $design_faktor_id = $request->design_faktor_id;
+        $search = $request->search;
+
+        $list = DB::table('assesment_hasil')
             ->join('domain', 'assesment_hasil.domain_id', 'domain.id')
-            ->where('assesment_hasil.assesment_id',$assesment_id)
+            ->where('assesment_hasil.assesment_id', $assesment_id)
+            ->where('assesment_hasil.design_faktor_id', $design_faktor_id)
             ->whereNull('domain.deleted_at')
-            ->orderBy('domain.urutan','asc')
+            ->orderBy('domain.urutan', 'asc')
             ->select(
                 'assesment_hasil.*',
                 'domain.kode as domain_kode',
                 'domain.ket as domain_ket',
                 'domain.urutan as domain_urutan',
-            )
-            ->get();
+            );
 
-        $data['in']=$in;
-        $data['out']=$out;
+        if($request->filled('search')){
+            $list->where('domain.kode', 'ilike', '%' . $search . '%');
+        }
+        $data = $this->paging($list, $limit, $page);
         return $this->successResponse($data);
     }
 }

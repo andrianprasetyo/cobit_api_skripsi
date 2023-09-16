@@ -7,6 +7,7 @@ use App\Exports\AssesmentOfiByDomainExport;
 use App\Helpers\CobitHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Assesment\AddPICRequest;
+use App\Http\Resources\Assesment\AssesmentDFInputSectionResource;
 use App\Http\Resources\Assesment\AssesmentGapReportResource;
 use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
@@ -1007,27 +1008,79 @@ class AsessmentController extends Controller
         $assesment_id = $request->assesment_id;
         $design_faktor_id = $request->design_faktor_id;
 
-        $list=DB::table('quisioner_hasil_avg')
+        $list_dfk=DB::table('quisioner_hasil_avg')
             ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
             ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
-            ->join('quisioner_pertanyaan','quisioner_hasil_avg.quisioner_pertanyaan_id','quisioner_pertanyaan.id')
-            ->where('quisioner_hasil_avg.assesment_id',$assesment_id)
-            // ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
-            ->where('design_faktor.id',$design_faktor_id)
+            ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
+            ->where('design_faktor.id', $design_faktor_id)
             ->whereNull('design_faktor_komponen.deleted_at')
             ->whereNull('design_faktor.deleted_at')
-            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->orderBy('design_faktor_komponen.urutan', 'asc')
             ->select(
-                'quisioner_hasil_avg.*',
-                'design_faktor.nama as df_nama',
+                'quisioner_hasil_avg.id',
                 'design_faktor.kode as df_kode',
+                'design_faktor_komponen.id as dfk_id',
                 'design_faktor_komponen.nama as dfk_nama',
                 'design_faktor_komponen.deskripsi as dfk_deskripsi',
                 'design_faktor_komponen.baseline as dfk_baseline',
-                'quisioner_pertanyaan.pertanyaan',
-            );
+                'design_faktor_komponen.urutan as dfk_urutan',
+            )->get();
 
-        $data = $this->paging($list);
+
+        $dfks=[];
+        $headercol_id = [];
+        $headercol=[];
+        if(!$list_dfk->isEmpty()){
+            foreach ($list_dfk as $_item_dfk) {
+                $item_dfk=$_item_dfk;
+                $values=DB::table('quisioner_hasil_avg')
+                    // ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
+                    // ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
+                    ->join('quisioner_pertanyaan','quisioner_hasil_avg.quisioner_pertanyaan_id','quisioner_pertanyaan.id')
+                    ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
+                    ->where('quisioner_hasil_avg.design_faktor_komponen_id',$_item_dfk->dfk_id)
+                    // ->where('design_faktor.id',$design_faktor_id)
+                    // ->whereNull('design_faktor_komponen.deleted_at')
+                    // ->whereNull('design_faktor.deleted_at')
+                    ->whereNull('quisioner_pertanyaan.deleted_at')
+                    // ->orderBy('design_faktor_komponen.urutan','asc')
+                    ->select(
+                        // 'quisioner_hasil_avg.*',
+                        'quisioner_hasil_avg.avg_bobot',
+                        // 'design_faktor.nama as df_nama',
+                        // 'design_faktor.kode as df_kode',
+                        // 'design_faktor_komponen.nama as dfk_nama',
+                        // 'design_faktor_komponen.deskripsi as dfk_deskripsi',
+                        // 'design_faktor_komponen.baseline as dfk_baseline',
+                        'quisioner_pertanyaan.id as pertanyaan_id',
+                        'quisioner_pertanyaan.pertanyaan',
+                    )->get();
+
+
+                $item_dfk->values=$values;
+                $dfks[]=$item_dfk;
+
+                if(!$values->isEmpty())
+                {
+                    // $_head_col=[];
+                    foreach ($values as $_item_value) {
+                        if(!in_array($_item_value->pertanyaan_id,$headercol_id))
+                        {
+                            $headercol_id[] = $_item_value->pertanyaan_id;
+
+                            if($item_dfk->df_kode == 'DF3'){
+                                $headercol[]=$_item_value->pertanyaan;
+                            }else{
+                                $headercol[] = 'Importance';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // $data = $this->paging($list,null,null, AssesmentDFInputSectionResource::class);
+        $data['list']=$dfks;
+        $data['headercol'] = $headercol;
         return $this->successResponse($data);
     }
 
@@ -1041,12 +1094,14 @@ class AsessmentController extends Controller
 
         $list = DB::table('assesment_hasil')
             ->join('domain', 'assesment_hasil.domain_id', 'domain.id')
+            ->join('design_faktor', 'assesment_hasil.design_faktor_id', 'design_faktor.id')
             ->where('assesment_hasil.assesment_id', $assesment_id)
             ->where('assesment_hasil.design_faktor_id', $design_faktor_id)
             ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'asc')
             ->select(
                 'assesment_hasil.*',
+                'design_faktor.kode as df_kode',
                 'domain.kode as domain_kode',
                 'domain.ket as domain_ket',
                 'domain.urutan as domain_urutan',

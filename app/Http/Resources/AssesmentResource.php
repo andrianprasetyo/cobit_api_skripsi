@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\UserAssesment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,7 @@ class AssesmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $assesment_pic = UserAssesment::where('assesment_id', $this->id)->where('users_id', $this->pic->id)->first();
         // $tahun=Carbon::parse($this->tahun);
         return [
             'id'=>$this->id,
@@ -32,6 +34,7 @@ class AssesmentResource extends JsonResource
             'start_date_quisioner' => $this->start_date_quisioner,
             'end_date_quisioner' => $this->end_date_quisioner,
             'minimum_target' => $this->minimum_target,
+            'assesment_user'=>$assesment_pic
         ];
     }
 }

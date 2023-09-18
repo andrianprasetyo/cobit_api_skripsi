@@ -342,7 +342,8 @@ class CapabilityAssesmentController extends Controller
                 );
                 $_total[]=(float)$_sum_bobot;
             }
-            $total=round(array_sum($_total),2) + 1;
+            $sub_total=array_sum($_total) / count($list_level);
+            $total=round($sub_total,2) + 1;
         }
 
 
@@ -390,6 +391,7 @@ class CapabilityAssesmentController extends Controller
                     $_level = DB::table('capability_assesment')
                         ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
                         ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                        ->where('capability_assesment.assesment_id', $assesment->id)
                         ->where('capability_level.domain_id', $domain->id)
                         ->where('capability_level.level', $_item_level->level)
                         ->whereNull('capability_assesment.deleted_at')
@@ -421,8 +423,10 @@ class CapabilityAssesmentController extends Controller
                 }
             }
         }
+
+        $_total=array_sum($_total_all) / count($list_levels) + 1;
         $data['list'] = $_list_level;
-        $data['total'] = array_sum($_total_all);
+        $data['total'] = round($_total,2);
         return $this->successResponse($data);
     }
 
@@ -465,6 +469,7 @@ class CapabilityAssesmentController extends Controller
 
                 $_list_level = [];
                 $_total_all=[];
+                $debug=[];
 
                 $list_levels = DB::table('capability_level')
                     ->where('domain_id', $_item_domain->id)
@@ -482,6 +487,7 @@ class CapabilityAssesmentController extends Controller
                         $_level = DB::table('capability_assesment')
                             ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
                             ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                            ->where('capability_assesment.assesment_id', $assesment->id)
                             ->where('capability_level.domain_id', $_item_domain->id)
                             ->where('capability_level.level', $_item_level->level)
                             ->whereNull('capability_assesment.deleted_at')
@@ -496,7 +502,6 @@ class CapabilityAssesmentController extends Controller
                             ->whereNull('capability_level.deleted_at')
                             ->select(DB::raw("SUM(bobot) as bobot_level"))
                             ->first();
-
 
 
                         // $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
@@ -514,7 +519,10 @@ class CapabilityAssesmentController extends Controller
                         //     $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
                         // }
 
+                        $debug[]=$_level;
                         $sts = null;
+
+                        $last_level=null;
 
                         if($_level->compilance != null){
 
@@ -549,24 +557,29 @@ class CapabilityAssesmentController extends Controller
                                 'label' => $sts,
                                 // '_total_sum_compilance' => $_total_sum_compilance
                             );
+
+                            $last_level=$_total_compilance;
                         }
 
-                        // if($_level->compilance != null)
-                        // {
-
-                        //     if ($_total_compilance > 0 && $_total_compilance < 0.15) {
-                        //         $sts = 'N';
-                        //     } else if ($_total_compilance > 0.15 && $_total_compilance <= 0.50) {
-                        //         $sts = 'P';
-                        //     } else if ($_total_compilance > 0.50 && $_total_compilance <= 0.85) {
-                        //         $sts = 'L';
-                        //     } else if ($_total_compilance > 0.85 && $_total_compilance <= 1) {
-                        //         $sts = 'F';
-                        //     } else {
-                        //         $sts = 'N/A';
-                        //     }
-                        // }
-
+                        if($last_level != null){
+                            if ($last_level < $answer_val['N']){
+                                $sts='N/A';
+                            }
+                            if ($last_level < $answer_val['P']) {
+                                // $_total_all[] = $last_level;
+                                $sts = 'N/A';
+                            }
+                            if ($last_level < $answer_val['L']) {
+                                // $_total_all[] = $last_level;
+                                $sts = 'N/A';
+                            }
+                            $_list_level[] = array(
+                                'level' => $_item_level->level,
+                                'total_compilance' => $last_level,
+                                'label' => $sts,
+                                // '_total_sum_compilance' => $_total_sum_compilance
+                            );
+                        }
 
                     }
                 }
@@ -575,7 +588,8 @@ class CapabilityAssesmentController extends Controller
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,
-                    'total' => array_sum($_total_all)
+                    'total' => array_sum($_total_all),
+                    'debug'=>$debug
                 );
             }
         }

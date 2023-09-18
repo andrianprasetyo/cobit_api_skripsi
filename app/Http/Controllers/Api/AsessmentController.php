@@ -111,10 +111,10 @@ class AsessmentController extends Controller
         $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
 
         // $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
-        // $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
-        // $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
-        // $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
-        // $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
+        $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
+        $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
+        $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
+        $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
         $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
         $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';

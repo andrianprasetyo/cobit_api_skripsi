@@ -40,34 +40,83 @@ class AuthController extends Controller
         // $auth=User::select(['id','username','password'])->where('username',$request->username)->first();
         $_auth = User::with([
                 'roleaktif.role',
+                // 'organisasi',
+                // 'assesment',
+                // 'jabatan',
+                // 'divisi'
+            ])
+            ->where('username', $request->username)
+            ->orWhere('email',$request->username)
+            ->first();
+
+
+
+        // return $this->successResponse($auth);
+        if(!$_auth || !Hash::check($request->password, $_auth->password)){
+            return $this->errorResponse('Username atau password anda salah', 401);
+        }
+        if($_auth->status == 'pending')
+        {
+            return $this->errorResponse('Akun anda belum aktifasi',401);
+        }
+        if ($_auth->status == 'banned')
+        {
+            return $this->errorResponse('Akun anda sudah tidak aktif', 401);
+        }
+
+        if($_auth->roleaktif == null)
+        {
+            return $this->errorResponse('Role belum terdaftar', 401);
+        }
+
+
+        $auth=null;
+        $assesments=[];
+        if($_auth->internal){
+            $auth = User::with([
+                'roleaktif.role',
+                // 'organisasi',
+                // 'assesment',
+                // 'jabatan',
+                // 'divisi'
+            ])
+                ->where('username', $request->username)
+                ->orWhere('email', $request->username)
+                ->first();
+        }else{
+
+            $assesments = UserAssesment::with('assesment')->where('users_id', $_auth->id)
+                ->whereDate('expire_at', '>', date('Y-m-d'))
+                ->orderBy('expire_at','asc')
+                ->get();
+
+            if (!$assesments->isEmpty()) {
+                UserAssesment::where('users_id', $_auth->id)->update([
+                    'default' => false
+                ]);
+
+                foreach ($assesments as $item_ass) {
+                    UserAssesment::where('id', $item_ass->id)->update([
+                        'default' => true
+                    ]);
+                    break;
+                }
+
+            } else {
+                // return $this->errorResponse('Assesment sudah kadaluarsa', 400);
+            }
+
+            $auth = User::with([
+                'roleaktif.role',
                 'organisasi',
                 'assesment',
                 'jabatan',
                 'divisi'
             ])
-            ->where('username', $request->username)
-            ->orWhere('email',$request->username);
-
-
-        $auth=$_auth->first();
-        // return $this->successResponse($auth);
-        if(!$auth || !Hash::check($request->password, $auth->password)){
-            return $this->errorResponse('Username atau password anda salah', 401);
+                ->where('username', $request->username)
+                ->orWhere('email', $request->username)
+                ->first();
         }
-        if($auth->status == 'pending')
-        {
-            return $this->errorResponse('Akun anda belum aktifasi',401);
-        }
-        if ($auth->status == 'banned')
-        {
-            return $this->errorResponse('Akun anda sudah tidak aktif', 401);
-        }
-
-        if($auth->roleaktif == null)
-        {
-            return $this->errorResponse('Role belum terdaftar', 401);
-        }
-
 
         // $account = User::select('id','username','nama','email','divisi','posisi','status','internal')
         //     ->with([
@@ -92,8 +141,11 @@ class AuthController extends Controller
         $role_users=RoleUsers::with(['role'])->where('users_id',$auth->id)->get();
         $user = $auth;
         if(!$auth->internal){
-            $assesment=UserAssesment::with('assesment')->where('users_id',$auth->id)->get();
-            $user['assesments'] = UserAssesmentsResource::collection($assesment);
+            // $assesment=UserAssesment::with('assesment')->where('users_id',$auth->id)
+            //     ->whereDate('expire_at','>',date('Y-m-d'))
+            //     ->get();
+
+            $user['assesments'] = UserAssesmentsResource::collection($assesments);
         }
 
         $user['roles'] = $role_users;

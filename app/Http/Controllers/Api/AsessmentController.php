@@ -1111,11 +1111,14 @@ class AsessmentController extends Controller
 
 
     public function editPicExpire(Request $request,$id){
-        $data=UserAssesment::find($id);
-        if(!$data){
+        $row=UserAssesment::find($id);
+        if(!$row){
             return $this->errorResponse('Data tidak ditemukan',404);
         }
-        $data->expire_at=$request->expire_at;
-        $data->save();
+        $row->expire_at=$request->expire_at;
+        $row->save();
+
+        $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($row->assesment_id);
+        return $this->successResponse(new AssesmentResource($data));
     }
 }

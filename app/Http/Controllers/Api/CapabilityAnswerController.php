@@ -15,7 +15,7 @@ class CapabilityAnswerController extends Controller
 
     public function list(Request $request)
     {
-        $sortBy = $request->get('sortBy', 'created_at');
+        $sortBy = $request->get('sortBy', 'bobot');
         $sortType = $request->get('sortType', 'asc');
         $search = $request->search;
 

@@ -340,6 +340,9 @@ class AsessmentController extends Controller
         if ($request->filled('end_date_quisioner')) {
             $data->end_date_quisioner = $request->end_date_quisioner;
         }
+        if ($request->filled('minimum_target')) {
+            $data->minimum_target = $request->minimum_target;
+        }
         $data->save();
 
         return $this->successResponse();
@@ -712,29 +715,6 @@ class AsessmentController extends Controller
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
 
-        // $listx = AssesmentCanvas::with(['assesment','domain'])
-        //     ->where('assesment_id',$request->assesment_id);
-
-        // $list_domain = DB::table('assesment_canvas')
-        //     ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-        //     ->join('capability_target','assesment_canvas.assesment_id','=', 'capability_target.assesment_id')
-        //     ->leftJoin('capability_target_level', 'capability_target.id', '=','capability_target_level.capability_target_id')
-        //     ->where('capability_target.default',true)
-        //     ->where('assesment_canvas.assesment_id', $assesment->id)
-        //     ->whereNull('domain.deleted_at')
-        //     ->whereNull('capability_target.deleted_at')
-        //     ->whereNull('capability_target_level.deleted_at')
-        //     ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-        //     ->select(
-        //         'assesment_canvas.*',
-        //         'domain.kode',
-        //         'domain.ket',
-        //         'capability_target.nama as nama_target',
-        //         'capability_target_level.target as target_organisasi'
-        //         )
-        //     ->orderBy($sortBy, $sortType);
-
-
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
@@ -816,23 +796,32 @@ class AsessmentController extends Controller
                     $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                 }
 
+                $target_name='-';
+                if($target_org->target != null)
+                {
+                    $target=CapabilityTarget::find($target_id);
+                    if($target){
+                        $target_name=$target->nama;
+                    }
+                }
+
                 $_result->hasil_assesment = $_total_compilance;
-                $_result->gap_deskripsi='Terdapata kesenjangan antara nilai saat ini dengan target Manajemen KCI';
-                $_result->potensi = 'Improvment pada area';
+                $_result->gap_deskripsi='Terdapat kesenjangan antara nilai saat ini dengan target '.$target_name;
+                $_result->potensi = 'Improvement pada area '.$_item_domain->translate.' dengan melakukan beberapa aktivitas tertentu sesuai rekomendasi.';
 
                 $_result->gap_minus=(float) $_result->target_level - $_total_compilance;
                 if($_total_compilance > $_result->target_level)
                 {
                     $_result->gap_minus=null;
-                    $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
-                    $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                    $_result->gap_deskripsi = 'Sudah memenuhi target ' . $target_name;
+                    $_result->potensi = 'Sudah memenuhi kebutuhan '. $_item_domain->translate.', tidak ada potensi inisiatif yang perlu dilakukan pada area ini.';
                 }
 
                 // $_result->gap_minus = (float) $_item_domain->aggreed_capability_level - $_total_compilance;
                 // if ($_total_compilance > $_item_domain->aggreed_capability_level) {
                 //     $_result->gap_minus = null;
                 //     $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
-                //     $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                //     $_result->potensi = 'Sudah memenuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
                 // }
 
                 $result[]=$_result;
@@ -977,29 +966,35 @@ class AsessmentController extends Controller
                     $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                 }
 
+                $target_name = '-';
+                if ($target_org->target != null) {
+                    $target = CapabilityTarget::find($target_id);
+                    $target_name = $target->nama;
+                }
+
                 $_result->hasil_assesment = $_total_compilance;
-                $_result->gap_deskripsi = 'Terdapata kesenjangan antara nilai saat ini dengan target Manajemen KCI';
-                $_result->potensi = 'Improvment pada area';
+                $_result->gap_deskripsi = 'Terdapat kesenjangan antara nilai saat ini dengan target ' . $target_name;
+                $_result->potensi = 'Improvement pada area ' . $_item_domain->translate . ' dengan melakukan beberapa aktivitas tertentu sesuai rekomendasi.';
 
                 $_result->gap_minus = (float) $_result->target_level - $_total_compilance;
                 if ($_total_compilance > $_result->target_level) {
                     $_result->gap_minus = null;
-                    $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
-                    $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                    $_result->gap_deskripsi = 'Sudah memenuhi target ' . $target_name;
+                    $_result->potensi = 'Sudah memenuhi kebutuhan ' . $_item_domain->translate . ', tidak ada potensi inisiatif yang perlu dilakukan pada area ini.';
                 }
 
                 // $_result->gap_minus = (float) $_item_domain->aggreed_capability_level - $_total_compilance;
                 // if ($_total_compilance > $_item_domain->aggreed_capability_level) {
                 //     $_result->gap_minus = null;
                 //     $_result->gap_deskripsi = 'Sudah memenuhi target Manajemen KCI';
-                //     $_result->potensi = 'Sudah memebuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
+                //     $_result->potensi = 'Sudah memenuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
                 // }
 
                 $data[] = $_result;
             }
         }
 
-        return Excel::download(new AnalisaGapExport($data),'report-capabbility-assesment.xlsx');
+        return Excel::download(new AnalisaGapExport($data),'report-capability-assesment.xlsx');
         // return $this->successResponse($data);
     }
 

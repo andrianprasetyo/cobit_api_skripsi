@@ -1108,4 +1108,14 @@ class AsessmentController extends Controller
         $data = $this->paging($list, $limit, $page);
         return $this->successResponse($data);
     }
+
+
+    public function editPicExpire(Request $request,$id){
+        $data=UserAssesment::find($id);
+        if(!$data){
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+        $data->expire_at=$request->expire_at;
+        $data->save();
+    }
 }

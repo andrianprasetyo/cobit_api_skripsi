@@ -27,20 +27,20 @@ class MediaRepositoryController extends Controller
         $assesment_id = $request->assesment_id;
 
         $list = MediaRepository::with(['author','assesment']);
+
+        if ($request->filled('type')) {
+            $list->whereJsonContains('docs->ext', $type);
+        }
+
+        // if ($request->filled('assesment_id')) {
+        //     $list->where('assesment_id', $assesment_id);
+        // }
+
         if ($request->filled('search')) {
             $list->where('deskripsi', 'ilike', '%' . $search . '%');
-            $list->orWhere('docs','ilike', '%' . $search . '%');
+            // $list->orWhere('docs','ilike', '%' . $search . '%');
         }
-
-        if($request->filled('type'))
-        {
-            $list->whereJsonContains('docs->ext',$type);
-        }
-
-        if ($request->filled('assesment_id'))
-        {
-            $list->where('assesment_id',$assesment_id);
-        }
+        $list->where('assesment_id', $assesment_id);
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page, RepositoryResource::class);

@@ -31,6 +31,7 @@ class AssesmentResource extends JsonResource
             'pic' => $this->pic,
             'start_date_quisioner' => $this->start_date_quisioner,
             'end_date_quisioner' => $this->end_date_quisioner,
+            'minimum_target' => $this->minimum_target,
         ];
     }
 }

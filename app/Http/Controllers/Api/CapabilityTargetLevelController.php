@@ -51,12 +51,12 @@ class CapabilityTargetLevelController extends Controller
         }
 
         $list=DB::table('assesment_canvas')
-            ->join('domain','assesment_canvas.domain_id','=','domain_id')
-            ->where('assesment_canvas.assesment_id',$assesment_id)
+            ->join('domain','assesment_canvas.domain_id','=','domain.id')
+            ->where('assesment_canvas.assesment_id',$ass->id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target)
             ->whereNull('domain.deleted_at')
             ->select('domain.id','domain.kode','domain.ket','domain.urutan')
-            ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')
+            // ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')
             ->orderBy('domain.urutan','asc');
 
         $data = $this->paging($list);
@@ -105,7 +105,7 @@ class CapabilityTargetLevelController extends Controller
             $_target = $request->target;
 
             $id = $request->id;
-            $default=true;
+            $default=false;
             $cap_target = new CapabilityTarget();
             if ($request->filled('id')) {
                 $cap_target = CapabilityTarget::find($id);
@@ -113,7 +113,7 @@ class CapabilityTargetLevelController extends Controller
                 {
                     return $this->errorResponse('Target capability ID tidak terdaftar',404);
                 }
-                $default=false;
+                // $default=false;
             }
             $cap_target->nama = $request->nama;
             $cap_target->assesment_id = $request->assesment_id;

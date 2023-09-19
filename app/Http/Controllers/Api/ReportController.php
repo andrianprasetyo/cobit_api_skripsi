@@ -294,8 +294,18 @@ class ReportController extends Controller
             foreach ($hasil as $_item_hasil) {
                 $hasil_init=$_item_hasil;
 
-                $ass_hasil=AssesmentHasil::where('assesment_id',$request->assesment_id)
-                    ->where('domain_id',$_item_hasil->id)
+                // $ass_hasil=AssesmentHasil::where('assesment_id',$request->assesment_id)
+                //     ->where('domain_id',$_item_hasil->id)
+                //     ->get();
+
+                $ass_hasil=DB::table('assesment_hasil')->join('domain', 'assesment_hasil.domain_id', '=', 'domain.id')
+                    ->join('design_faktor', 'assesment_hasil.design_faktor_id', '=', 'design_faktor.id')
+                    ->where('assesment_hasil.assesment_id', $request->assesment_id)
+                    ->where('domain.id', $_item_hasil->id)
+                    ->whereNull('domain.deleted_at')
+                    ->whereNull('design_faktor.deleted_at')
+                    ->select('assesment_hasil.*')
+                    ->orderBy('design_faktor.urutan', 'ASC')
                     ->get();
 
                 $hasil_init['assesmenthasil']=$ass_hasil;

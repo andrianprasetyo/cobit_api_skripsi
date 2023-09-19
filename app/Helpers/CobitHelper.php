@@ -181,7 +181,11 @@ class CobitHelper
 
             $step2InitValue=0;
             foreach($respondentHasil as $k=>$rh){
-                $step2InitValue+=$rh->relative_importance*$dfWeight[$k]->weight;
+                $default = 0;
+                if(isset($dfWeight[$k]->weight)){
+                    $default = $dfWeight[$k]->weight;
+                }
+                $step2InitValue+=$rh->relative_importance*$default;
             }
 
 

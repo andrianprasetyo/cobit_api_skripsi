@@ -561,6 +561,7 @@ class CapabilityAssesmentController extends Controller
                             $last_level=$_total_compilance;
                         }
 
+                        /*
                         if($last_level != null){
                             if ($last_level < $answer_val['N']){
                                 $sts='N/A';
@@ -580,6 +581,7 @@ class CapabilityAssesmentController extends Controller
                                 // '_total_sum_compilance' => $_total_sum_compilance
                             );
                         }
+                        */
 
                     }
                 }

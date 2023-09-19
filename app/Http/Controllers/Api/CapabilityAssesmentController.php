@@ -209,15 +209,26 @@ class CapabilityAssesmentController extends Controller
                     if (count($evident) > 0) {
                         CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                         for ($r = 0; $r < count($evident); $r++) {
+                            /* Legacy Code
                             $_evident[] = array(
-                                'id'=>Str::uuid(),
                                 'capability_assesment_id' => $capability_ass->id,
                                 'url' => isset($evident[$r]['url'])?$evident[$r]['url']:null,
                                 'deskripsi'=>isset($evident[$r]['deskripsi'])?$evident[$r]['deskripsi']:null,
                                 'media_repositories_id' => isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null,
                             );
+                            */
+
+                            $_new_ass_ev=new CapabilityAssesmentEvident();
+                            $_new_ass_ev->capability_assesment_id=$capability_ass->id;
+                            $_new_ass_ev->url=isset($evident[$r]['url'])?$evident[$r]['url']:null;
+                            $_new_ass_ev->deskripsi=isset($evident[$r]['deskripsi'])?$evident[$r]['deskripsi']:null;
+                            $_new_ass_ev->media_repositories_id=isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null;
+                            $_new_ass_ev->save();
                         }
-                        CapabilityAssesmentEvident::insert($_evident);
+
+                        // Legacy Code
+                        // CapabilityAssesmentEvident::insert($_evident);
+
                     }
                 }
 

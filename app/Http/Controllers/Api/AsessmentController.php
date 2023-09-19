@@ -834,41 +834,137 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function ReportDetailOfi(Request $request)
+    public function chartReportHasil(Request $request)
     {
-        // $data=Domain::find($request->domain_id);
-        // // $data=CapabilityTarget::with(['targetlevel.domain','targetlevel.capabilityassesments'])
-        // //     ->whereRelation('targetlevel','domain_id','=',$request->domain_id)
-        // //     ->find($id);
+        $domain_id = $request->domain_id;
+        $target_id = $request->target_id;
+        $assesment_id = $request->assesment_id;
+        $categories = [];
+        $series = [];
 
-        // $cap_ass=CapabilityAssesment::where('domain_id',$request->domain_id)
-        //     ->where('assesment_id',$request->assesment_id)
-        //     // ->where('target_id', $request->target_id)
-        //     ->get();
+        $assesment = Assesment::find($assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+        $list_domain = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
+            // ->join('capability_target_level', 'capability_target.id', '=', 'capability_target_level.capability_target_id')
+            ->where('assesment_canvas.assesment_id', $assesment->id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
+            ->whereNull('capability_target.deleted_at')
+            ->whereNull('domain.deleted_at')
+            ->select(
+                'assesment_canvas.*',
+                'domain.kode',
+                'domain.ket',
+                'domain.translate',
+                'capability_target.nama as nama_target',
+                'capability_target.id as capability_target_id',
+            )
+            ->orderBy('domain.urutan', 'asc');
 
-        // $targets=CapabilityTarget::where('assesment_id',$request->assesment_id)->get();
-
-        // $list_target=[];
-        // if(!$targets->isEmpty())
-        // {
-        //     foreach ($targets as $_item_target) {
-        //         $_target=$_item_target;
-        //         $ofis=CapabilityAssesment::where('assesment_id',$request->assesment_id)
-        //             ->where('domain_id',$request->domain_id)
-        //             ->where('capability_target_id',$_item_target->id)
-        //             ->get();
-
-        //         $_target->listofi=$ofis;
-        //         $list_target=$_target;
-        //     }
+        // if ($request->filled('domain_id')) {
+        //     $list_domain->where('assesment_canvas.domain_id', $domain_id);
         // }
 
-        // $data->capabilityassesments=$cap_ass;
-        // $data->targets = $list_target;
+        if ($request->filled('target_id')){
+            $list_domain->where('capability_target.id', $target_id);
+        }
+
+        // if ($request->filled('target_id')) {
+        //     $list_domain->where('capability_target.id', $target_id);
+        // } else {
+        //     $list_domain->where('capability_target.default', true);
+        // }
+
+        $target = CapabilityTarget::find($target_id);
+        $list_domain->where('capability_target.id', $target_id);
+
+        $list_domain = $list_domain->get();
+        $list_domains = [];
+
+        $hasil_assesment=[];
+        $gap_minus=[];
+        $target_level=[];
+
+        if (!$list_domain->isEmpty()) {
+            foreach ($list_domain as $_item_domain) {
+                $_result = $_item_domain;
+                $list_domains[] = $_item_domain->kode;
+
+                $target_org = CapabilityTargetLevel::with('target')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->where('capability_target_id', $_item_domain->capability_target_id)
+                    ->first();
+
+                $_result->target_organisasi = $target_org;
+                $_result->target_level = $target_org && $target_org->target != null ? (int) $target_org->target : 0;
+
+                $_level = DB::table('capability_assesment')
+                    ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                    ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                    ->where('capability_level.domain_id', $_item_domain->domain_id)
+                    ->whereNull('capability_assesment.deleted_at')
+                    ->whereNull('capability_level.deleted_at')
+                    ->whereNull('capability_answer.deleted_at')
+                    ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                    ->first();
+
+                $_bobot = DB::table('capability_level')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->select(DB::raw("SUM(bobot) as bobot_level"))
+                    ->first();
+
+                $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
+                $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
+
+                $_total_compilance = 0;
+                if ($_total_sum_compilance != null) {
+                    $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                }
+
+                $_result->hasil_assesment = $_total_compilance;
+                $_result->gap_minus = round((float) $_result->target_level - $_total_compilance, 2);
+
+                $gap_minus[]=$_result->gap_minus;
+                $hasil_assesment[]=$_total_compilance;
+                $target_level[]=$_result->target_level;
+            }
+        }
+
+        $categories = $list_domains;
+        $series= [
+            array(
+                'name' => 'Hasil Assesment & Klrifikasi',
+                'data' => $hasil_assesment
+            ),
+            array(
+                'name' => 'Target Capbility Adjustment (KCI)',
+                'data' => $target_level
+            ),
+            array(
+                'name' => $target->nama,
+                'data' => $gap_minus
+            )
+        ];
+
+        $data['categories'] = $categories;
+        $data['series'] = $series;
+        return $this->successResponse($data);
+    }
+
+    public function ReportDetailOfi(Request $request)
+    {
+
         $list_ofi=CapabilityAssesmentOfi::where('capability_target_id',$request->capability_target_id);
 
         if($request->filled('capability_assesment_id')){
             $list_ofi->where('capability_assesment_id',$request->capability_assesment_id);
+        }
+        if($request->filled('domain_id')){
+            $list_ofi->where('domain_id',$request->domain_id);
         }
         $list_ofi=$list_ofi->get();
         $domain = Domain::find($request->domain_id);

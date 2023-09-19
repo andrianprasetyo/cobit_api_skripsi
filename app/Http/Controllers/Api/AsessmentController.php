@@ -809,7 +809,7 @@ class AsessmentController extends Controller
                 $_result->gap_deskripsi='Terdapat kesenjangan antara nilai saat ini dengan target '.$target_name;
                 $_result->potensi = 'Improvement pada area '.$_item_domain->translate.' dengan melakukan beberapa aktivitas tertentu sesuai rekomendasi.';
 
-                $_result->gap_minus=(float) $_result->target_level - $_total_compilance;
+                $_result->gap_minus=round((float) $_result->target_level - $_total_compilance, 2);
                 if($_total_compilance > $_result->target_level)
                 {
                     $_result->gap_minus=null;

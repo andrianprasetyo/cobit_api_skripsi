@@ -424,7 +424,7 @@ class CapabilityAssesmentController extends Controller
             }
         }
 
-        $_total=array_sum($_total_all) / count($list_levels) + 1;
+        $_total=array_sum($_total_all) + 1;
         $data['list'] = $_list_level;
         $data['total'] = round($_total,2);
         return $this->successResponse($data);

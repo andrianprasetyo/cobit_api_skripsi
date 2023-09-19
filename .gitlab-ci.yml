@@ -36,7 +36,7 @@ deploy_main:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh -o StrictHostKeyChecking=no msi@10.10.12.9 "cd /home/msi/cobit-api.millennia-solusi.id && git pull origin main && composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan cache:clear && php artisan view:clear"
+    - ssh -o StrictHostKeyChecking=no msi@10.10.12.9 "cd /home/msi/cobit-api.millennia-solusi.id && git pull origin main && composer install --no-plugins && php artisan config:cache && php artisan route:cache && php artisan cache:clear && php artisan view:clear"
   environment:
     name: main
     url: http://10.10.12.9

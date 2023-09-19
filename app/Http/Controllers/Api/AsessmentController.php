@@ -937,7 +937,7 @@ class AsessmentController extends Controller
         $categories = $list_domains;
         $series= [
             array(
-                'name' => 'Hasil Assesment & Klaifikasi',
+                'name' => 'Hasil Assesment & Klarifikasi',
                 'data' => $hasil_assesment
             ),
             array(

@@ -272,7 +272,11 @@ class CobitHelper
 
             $step3PraInitValue = 0;
             foreach ($respondentHasil as $k => $rh) {
-                $step3PraInitValue += $rh->relative_importance * $dfWeight[$k]->weight;
+                $default = 0;
+                if(isset($dfWeight[$k]->weight)){
+                    $default = $dfWeight[$k]->weight;
+                }
+                $step3PraInitValue += $rh->relative_importance * $default;
             }
             $step3InitValue=$step3PraInitValue+$dom->step2_init_value;
             AssesmentCanvas::where('id',$dom->id)->update([

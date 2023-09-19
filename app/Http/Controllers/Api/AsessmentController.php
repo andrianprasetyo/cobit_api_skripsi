@@ -937,17 +937,13 @@ class AsessmentController extends Controller
         $categories = $list_domains;
         $series= [
             array(
-                'name' => 'Hasil Assesment & Klrifikasi',
+                'name' => 'Hasil Assesment & Klaifikasi',
                 'data' => $hasil_assesment
             ),
             array(
-                'name' => 'Target Capbility Adjustment (KCI)',
+                'name' => 'Target Capability Adjustment (' . $target->nama . ' )',
                 'data' => $target_level
             ),
-            array(
-                'name' => $target->nama,
-                'data' => $gap_minus
-            )
         ];
 
         $data['categories'] = $categories;

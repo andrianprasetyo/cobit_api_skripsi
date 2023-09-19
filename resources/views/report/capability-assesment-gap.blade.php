@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th>Domain/GAMO</th>
-            <th>Target Organisasi</th>
+            <th>Target {{ $header }}</th>
             <th>Hasil Assesment</th>
             <th>GAP</th>
             <th>GAP Deskripsi</th>

@@ -994,7 +994,7 @@ class AsessmentController extends Controller
             }
         }
 
-        return Excel::download(new AnalisaGapExport($data),'report-capability-assesment.xlsx');
+        return Excel::download(new AnalisaGapExport($data, $target_name),'report-capability-assesment.xlsx');
         // return $this->successResponse($data);
     }
 

@@ -1,0 +1,14 @@
+<table>
+    <head>
+        <tr>
+            <th>Pertanyaan</th>
+            <th>Urutan</th>
+        </tr>
+    </head>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+        </tr>
+    </tbody>
+</table>

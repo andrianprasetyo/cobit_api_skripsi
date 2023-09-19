@@ -278,7 +278,9 @@ class ReportController extends Controller
         $hasil= Domain::with([
             // 'assesmenthasil',
             // 'assesmenthasil.designfaktor',
-            'assesmentcanvas',
+            'assesmentcanvas'=>function($query) use($request){
+                $query->where('assesment_id', $request->assesment_id);
+            }
         ])
             // ->whereRelation('assesmenthasil','assesment_id', $request->assesment_id)
             ->whereRelation('assesmentcanvas', 'assesment_id', $request->assesment_id)

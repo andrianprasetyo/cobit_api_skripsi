@@ -474,6 +474,7 @@ class CapabilityAssesmentController extends Controller
         //     ->get();
 
         $cap_answer = CapabilityAnswer::all();
+
         $answer_val=[];
         if(!$cap_answer->isEmpty())
         {
@@ -632,7 +633,7 @@ class CapabilityAssesmentController extends Controller
 
                     $current_total_list_level = count($_list_level);
                     
-                    if(isset($_list_level[0]) && $current_total_list_level < 5){
+                    if(isset($_list_level[1]) && $current_total_list_level < 5){
                         $remaining_list = 5 - $current_total_list_level;
                         
                         for ($x = 1; $x < $remaining_list; $x++) {

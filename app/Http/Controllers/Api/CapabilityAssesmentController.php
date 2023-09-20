@@ -480,7 +480,6 @@ class CapabilityAssesmentController extends Controller
 
                 $_list_level = [];
                 $_total_all=[];
-                $debug=[];
 
                 $list_levels = DB::table('capability_level')
                     ->where('domain_id', $_item_domain->id)
@@ -492,8 +491,7 @@ class CapabilityAssesmentController extends Controller
 
                 if(!$list_levels->isEmpty())
                 {
-                    foreach ($list_levels as $_item_level) {
-
+                    foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
                         $_level = DB::table('capability_assesment')
                             ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
@@ -530,7 +528,6 @@ class CapabilityAssesmentController extends Controller
                         //     $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
                         // }
 
-                        $debug[]=$_level;
                         $sts = null;
 
                         $last_level=null;
@@ -572,6 +569,14 @@ class CapabilityAssesmentController extends Controller
                             $last_level=$_total_compilance;
                         }
 
+                        if(isset($_list_level[$key - 1]) && !isset($_list_level[$key])){
+                            $_list_level[$key] = array(
+                                'level' => $_item_level->level,
+                                'total_compilance' => 0,
+                                'label' => 'N/A',
+                            );
+                        }
+
                         /*
                         if($last_level != null){
                             if ($last_level < $answer_val['N']){
@@ -602,7 +607,6 @@ class CapabilityAssesmentController extends Controller
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,
                     'total' => array_sum($_total_all),
-                    'debug'=>$debug
                 );
             }
         }

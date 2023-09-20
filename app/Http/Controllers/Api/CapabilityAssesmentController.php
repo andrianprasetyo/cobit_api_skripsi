@@ -490,7 +490,7 @@ class CapabilityAssesmentController extends Controller
                     ->get();
 
                 if(!$list_levels->isEmpty())
-                {
+                {   
                     foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
                         $_level = DB::table('capability_assesment')
@@ -572,10 +572,20 @@ class CapabilityAssesmentController extends Controller
                         if(isset($_list_level[$key - 1]) && !isset($_list_level[$key])){
                             $_list_level[$key] = array(
                                 'level' => $_item_level->level,
+                                'total_compilance' => null,
+                                'label' => null,
+                            );
+                        }
+
+                        /* Added N/A When Prev Level Not Passed
+                        if(isset($_list_level[$key - 1]) && !isset($_list_level[$key])){
+                            $_list_level[$key] = array(
+                                'level' => $_item_level->level,
                                 'total_compilance' => 0,
                                 'label' => 'N/A',
                             );
                         }
+                        */
 
                         /*
                         if($last_level != null){
@@ -598,15 +608,31 @@ class CapabilityAssesmentController extends Controller
                             );
                         }
                         */
-
                     }
-                }
+
+                    $current_total_list_level = count($_list_level);
+                    
+                    if($current_total_list_level < 5){
+                        $remaining_list = 5 - $current_total_list_level;
+                        
+                        for ($x = 1; $x < $remaining_list; $x++) {
+                            array_push($_list_level, array(
+                                'level' => $current_total_list_level + $remaining_list,
+                                'total_compilance' => null,
+                                'label' => "N/A",
+                            ));
+                          }
+                        
+                    };
+                }  
+                
+
                 $list[] = array(
                     'id' => $_item_domain->id,
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,
-                    'total' => array_sum($_total_all),
+                    'total' => round(array_sum($_total_all), 2),
                 );
             }
         }

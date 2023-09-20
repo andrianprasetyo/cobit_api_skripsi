@@ -15,14 +15,17 @@ use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentEvident;
 use App\Models\CapabilityAssesmentOfi;
 use App\Models\CapabilityAssesmentSubmited;
+use App\Models\HistoryCapabilityAssesment;
 use App\Models\CapabilityLevel;
 use App\Models\CapabilityTarget;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Resources\History\HistoryCapabilityResources;
 
 class CapabilityAssesmentController extends Controller
 {
@@ -180,7 +183,8 @@ class CapabilityAssesmentController extends Controller
         $evidents = $request->evident;
         $ofi = $request->ofi;
 
-        // $_deb=[];
+        $after = [];
+
         DB::beginTransaction();
         try {
 
@@ -202,10 +206,13 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->assesment_id=$request->assesment_id;
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
+                
+                $after['capability_assesment'][] = $capability_ass;
 
                 if(isset($evidents[$i]) && count($evidents[$i]) > 0)
                 {
                     $evident = $evidents[$i];
+                    $evident_after = [];
                     if (count($evident) > 0) {
                         CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                         for ($r = 0; $r < count($evident); $r++) {
@@ -224,7 +231,10 @@ class CapabilityAssesmentController extends Controller
                             $_new_ass_ev->deskripsi=isset($evident[$r]['deskripsi'])?$evident[$r]['deskripsi']:null;
                             $_new_ass_ev->media_repositories_id=isset($evident[$r]['media_repositories_id']) ? $evident[$r]['media_repositories_id'] : null;
                             $_new_ass_ev->save();
+                            $evident_after[] = $_new_ass_ev;
                         }
+
+                        $after['capability_assesment_evident'][] = $evident_after;
 
                         // Legacy Code
                         // CapabilityAssesmentEvident::insert($_evident);
@@ -237,6 +247,7 @@ class CapabilityAssesmentController extends Controller
                     if (count($ofi) > 0) {
                         CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
                         $_ofi = [];
+                        $ofi_after = [];
                         $ofi_item=$ofi[$i];
                         for ($o = 0; $o < count($ofi); $o++) {
                             $new_ofi=new CapabilityAssesmentOfi();
@@ -245,6 +256,7 @@ class CapabilityAssesmentController extends Controller
                             $new_ofi->ofi= isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null;
                             $new_ofi->capability_target_id = isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null;
                             $new_ofi->save();
+                            $ofi_after[]=$new_ofi;
 
                             // $_ofi[] = array(
                             //     'id' => Str::uuid(),
@@ -258,9 +270,17 @@ class CapabilityAssesmentController extends Controller
                         }
                         // CapabilityAssesmentOfi::insert($_ofi);
                         // $_deb[]=$_ofi;
+                        $after['capability_assesment_ofi'][] = $ofi_after;
                     }
                 }
             }
+
+            $history = new HistoryCapabilityAssesment();
+            $history->created_by = Auth::user()->id;
+            $history->assesment_id=$request->assesment_id;
+            $history->domain_id=$request->domain_id;
+            $history->after = $after;
+            $history->save();
 
             // CapabilityAssesmentSubmited::firstOrCreate([
             //     'assesment_id'=>$request->assesment_id,
@@ -270,7 +290,7 @@ class CapabilityAssesmentController extends Controller
             // ]);
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($after);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());
@@ -807,5 +827,20 @@ class CapabilityAssesmentController extends Controller
         $data = CapabilityAssesmentOfi::find($request->id);
 
         return $this->successResponse($data);
+    }
+
+    public function historyCapabilityAss(Request $request){
+        $limit = $request->get('limit', 10);
+        $page = $request->get('page', 1);
+
+        $list = HistoryCapabilityAssesment::with('author')
+            ->where('assesment_id',$request->assesment_id)
+            ->where('domain_id',$request->domain_id)
+            ->orderBy('created_at', 'DESC');
+
+        $data = $this->paging($list,$limit,$page, HistoryCapabilityResources::class);
+        return $this->successResponse($data);
+
+        
     }
 }

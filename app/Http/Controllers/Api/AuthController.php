@@ -103,7 +103,7 @@ class AuthController extends Controller
                 }
 
             } else {
-                // return $this->errorResponse('Assesment sudah kadaluarsa', 400);
+                return $this->errorResponse('Assesment sudah kadaluarsa', 400);
             }
 
             $auth = User::with([

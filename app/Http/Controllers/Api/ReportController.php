@@ -312,16 +312,17 @@ class ReportController extends Controller
                 $_hasil[]=$hasil_init;
             }
         }
-        $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
-            ->where('assesment_id', $request->assesment_id)
-            ->get();
+        // $weight=AssesmentDesignFaktorWeight::with(['designfaktor'])
+        //     ->where('assesment_id', $request->assesment_id)
+        //     ->get();
 
-        $df=DesignFaktor::with('assesmentweight')
-            ->whereRelation('assesmentweight','assesment_id', $request->assesment_id)
+        $df=DesignFaktor::with(['assesmentweight' =>function($query) use($request){
+            $query->where('assesment_id', $request->assesment_id);
+        }])
             ->orderBy('urutan','ASC')
             ->get();
-
-        // $data['hasil'] = DomainCanvasResource::collection($hasil);
+        
+        
         $data['hasil']=$_hasil;
         // $data['weight'] = AssesmentDesignFaktorWeightCanvasResource::collection($weight);
         $data['df'] = DesignFaktorCanvasResource::collection($df);

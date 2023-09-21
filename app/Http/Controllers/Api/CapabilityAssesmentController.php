@@ -250,13 +250,15 @@ class CapabilityAssesmentController extends Controller
                         $ofi_after = [];
                         $ofi_item=$ofi[$i];
                         for ($o = 0; $o < count($ofi); $o++) {
-                            $new_ofi=new CapabilityAssesmentOfi();
-                            $new_ofi->capability_assesment_id=$capability_ass->id;
-                            $new_ofi->domain_id = $request->domain_id;
-                            $new_ofi->ofi= isset($ofi_item[$o]['ofi']) ? $ofi_item[$o]['ofi'] : null;
-                            $new_ofi->capability_target_id = isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null;
-                            $new_ofi->save();
-                            $ofi_after[]=$new_ofi;
+                            if(isset($ofi_item[$o]['ofi'])){
+                                $new_ofi=new CapabilityAssesmentOfi();
+                                $new_ofi->capability_assesment_id=$capability_ass->id;
+                                $new_ofi->domain_id = $request->domain_id;
+                                $new_ofi->ofi= $ofi_item[$o]['ofi'];
+                                $new_ofi->capability_target_id = isset($ofi_item[$o]['capability_target_id']) ? $ofi_item[$o]['capability_target_id'] : null;
+                                $new_ofi->save();
+                                $ofi_after[]=$new_ofi;
+                            }
 
                             // $_ofi[] = array(
                             //     'id' => Str::uuid(),

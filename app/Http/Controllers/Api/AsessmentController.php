@@ -956,9 +956,12 @@ class AsessmentController extends Controller
 
         $list_ofi=CapabilityAssesmentOfi::where('capability_target_id',$request->capability_target_id);
 
+        /*
         if($request->filled('capability_assesment_id')){
             $list_ofi->where('capability_assesment_id',$request->capability_assesment_id);
         }
+        */
+        
         if($request->filled('domain_id')){
             $list_ofi->where('domain_id',$request->domain_id);
         }

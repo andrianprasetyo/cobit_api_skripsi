@@ -701,6 +701,7 @@ class CapabilityAssesmentController extends Controller
         if (!$list_domain->isEmpty()) {
             foreach ($list_domain as $_item_domain) {
 
+                
                 $_list_level = [];
                 $_total_all=[];
 
@@ -712,10 +713,13 @@ class CapabilityAssesmentController extends Controller
                     ->orderBy('level', 'asc')
                     ->get();
 
+     
+
                 if(!$list_levels->isEmpty())
                 {   
                     foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
+
                         $_level = DB::table('capability_assesment')
                             ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
                             ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
@@ -735,26 +739,24 @@ class CapabilityAssesmentController extends Controller
                             ->select(DB::raw("SUM(bobot) as bobot_level"))
                             ->first();
 
+                        /*
+                        $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
+                        $_total_sum_compilance = null;
+                        if($_level->compilance != null)
+                        {
+                            $_total_sum_compilance = $_level->compilance;
+                        }
+                        $_total_sum_compilance = (float) $_level->compilance;
+                        $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
 
-                        // $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : 0;
-                        // $_total_sum_compilance = null;
-                        // if($_level->compilance != null)
-                        // {
-                        //     $_total_sum_compilance = $_level->compilance;
-                        // }
-                        // $_total_sum_compilance = (float) $_level->compilance;
-                        // $_bobot_level=$_bobot->bobot_level?$_bobot->bobot_level:0;
-
-                        // $_total_compilance=0;
-                        // if($_total_sum_compilance != null)
-                        // {
-                        //     $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
-                        // }
+                        $_total_compilance=0;
+                        if($_total_sum_compilance != null)
+                        {
+                            $_total_compilance = $_total_sum_compilance !=0?round($_total_sum_compilance / $_bobot->bobot_level, 2):0;
+                        }
+                        */
 
                         $sts = null;
-
-                        $last_level=null;
-
                         if($_level->compilance != null){
 
                             $_total_sum_compilance = $_level->compilance;
@@ -799,6 +801,20 @@ class CapabilityAssesmentController extends Controller
                                 'label' => null,
                             );
                         }
+                    }
+
+                    $current_total_list_level = count($_list_level);
+                    $remaining_list = 4 - $current_total_list_level; // Total Level Max (2, 3 , 4 , 5)
+
+                    if(($current_total_list_level > 0) && ($remaining_list > 0)){
+                        for ($x = 1; $x <= $remaining_list; $x++) {
+                            array_push($_list_level, array(
+                                'level' => $current_total_list_level + ++$x ,
+                                'total_compilance' => null,
+                                'label' => "N/A",
+                            ));
+                        }
+
                     }
                 }  
                 

@@ -195,7 +195,7 @@ class CapabilityAssesmentController extends Controller
                 if ($capability_assesment[$i] != null) {
                     $capability_ass = CapabilityAssesment::find($capability_assesment[$i]);
                     if (!$capability_ass) {
-                        return $this->errorResponse('Capbility asesment ID tidak ditemukan', 404);
+                        return $this->errorResponse('Capability asesment ID tidak ditemukan', 404);
                     }
                 }
                 // $capability_ass->capability_target_id = $capability_target_id[$i];

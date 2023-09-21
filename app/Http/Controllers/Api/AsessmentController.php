@@ -1107,14 +1107,15 @@ class AsessmentController extends Controller
             ->whereNull('design_faktor.deleted_at')
             ->orderBy('design_faktor_komponen.urutan', 'asc')
             ->select(
-                'quisioner_hasil_avg.id',
-                'design_faktor.kode as df_kode',
                 'design_faktor_komponen.id as dfk_id',
+                'design_faktor.kode as df_kode',
                 'design_faktor_komponen.nama as dfk_nama',
                 'design_faktor_komponen.deskripsi as dfk_deskripsi',
                 'design_faktor_komponen.baseline as dfk_baseline',
                 'design_faktor_komponen.urutan as dfk_urutan',
-            )->get();
+            )
+            ->groupBy('dfk_id', 'df_kode')
+            ->get();
 
 
         $dfks=[];
@@ -1144,7 +1145,8 @@ class AsessmentController extends Controller
                         // 'design_faktor_komponen.baseline as dfk_baseline',
                         'quisioner_pertanyaan.id as pertanyaan_id',
                         'quisioner_pertanyaan.pertanyaan',
-                    )->get();
+                    )
+                    ->get();
 
 
                 $item_dfk->values=$values;

@@ -209,11 +209,12 @@ class CapabilityAssesmentController extends Controller
                 
                 $after['capability_assesment'][] = $capability_ass;
 
+                CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
+                
                 if(isset($evidents[$i]) && count($evidents[$i]) > 0)
                 {
                     $evident = $evidents[$i];
                     $evident_after = [];
-                    CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
                     if (count($evident) > 0) {
                         for ($r = 0; $r < count($evident); $r++) {
                             /* Legacy Code
@@ -241,10 +242,11 @@ class CapabilityAssesmentController extends Controller
 
                     }
                 }
-
+                
+                CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
+                
                 if(isset($ofi[$i]) && count($ofi[$i]) > 0)
                 {
-                    CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
                     if (count($ofi) > 0) {
                         $_ofi = [];
                         $ofi_after = [];

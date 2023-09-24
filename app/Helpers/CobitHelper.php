@@ -729,7 +729,7 @@ class CobitHelper
         return true;
     }
 
-    public static function generateTargetLevelDomain($assesment_id,$nama_target='organisasi',$default=false)
+    public static function generateTargetLevelDomain($assesment_id,$nama_target='Organisasi',$default=false)
     {
         $_check_target=CapabilityTarget::where('assesment_id',$assesment_id)
             ->where('nama',$nama_target)

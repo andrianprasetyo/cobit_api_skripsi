@@ -17,7 +17,7 @@ class AssesmentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $assesment_pic =null;
-        if($this->pic->id){
+        if(isset($this->pic->id)){
 
             $assesment_pic = UserAssesment::where('assesment_id', $this->id)->where('users_id', $this->pic->id)->first();
         }

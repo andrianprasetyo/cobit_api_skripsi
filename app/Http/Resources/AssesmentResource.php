@@ -16,7 +16,11 @@ class AssesmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $assesment_pic = UserAssesment::where('assesment_id', $this->id)->where('users_id', $this->pic->id)->first();
+        $assesment_pic =null;
+        if($this->pic->id){
+
+            $assesment_pic = UserAssesment::where('assesment_id', $this->id)->where('users_id', $this->pic->id)->first();
+        }
         // $tahun=Carbon::parse($this->tahun);
         return [
             'id'=>$this->id,

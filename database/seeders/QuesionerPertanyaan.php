@@ -18,57 +18,57 @@ class QuesionerPertanyaan extends Seeder
         //
         $data=[
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa penting masing-masing strategi perusahaan diatas yang seharusnya dapat dipenuhi di PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa penting masing-masing strategi perusahaan diatas yang seharusnya dapat dipenuhi di Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF1')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Penting')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa penting masing-masing tujuan tersebut untuk merealisasikan strategi PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa penting masing-masing tujuan tersebut untuk merealisasikan strategi Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF2')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Penting')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa besar dampak dari skenario risiko-risiko dibawah ini untuk PT Kereta Commuter Indonesia? *Level of Impact from Risks',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa besar dampak dari skenario risiko-risiko dibawah ini untuk Perusahaan Bapak/Ibu? *Level of Impact from Risks',
                 'df'=> DesignFaktor::where('kode', 'DF3')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Kecil')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa besar kemungkinan dari risiko-risiko dibawah ini terjadi pada PT Kereta Commuter Indonesia? *Likelihood of Risks',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa besar kemungkinan dari risiko-risiko dibawah ini terjadi pada Perusahaan Bapak/Ibu? *Likelihood of Risks',
                 'df'=> DesignFaktor::where('kode', 'DF3')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Mungkin')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa serius dampak dari isu-isu terkait IT ini jika terjadi pada PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa serius dampak dari isu-isu terkait IT ini jika terjadi pada Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF4')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Serius')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, saat ini PT Kereta Commuter Indonesia beroperasi di lingkungan dengan tingkat ancaman yang bagaimana?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, saat ini Perusahaan Bapak/Ibu beroperasi di lingkungan dengan tingkat ancaman yang bagaimana?',
                 'df'=> DesignFaktor::where('kode', 'DF5')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup High Normal')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa banyak persyaratan kepatuhan yang harus dipenuhi PT Kereta Commuter Indonesia saat ini?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, seberapa banyak persyaratan kepatuhan yang harus dipenuhi Perusahaan Bapak/Ibu saat ini?',
                 'df'=> DesignFaktor::where('kode', 'DF6')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup High Normal Low')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimana seharusnya peran IT di PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimana seharusnya peran IT di Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF7')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Setuju')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya model pengadaan TI di PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya model pengadaan TI di Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF8')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup Outsource')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya metode implementasi IT yang dijalankan di PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya metode implementasi IT yang dijalankan di Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF9')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup AgileDevOps')->first()->id
             ],
             [
-                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya strategi adopsi teknologi untuk PT Kereta Commuter Indonesia?',
+                'pertanyaan'=>'Menurut Bapak/Ibu, bagaimanakah seharusnya strategi adopsi teknologi untuk Perusahaan Bapak/Ibu?',
                 'df'=> DesignFaktor::where('kode', 'DF10')->first()->id,
                 'jenis'=>QuisionerGrupJawaban::where('nama','Grup FirstMover')->first()->id
             ],

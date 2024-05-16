@@ -441,72 +441,122 @@ class ReportController extends Controller
                 dfk.urutan ASC
         ");
 
-        $hasilQuesioner = DB::select("
-            SELECT
-                *,
-                odj.nama as nama_jabatan,
-                od.nama as nama_divisi,
-                au.nama as nama_responden,
-                (
-                    select json_agg(tbl2) from (
-                        select
-                            json_build_object(
-                                'id',tbl.id,
-                                'kode',tbl.kode,
-                                'deskripsi',tbl.deskripsi,
-                                'dfk_id',tbl.dfk_id,
-                                'nama',tbl.nama,
-                                'komponen_deskripsi',komponen_deskripsi,
-                                'jawaban',jawaban,
-                                'bobot',bobot,
-                                'pertanyaan',pertanyaan,
-                                'assesment_users_id',assesment_users_id,
-                                'nama_grup_jawaban',nama_grup_jawaban,
-                                'jenis',jenis
-                            ) as jawaban
-                        from (
-                        SELECT
-                            df.ID,
-                            df.kode,
-                            df.deskripsi,
-                            dfk.ID AS dfk_id,
-                            dfk.nama,
-                            dfk.deskripsi as komponen_deskripsi,
-                            qj.jawaban,
-                            qh.bobot,
-                            qp.pertanyaan,
-                            qh.assesment_users_id,
-                            qgj.nama as nama_grup_jawaban,
-                            qgj.jenis
-                        FROM
-                            design_faktor_komponen dfk
-                            JOIN design_faktor df ON df.ID = dfk.design_faktor_id
-                            left JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id=dfk.id and qh.assesment_users_id=au.id
-                            left JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
-                            left JOIN quisioner_grup_jawaban qgj ON qgj.id=qj.quisioner_grup_jawaban_id
-                            left JOIN quisioner_pertanyaan qp ON qp.id=qh.quisioner_pertanyaan_id
-                        ORDER BY
-                            df.urutan ASC,
-                            qp.sorting asc,
-                            dfk.urutan ASC
-
+        $query = "
+                SELECT
+                    *,
+                    odj.nama as nama_jabatan,
+                    od.nama as nama_divisi,
+                    au.nama as nama_responden,
+                    (
+                        select json_agg(tbl2) from (
+                            select
+                                json_build_object(
+                                    'id', tbl.id,
+                                    'kode', tbl.kode,
+                                    'deskripsi', tbl.deskripsi,
+                                    'dfk_id', tbl.dfk_id,
+                                    'nama', tbl.nama,
+                                    'komponen_deskripsi', komponen_deskripsi,
+                                    'jawaban', jawaban,
+                                    'bobot', bobot,
+                                    'pertanyaan', pertanyaan,
+                                    'assesment_users_id', assesment_users_id,
+                                    'nama_grup_jawaban', nama_grup_jawaban,
+                                    'jenis', jenis
+                                ) as jawaban
+                            from (
+                            SELECT
+                                df.ID,
+                                df.kode,
+                                df.deskripsi,
+                                dfk.ID AS dfk_id,
+                                dfk.nama,
+                                dfk.deskripsi as komponen_deskripsi,
+                                qj.jawaban,
+                                qh.bobot,
+                                qp.pertanyaan,
+                                qh.assesment_users_id,
+                                qgj.nama as nama_grup_jawaban,
+                                qgj.jenis
+                            FROM
+                                design_faktor_komponen dfk
+                                JOIN design_faktor df ON df.ID = dfk.design_faktor_id
+                                LEFT JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id = dfk.id AND qh.assesment_users_id = au.id
+                                LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
+                                LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
+                                LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
+                            ORDER BY
+                                df.urutan ASC,
+                                qp.sorting ASC,
+                                dfk.urutan ASC
                             ) as tbl
+                        ) as tbl2
+                    ) as jawaban_quesioner
+                FROM
+                    assesment_users au
+                    LEFT JOIN organisasi_divisi_jabatan odj ON odj.id = au.jabatan_id
+                    LEFT JOIN organisasi_divisi od ON od.id = odj.organisasi_divisi_id
+                WHERE
+                    au.status = 'done'
+                    AND au.assesment_id = :assesment_id
+            ";
 
-                    ) as tbl2
-                ) as jawaban_quesioner
-            FROM
-                assesment_users au
-                LEFT JOIN organisasi_divisi_jabatan odj on odj.id=au.jabatan_id
-                LEFT JOIN organisasi_divisi od on od.id=odj.organisasi_divisi_id
-            WHERE
-                au.status = 'done'
-                and au.assesment_id=:assesment_id
-        ", [
-            'assesment_id' => $request->assesment_id
-        ]);
+        $params = [
+            'assesment_id' => $request->assesment_id,
+        ];
+        if($request->filled('assesment_users_id')){
+            $query .= " AND au.id = :assesment_users_id";
+            $params['assesment_users_id'] = $request->assesment_users_id;
+        }
+        $hasilQuesioner = DB::select($query, $params);
+        // $results = AssessmentUsers::with([
+        //     'jabatan.divisi',
+        //     'assesmentquisionerhasil' => function ($query) {
+        //         $query->select(
+        //             'design_faktor_komponen_id',
+        //             'jawaban_id',
+        //             'bobot',
+        //             'assesment_users_id',
+        //             'quisioner_pertanyaan_id'
+        //         )
+        //             ->with([
+        //                 'dfkomponen.designfaktor',
+        //                 'pertanyaan.grup_jawaban',
+        //                 'pertanyaan',
+        //                 'jawaban'
+        //             ]);
+        //             // ->orderBy('dfkomponen.designfaktor.urutan');
+        //             // ->orderBy('quisioner_pertanyaan.sorting');
+        //     }
+        // ])->where('status', 'done')
+        //     ->where('assesment_id', $request->assesment_id)
+        //     ->get()
+        //     ->map(function ($user) {
+        //         $user->nama_jabatan = $user->jabatan->nama;
+        //         $user->nama_divisi = $user->jabatan->divisi->nama;
+        //         $user->nama_responden = $user->nama;
+        //         $user->jawaban_quesioner = $user->assesmentquisionerhasil->map(function ($hasil) {
+        //             return [
+        //                 'id' => $hasil->dfkomponen->designfaktor->id,
+        //                 'kode' => $hasil->dfkomponen->designfaktor->kode,
+        //                 'deskripsi' => $hasil->dfkomponen->designfaktor->deskripsi,
+        //                 'dfk_id' => $hasil->dfkomponen->id,
+        //                 'nama' => $hasil->dfkomponen->nama,
+        //                 'komponen_deskripsi' => $hasil->dfkomponen->deskripsi,
+        //                 'jawaban' => $hasil->jawaban,
+        //                 'bobot' => $hasil->bobot,
+        //                 'pertanyaan' => $hasil->pertanyaan->pertanyaan,
+        //                 'assesment_users_id' => $hasil->assesment_users_id,
+        //                 'nama_grup_jawaban' => $hasil->pertanyaan->grup_jawaban->nama,
+        //                 'jenis' => $hasil->pertanyaan->grup_jawaban->jenis
+        //             ];
+        //         });
+        //         return $user;
+        //     });
 
         $data['header']=$header;
         $data['quesioner']=$hasilQuesioner;
+        // $data['quesioner'] = $results;
 
         return $this->successResponse($data);
     }

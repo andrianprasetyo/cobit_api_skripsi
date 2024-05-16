@@ -49,4 +49,9 @@ class Assesment extends Model
     {
         return $this->belongsTo(User::class,'users_id');
     }
+
+    public function users()
+    {
+        return $this->hasMany(AssessmentUsers::class,'assesment_id','id');
+    }
 }

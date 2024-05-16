@@ -53,7 +53,7 @@ class AsessmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = Assesment::with(['organisasi','pic'])->expire();
+        $list = Assesment::with(['organisasi','pic'])->withCount('users')->expire();
 
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
@@ -961,7 +961,7 @@ class AsessmentController extends Controller
             $list_ofi->where('capability_assesment_id',$request->capability_assesment_id);
         }
         */
-        
+
         if($request->filled('domain_id')){
             $list_ofi->where('domain_id',$request->domain_id);
         }

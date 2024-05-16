@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assesment;
+use App\Models\AssesmentDomain;
 use App\Models\AssessmentUsers;
+use App\Models\CapabilityTarget;
+use App\Models\Domain;
 use App\Models\UserAssesment;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
@@ -126,6 +129,19 @@ class DashboardController extends Controller
 
         $data['categories'] = $categories;
         $data['series'] = $series;
+        return $this->successResponse($data);
+    }
+
+    public function dashboardByAssesment(Request $request)
+    {
+        $assesment_id=$request->assesment_id;
+        $responden = AssessmentUsers::where('assesment_id',$assesment_id)->count();
+        $gamo = AssesmentDomain::where('assesment_id', $assesment_id)->count();
+        $capability_taget = CapabilityTarget::where('assesment_id', $assesment_id)->count();
+
+        $data['responden'] = $responden;
+        $data['gamo'] = $gamo;
+        $data['capability_taget']=$capability_taget;
         return $this->successResponse($data);
     }
 }

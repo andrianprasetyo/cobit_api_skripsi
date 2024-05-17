@@ -1240,9 +1240,9 @@ class AsessmentController extends Controller
                         'domain.urutan as domain_urutan',
                     )->first();
 
-                    $score[]= $nilai->score ? CobitHelper::convertToNumber($nilai->score) : 0;
-                    $baseline_score[] = $nilai->baseline_score ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
-                    $relative_importance[] = $nilai->relative_importance ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
+                    $score[]= $nilai ? CobitHelper::convertToNumber($nilai->score) : 0;
+                    $baseline_score[] = $nilai ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
+                    $relative_importance[] = $nilai ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
             }
 
             $series= array(

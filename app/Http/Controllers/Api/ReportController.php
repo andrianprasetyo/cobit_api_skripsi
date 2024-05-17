@@ -554,6 +554,10 @@ class ReportController extends Controller
         //         return $user;
         //     });
 
+        foreach ($hasilQuesioner as $item) {
+            $item->jawaban_quesioner = json_decode($item->jawaban_quesioner, true);
+        }
+
         $data['header']=$header;
         $data['quesioner']=$hasilQuesioner;
         // $data['quesioner'] = $results;

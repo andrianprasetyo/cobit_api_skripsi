@@ -459,4 +459,61 @@ class QuisionerController extends Controller
         $data = $this->paging($list, $limit, $page, JabatanRefResource::class);
         return $this->successResponse($data);
     }
+
+    public function setFinish(Request $request)
+    {
+        $request->validate([
+            'assesment_id'=>'required',
+            'assesment_user_id'=>'required|array'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $assesment_user_id = $request->assesment_user_id;
+
+            foreach ($assesment_user_id as $item_user_id) {
+                $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($item_user_id);
+                if($responden){
+
+                    if ($responden->status == 'diundang') {
+                        return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
+                    }
+
+                    if ($responden->status == 'done') {
+                        return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+                    }
+
+                    $total_soal = DB::table('design_faktor')
+                        ->join('quisioner_pertanyaan', 'design_faktor.id', '=', 'quisioner_pertanyaan.design_faktor_id')
+                        ->where('quisioner_pertanyaan.quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                        ->whereNull('design_faktor.deleted_at')
+                        ->whereNull('quisioner_pertanyaan.deleted_at')
+                        ->count();
+
+                    $total_jawaban = QuisionerHasil::where('assesment_users_id', $item_user_id)
+                        ->where('quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                        ->count();
+
+                    if ($total_jawaban < $total_soal) {
+                        return $this->errorResponse('Harap isi semua jawaban di setiap pertanyaan', 400);
+                    }
+
+                    $responden->status = 'done';
+                    $responden->is_proses = null;
+                    $responden->quesioner_processed = true;
+
+                    $responden->save();
+
+                    SetProsesQuisionerHasilQueue::dispatch($item_user_id);
+                    SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
+    }
 }

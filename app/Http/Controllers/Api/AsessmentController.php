@@ -1206,6 +1206,66 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
+    public function dfRiskSkenarioOUTChart(Request $request)
+    {
+        $assesment_id = $request->assesment_id;
+        $design_faktor_id = $request->design_faktor_id;
+        $_list_domain = Domain::orderBy('urutan', 'ASC')->get();
+
+        $series = [];
+        $categories = [];
+
+        $score=[];
+        $baseline_score = [];
+        $relative_importance = [];
+        if(!$_list_domain->isEmpty())
+        {
+            foreach ($_list_domain as $_item_domain)
+            {
+                $categories[] = $_item_domain->kode;
+
+                $nilai = DB::table('assesment_hasil')
+                    ->join('domain', 'assesment_hasil.domain_id', 'domain.id')
+                    ->join('design_faktor', 'assesment_hasil.design_faktor_id', 'design_faktor.id')
+                    ->where('domain.id', $_item_domain->id)
+                    ->where('assesment_hasil.assesment_id', $assesment_id)
+                    ->where('assesment_hasil.design_faktor_id', $design_faktor_id)
+                    ->whereNull('domain.deleted_at')
+                    ->orderBy('domain.urutan', 'asc')
+                    ->select(
+                        'assesment_hasil.*',
+                        'design_faktor.kode as df_kode',
+                        'domain.kode as domain_kode',
+                        'domain.ket as domain_ket',
+                        'domain.urutan as domain_urutan',
+                    )->first();
+
+                    $score[]= $nilai->score ? CobitHelper::convertToNumber($nilai->score) : 0;
+                    $baseline_score[] = $nilai->baseline_score ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
+                    $relative_importance[] = $nilai->relative_importance ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
+            }
+
+            $series= array(
+                [
+                    'name' => 'Score',
+                    'data' => $score
+                ],
+                [
+                    'name' => 'Baseline Score',
+                    'data' => $baseline_score
+                ],
+                [
+                    'name' => 'Relative Importance',
+                    'data' => $relative_importance
+                ]
+            );
+        }
+
+        $data['categories'] = $categories;
+        $data['series'] = $series;
+
+        return $this->successResponse($data);
+    }
 
     public function editPicExpire(Request $request,$id){
         $row=UserAssesment::find($id);

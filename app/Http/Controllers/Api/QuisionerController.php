@@ -476,11 +476,7 @@ class QuisionerController extends Controller
                 if($responden){
 
                     if ($responden->status == 'diundang') {
-                        return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
-                    }
-
-                    if ($responden->status == 'done') {
-                        return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+                        return $this->errorResponse('Terdapat data responden yang statusnya masih diundang, Silahkan cek kembali', 400);
                     }
 
                     $total_soal = DB::table('design_faktor')
@@ -495,7 +491,7 @@ class QuisionerController extends Controller
                         ->count();
 
                     if ($total_jawaban < $total_soal) {
-                        return $this->errorResponse('Harap isi semua jawaban di setiap pertanyaan', 400);
+                        return $this->errorResponse('Terdapat data quesionernya yang total jawabannya tidak sesuai', 400);
                     }
 
                     $responden->status = 'done';

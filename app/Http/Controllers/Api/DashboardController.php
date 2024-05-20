@@ -147,7 +147,8 @@ class DashboardController extends Controller
             ->select('domain.id', 'domain.kode')
             ->where('assesment_canvas.assesment_id', $assesment_id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->whereNull('domain.deleted_at');
+            ->whereNull('domain.deleted_at')
+            ->count();
 
         $capability_taget = CapabilityTarget::where('assesment_id', $assesment_id)->count();
 

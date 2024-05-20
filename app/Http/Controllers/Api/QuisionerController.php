@@ -512,4 +512,14 @@ class QuisionerController extends Controller
             return $this->errorResponse($e->getMessage());
         }
     }
+
+    public function updateQuesioner(Request $request,$id)
+    {
+        $responden = AssessmentUsers::find($id);
+        if(!$responden){
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+        $responden->update($request->all());
+        return $this->successResponse($responden);
+    }
 }

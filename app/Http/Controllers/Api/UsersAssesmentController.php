@@ -44,7 +44,7 @@ class UsersAssesmentController extends Controller
         }
         $list->orderBy($sortBy, $sortType);
 
-        $data = $this->paging($list, $limit, $page, UserAssesmentResource::class);
+        $data = $this->paging($list, $request->filled('nopaging')? null : $limit, $request->filled('nopaging') ? null : $page, UserAssesmentResource::class);
         return $this->successResponse($data);
     }
 

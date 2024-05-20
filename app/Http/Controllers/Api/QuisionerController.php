@@ -522,4 +522,21 @@ class QuisionerController extends Controller
         $responden->update($request->all());
         return $this->successResponse($responden);
     }
+
+    public function updateListAssesmentUser(Request $request)
+    {
+        $request->validate([
+            'data'=>'required|array'
+        ]);
+
+        foreach ($request->data as $item_user) {
+            $responden = AssessmentUsers::find($item_user['id']);
+            if($responden){
+                $responden->quesioner_processed=$item_user['quesioner_processed'];
+                $responden->save();
+            }
+        }
+
+        return $this->successResponse();
+    }
 }

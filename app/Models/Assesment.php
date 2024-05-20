@@ -40,6 +40,16 @@ class Assesment extends Model
         }
     }
 
+    public function getDocsAttribute()
+    {
+        if (!is_null($this->attributes['docs'])) {
+            $file = json_decode($this->attributes['docs']);
+            $file->url = asset($file->path);
+            return $file;
+        }
+        return null;
+    }
+
     public function organisasi()
     {
         return $this->belongsTo(Organisasi::class, 'organisasi_id');

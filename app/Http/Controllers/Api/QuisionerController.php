@@ -83,7 +83,7 @@ class QuisionerController extends Controller
             $responden->divisi_id = $request->divisi_id;
             $responden->status = 'active';
             // $responden->code=null;
-            // $responden->quesioner_processed=true;
+            $responden->quesioner_processed=true;
             $responden->save();
 
             $quisioner_responden = new AssessmentQuisioner();

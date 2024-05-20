@@ -13,6 +13,7 @@ use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
+use App\Models\AssesmentDocs;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
@@ -696,6 +697,12 @@ class AsessmentController extends Controller
             $filedocs = CobitHelper::Media($filename, $path, $docs);
             $assesment->docs=$filedocs;
             $assesment->save();
+
+            $ass_docs =new AssesmentDocs();
+            $ass_docs->assesment_id=$assesment->id;
+            $ass_docs->name = $request->filename;
+            $ass_docs->file = $filedocs;
+            $ass_docs->save();
         }
         return $this->successResponse();
     }

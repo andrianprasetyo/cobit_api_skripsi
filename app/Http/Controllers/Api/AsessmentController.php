@@ -1246,14 +1246,14 @@ class AsessmentController extends Controller
             }
 
             $series= array(
-                [
-                    'name' => 'Score',
-                    'data' => $score
-                ],
-                [
-                    'name' => 'Baseline Score',
-                    'data' => $baseline_score
-                ],
+                // [
+                //     'name' => 'Score',
+                //     'data' => $score
+                // ],
+                // [
+                //     'name' => 'Baseline Score',
+                //     'data' => $baseline_score
+                // ],
                 [
                     'name' => 'Relative Importance',
                     'data' => $relative_importance

@@ -36,6 +36,16 @@ class AssesmentDocs extends Model
         });
     }
 
+    public function getFileAttribute()
+    {
+        if (!is_null($this->attributes['file'])) {
+            $file = json_decode($this->attributes['file']);
+            $file->url = asset($file->path);
+            return $file;
+        }
+        return null;
+    }
+
     public function assesment()
     {
         return $this->belongsTo(Assesment::class, 'assesment_id');

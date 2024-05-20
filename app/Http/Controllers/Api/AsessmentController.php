@@ -1285,4 +1285,33 @@ class AsessmentController extends Controller
         $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($row->assesment_id);
         return $this->successResponse(new AssesmentResource($data));
     }
+
+    public function detailDocs(Request $request)
+    {
+        $data = AssesmentDocs::where('assesment_id', $request->assesment_id)->orderByDesc('created_at')->get();
+        return $this->successResponse($data);
+    }
+
+    public function removeDocs($id)
+    {
+        $data=AssesmentDocs::find($id);
+        if(!$data){
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+
+        return $this->successResponse();
+    }
+
+    public function updateDocs(Request $request,$id)
+    {
+        $data = AssesmentDocs::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        $data->name=$request->filename;
+        $data->save();
+
+        return $this->successResponse();
+    }
 }

@@ -529,14 +529,26 @@ class QuisionerController extends Controller
             'data'=>'required|array'
         ]);
 
-        foreach ($request->data as $item_user) {
-            $responden = AssessmentUsers::find($item_user['id']);
-            if($responden){
-                $responden->quesioner_processed=$item_user['quesioner_processed'];
-                $responden->save();
-            }
-        }
+        DB::beginTransaction();
+        try {
+            foreach ($request->data as $item_user) {
+                $responden = AssessmentUsers::find($item_user['id']);
+                if ($responden) {
+                    $responden->quesioner_processed = $item_user['quesioner_processed'];
+                    $responden->save();
 
-        return $this->successResponse();
+                    if ($item_user['quesioner_processed']) {
+                        SetProsesQuisionerHasilQueue::dispatch($responden->id);
+                        SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                    }
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 }

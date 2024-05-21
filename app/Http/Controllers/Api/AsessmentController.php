@@ -679,12 +679,16 @@ class AsessmentController extends Controller
         $request->validate(
             [
                 'id'=>'required|exists:assesment,id',
-                'docs'=>'required'
+                'docs'=>'required',
+                'filename' => 'required',
+                'version' => 'required',
             ],
             [
                 'id.required'=>'ID assement harus di isi',
                 'id.exists' => 'Assement ID tidak terdaftar',
                 'docs.required' => 'file laporan harus di isi',
+                'filename.required' => 'nama file laporan harus di isi',
+                'version.required' => 'version file laporan harus di isi',
             ]
         );
         $assesment=Assesment::find($request->id);
@@ -701,6 +705,7 @@ class AsessmentController extends Controller
             $ass_docs =new AssesmentDocs();
             $ass_docs->assesment_id=$assesment->id;
             $ass_docs->name = $request->filename;
+            $ass_docs->version = $request->version;
             $ass_docs->file = $filedocs;
             $ass_docs->save();
         }

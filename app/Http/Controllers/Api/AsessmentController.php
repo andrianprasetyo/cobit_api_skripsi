@@ -1315,7 +1315,12 @@ class AsessmentController extends Controller
 
     public function listCurrentDocs(Request $request)
     {
-        $data = AssesmentDocs::where('assesment_id', $request->assesment_id)->where('current',true)->orderByDesc('created_at')->get();
+        $list = AssesmentDocs::where('assesment_id', $request->assesment_id);
+        if(!$request->filled('history')){
+            $list->where('current', true);
+        }
+
+        $data = $list->orderByDesc('created_at')->get();
         return $this->successResponse($data);
     }
 

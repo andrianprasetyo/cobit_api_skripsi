@@ -19,22 +19,22 @@ class AssesmentDocs extends Model
         'file' => 'json'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($item) {
+    // protected static function boot()
+    // {
+    //     parent::boot();
+    //     static::creating(function ($item) {
 
-            $latestItem = static::where('assesment_id', $item->assesment_id)
-                ->latest()
-                ->first();
+    //         $latestItem = static::where('assesment_id', $item->assesment_id)
+    //             ->latest()
+    //             ->first();
 
-            if ($latestItem) {
-                $item->version = $latestItem->version + 1;
-            } else {
-                $item->version =1;
-            }
-        });
-    }
+    //         if ($latestItem) {
+    //             $item->version = $latestItem->version + 1;
+    //         } else {
+    //             $item->version =1;
+    //         }
+    //     });
+    // }
 
     public function getFileAttribute()
     {

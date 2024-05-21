@@ -83,6 +83,7 @@ class QuisionerController extends Controller
             $responden->divisi_id = $request->divisi_id;
             $responden->status = 'active';
             // $responden->code=null;
+            $responden->quesioner_processed=true;
             $responden->save();
 
             $quisioner_responden = new AssessmentQuisioner();
@@ -458,5 +459,124 @@ class QuisionerController extends Controller
 
         $data = $this->paging($list, $limit, $page, JabatanRefResource::class);
         return $this->successResponse($data);
+    }
+
+    public function setFinish(Request $request)
+    {
+        $request->validate([
+            'assesment_id'=>'required',
+            'assesment_user_id'=>'required|array'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $assesment_user_id = $request->assesment_user_id;
+
+            foreach ($assesment_user_id as $item_user_id) {
+                $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($item_user_id);
+                if($responden){
+
+                    if ($responden->status == 'diundang') {
+                        return $this->errorResponse('Terdapat data responden yang statusnya masih diundang, Silahkan cek kembali', 400);
+                    }
+
+                    $total_soal = DB::table('design_faktor')
+                        ->join('quisioner_pertanyaan', 'design_faktor.id', '=', 'quisioner_pertanyaan.design_faktor_id')
+                        ->where('quisioner_pertanyaan.quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                        ->whereNull('design_faktor.deleted_at')
+                        ->whereNull('quisioner_pertanyaan.deleted_at')
+                        ->count();
+
+                    $total_jawaban = QuisionerHasil::where('assesment_users_id', $item_user_id)
+                        ->where('quisioner_id', $responden->assesmentquisioner->quisioner_id)
+                        ->count();
+
+                    if ($total_jawaban < $total_soal) {
+                        return $this->errorResponse('Terdapat data quesionernya yang total jawabannya tidak sesuai', 400);
+                    }
+
+                    $responden->status = 'done';
+                    $responden->is_proses = null;
+                    $responden->quesioner_processed = true;
+
+                    $responden->save();
+
+                    SetProsesQuisionerHasilQueue::dispatch($item_user_id);
+                    SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function updateQuesioner(Request $request,$id)
+    {
+        $responden = AssessmentUsers::find($id);
+        if(!$responden){
+            return $this->errorResponse('Data tidak ditemukan',404);
+        }
+        $responden->update($request->all());
+        return $this->successResponse($responden);
+    }
+
+    public function updateListAssesmentUser(Request $request)
+    {
+        $request->validate([
+            'assesment_id' => 'required|exists:assesment,id',
+            'data'=>'required|array'
+        ]);
+
+        DB::beginTransaction();
+        try {
+
+            $list_selected=[];
+            $not_in_selected = [];
+
+            foreach ($request->data as $item_data){
+                $not_in_selected[]=$item_data['id'];
+                $list_selected[] = array(
+                    'id' => $item_data['id'],
+                    'quesioner_processed' => $item_data['quesioner_processed']
+                );
+            }
+
+            $list_responden = AssessmentUsers::where('assesment_id', $request->assesment_id)
+                ->where('quesioner_processed', true)
+                ->whereNotIn('id',$not_in_selected)
+                ->get();
+
+
+            if (!$list_responden->isEmpty()) {
+                foreach ($list_responden as $item_responden) {
+                    $list_selected[] = array(
+                        'id' => $item_responden->id,
+                        'quesioner_processed' => $item_responden->quesioner_processed
+                    );
+                }
+            }
+            foreach ($list_selected as $item_user) {
+                $responden = AssessmentUsers::find($item_user['id']);
+                if ($responden) {
+                    $responden->quesioner_processed = $item_user['quesioner_processed'];
+                    $responden->save();
+
+                    if ($item_user['quesioner_processed']) {
+                        SetProsesQuisionerHasilQueue::dispatch($responden->id);
+                        SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                    }
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 }

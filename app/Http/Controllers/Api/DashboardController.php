@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assesment;
+use App\Models\AssesmentDomain;
 use App\Models\AssessmentUsers;
+use App\Models\CapabilityTarget;
+use App\Models\Domain;
 use App\Models\UserAssesment;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -126,6 +130,31 @@ class DashboardController extends Controller
 
         $data['categories'] = $categories;
         $data['series'] = $series;
+        return $this->successResponse($data);
+    }
+
+    public function dashboardByAssesment(Request $request)
+    {
+        $assesment_id=$request->assesment_id;
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+        $responden = AssessmentUsers::where('assesment_id',$assesment_id)->count();
+        // $gamo = AssesmentDomain::where('assesment_id', $assesment_id)->count();
+        $gamo = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('domain.id', 'domain.kode')
+            ->where('assesment_canvas.assesment_id', $assesment_id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
+            ->count();
+
+        $capability_taget = CapabilityTarget::where('assesment_id', $assesment_id)->count();
+
+        $data['responden'] = $responden;
+        $data['gamo'] = $gamo;
+        $data['capability_taget']=$capability_taget;
         return $this->successResponse($data);
     }
 }

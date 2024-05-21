@@ -16,7 +16,7 @@ class AssessmentUsers extends Model
     protected $table = 'assesment_users';
     protected $keyType = 'string';
 
-    protected $fillable = ['assesment_id', 'nama','email','code','status','is_proses','divisi_id','jabatan_id'];
+    protected $fillable = ['assesment_id', 'nama','email','code','status','is_proses','divisi_id','jabatan_id','quesioner_processed'];
 
     protected $hidden = [
         'deleted_at',

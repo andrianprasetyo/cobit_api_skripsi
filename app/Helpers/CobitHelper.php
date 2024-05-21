@@ -805,4 +805,16 @@ class CobitHelper
             }
         }
     }
+
+    public static function convertToNumber($value)
+    {
+        if (is_numeric($value)) {
+            if (strpos($value, '.') !== false) {
+                return floatval($value);
+            } else {
+                return intval($value);
+            }
+        }
+        return 0;
+    }
 }

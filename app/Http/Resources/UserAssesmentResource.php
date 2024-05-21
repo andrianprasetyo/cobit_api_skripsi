@@ -25,7 +25,8 @@ class UserAssesmentResource extends JsonResource
             'status' => $this->status,
             'is_proses' => $this->is_proses,
             'created_at' => $this->created_at,
-            'assesment'=>$this->assesment
+            'assesment'=>$this->assesment,
+            'quesioner_processed' => $this->quesioner_processed,
         ];
     }
 }

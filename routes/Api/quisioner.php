@@ -8,4 +8,7 @@ Route::group([], function ($router) {
     Route::get('/quisioner/responden/navigation/list', 'QuisionerController@navigation');
     Route::get('/quisioner/responden/divisi/list', 'QuisionerController@listDivisi');
     Route::get('/quisioner/responden/jabatan/list', 'QuisionerController@listJabatan');
+    Route::post('/quisioner/responden/set-finish', 'QuisionerController@setFinish');
+    // Route::put('/quisioner/responden/{id}', 'QuisionerController@updateQuesioner');
+    Route::put('/quisioner/responden/update-all', 'QuisionerController@updateListAssesmentUser');
 });

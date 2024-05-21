@@ -13,6 +13,7 @@ use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
+use App\Models\AssesmentDocs;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
 use App\Models\AssessmentUsers;
@@ -38,6 +39,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -53,7 +55,7 @@ class AsessmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = Assesment::with(['organisasi','pic'])->expire();
+        $list = Assesment::with(['organisasi','pic'])->withCount('users')->expire();
 
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
@@ -675,29 +677,90 @@ class AsessmentController extends Controller
 
     public function uploadReport(Request $request)
     {
+
         $request->validate(
             [
-                'id'=>'required|exists:assesment,id',
-                'docs'=>'required'
+                'id' => 'required|exists:assesment,id',
+                // 'docs' => 'required',
+                'filename' => 'required',
+                'version' => ['required', 'regex:/^\d+\.\d+(\.\d+)?$/'],
             ],
             [
-                'id.required'=>'ID assement harus di isi',
+                'id.required' => 'ID assement harus di isi',
                 'id.exists' => 'Assement ID tidak terdaftar',
-                'docs.required' => 'file laporan harus di isi',
+                // 'docs.required' => 'file laporan harus di isi',
+                'filename.required' => 'nama file laporan harus di isi',
+                'version.required' => 'version file laporan harus di isi',
+                'version.regex' => ' Version format tidak valid. gunakan format : 1.0, 1.1, 1.1.0, ...',
             ]
         );
-        $assesment=Assesment::find($request->id);
-        if($request->hasFile('docs'))
-        {
-            $path = config('filesystems.path.report').'assesment/'. $assesment->id . '/report/';
-            $docs = $request->file('docs');
-            $filename = date('Ymdhis') . '-' . $assesment->id . '-' . $docs->hashName();
-            $docs->storeAs($path, $filename);
-            $filedocs = CobitHelper::Media($filename, $path, $docs);
-            $assesment->docs=$filedocs;
-            $assesment->save();
+
+        Db::beginTransaction();
+        try {
+            $assesment = Assesment::find($request->id);
+            if (!$assesment) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+
+            if ($request->hasFile('docs')) {
+                if ($request->filled('parent_id')) {
+
+                    $parent=AssesmentDocs::find($request->parent_id);
+
+                    if($parent){
+
+                        if($parent->current){
+                            $parent->current = false;
+                            $parent->save();
+                        }
+
+                        $latest_version = AssesmentDocs::where('parent_id',$request->parent_id)->latest()->first();
+                        $current_version=null;
+                        if($latest_version){
+                            $current_version=$latest_version->version;
+                        }else{
+                            $current_version = $parent->version;
+                        }
+
+                        $version = version_compare($request->version, $current_version, '>');
+                        if (!$version) {
+                            return $this->errorResponse('Version harus lebih besar dari ' . $parent->version, 400);
+                        }
+                    }
+
+                    AssesmentDocs::where('assesment_id', $assesment->id)->where('parent_id', $request->parent_id)->where('current', true)->update([
+                        'current' => false
+                    ]);
+                }
+                $path = config('filesystems.path.report') . 'assesment/' . str_replace('-', '', $assesment->id) . '/report/';
+                $docs = $request->file('docs');
+                $filename = date('Ymdhis') . '-' . str_replace('-', '', $assesment->id) . '-' . $docs->hashName();
+                $docs->storeAs($path, $filename);
+                $filedocs = CobitHelper::Media($filename, $path, $docs);
+
+                $ass_docs = new AssesmentDocs();
+                $ass_docs->assesment_id = $assesment->id;
+                $ass_docs->name = $request->filename;
+                $ass_docs->version = $request->version;
+                $ass_docs->parent_id = $request->parent_id;
+                $ass_docs->file = $filedocs;
+                $ass_docs->current = true;
+                $ass_docs->save();
+            }
+
+            if($request->filled('docs_id')){
+                AssesmentDocs::find($request->docs_id)->update([
+                    'name'=>$request->filename,
+                    'version' => $request->version,
+                ]);
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-        return $this->successResponse();
     }
 
     public function reportHasil(Request $request)
@@ -961,7 +1024,7 @@ class AsessmentController extends Controller
             $list_ofi->where('capability_assesment_id',$request->capability_assesment_id);
         }
         */
-        
+
         if($request->filled('domain_id')){
             $list_ofi->where('domain_id',$request->domain_id);
         }
@@ -1206,6 +1269,66 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
+    public function dfRiskSkenarioOUTChart(Request $request)
+    {
+        $assesment_id = $request->assesment_id;
+        $design_faktor_id = $request->design_faktor_id;
+        $_list_domain = Domain::orderBy('urutan', 'ASC')->get();
+
+        $series = [];
+        $categories = [];
+
+        $score=[];
+        $baseline_score = [];
+        $relative_importance = [];
+        if(!$_list_domain->isEmpty())
+        {
+            foreach ($_list_domain as $_item_domain)
+            {
+                $categories[] = $_item_domain->kode;
+
+                $nilai = DB::table('assesment_hasil')
+                    ->join('domain', 'assesment_hasil.domain_id', 'domain.id')
+                    ->join('design_faktor', 'assesment_hasil.design_faktor_id', 'design_faktor.id')
+                    ->where('domain.id', $_item_domain->id)
+                    ->where('assesment_hasil.assesment_id', $assesment_id)
+                    ->where('assesment_hasil.design_faktor_id', $design_faktor_id)
+                    ->whereNull('domain.deleted_at')
+                    ->orderBy('domain.urutan', 'asc')
+                    ->select(
+                        'assesment_hasil.*',
+                        'design_faktor.kode as df_kode',
+                        'domain.kode as domain_kode',
+                        'domain.ket as domain_ket',
+                        'domain.urutan as domain_urutan',
+                    )->first();
+
+                    $score[]= $nilai ? CobitHelper::convertToNumber($nilai->score) : 0;
+                    $baseline_score[] = $nilai ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
+                    $relative_importance[] = $nilai ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
+            }
+
+            $series= array(
+                // [
+                //     'name' => 'Score',
+                //     'data' => $score
+                // ],
+                // [
+                //     'name' => 'Baseline Score',
+                //     'data' => $baseline_score
+                // ],
+                [
+                    'name' => 'Relative Importance',
+                    'data' => $relative_importance
+                ]
+            );
+        }
+
+        $data['categories'] = $categories;
+        $data['series'] = $series;
+
+        return $this->successResponse($data);
+    }
 
     public function editPicExpire(Request $request,$id){
         $row=UserAssesment::find($id);
@@ -1217,5 +1340,77 @@ class AsessmentController extends Controller
 
         $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($row->assesment_id);
         return $this->successResponse(new AssesmentResource($data));
+    }
+
+    public function listCurrentDocs(Request $request)
+    {
+        $list = AssesmentDocs::where('assesment_id', $request->assesment_id);
+        if($request->filled('parent_id')){
+            $list->where('id', $request->parent_id);
+            $list->orWhere('parent_id',$request->parent_id);
+        }else{
+            $list->where('current', true);
+        }
+
+        $data = $list->orderByDesc('created_at')->get();
+        return $this->successResponse($data);
+    }
+
+    public function detailDocs($id)
+    {
+        $data = AssesmentDocs::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        return $this->successResponse($data);
+    }
+
+    public function removeDocs($id)
+    {
+        DB::beginTransaction();
+        try {
+            $data = AssesmentDocs::find($id);
+            if (!$data) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+
+            if($data->parent_id){
+                $list_deleted = AssesmentDocs::where('id', $data->parent_id)->orWhere('parent_id', $data->parent_id)->get();
+                if(!$list_deleted->isEmpty()){
+                    foreach ($list_deleted as $item_doc) {
+                        if (Storage::exists($item_doc->file->path)) {
+                            Storage::delete($item_doc->file->path);
+                        }
+                        $item_doc->delete();
+                    }
+                }
+                // AssesmentDocs::where('id',$data->parent_id)->orWhere('parent_id', $data->parent_id)->delete();
+            }
+
+            if(Storage::exists($data->file->path)){
+                Storage::delete($data->file->path);
+            }
+
+            $data->delete();
+            DB::commit();
+            return $this->successResponse(Storage::exists($data->file->path));
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    public function updateDocs(Request $request,$id)
+    {
+        $data = AssesmentDocs::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        $data->name=$request->filename;
+        $data->save();
+
+        return $this->successResponse();
     }
 }

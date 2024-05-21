@@ -40,6 +40,16 @@ class Assesment extends Model
         }
     }
 
+    public function getDocsAttribute()
+    {
+        if (!is_null($this->attributes['docs'])) {
+            $file = json_decode($this->attributes['docs']);
+            $file->url = asset($file->path);
+            return $file;
+        }
+        return null;
+    }
+
     public function organisasi()
     {
         return $this->belongsTo(Organisasi::class, 'organisasi_id');
@@ -48,5 +58,16 @@ class Assesment extends Model
     public function pic()
     {
         return $this->belongsTo(User::class,'users_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(AssessmentUsers::class,'assesment_id','id');
+    }
+
+    public function docs()
+    {
+        // return $this->hasMany(AssesmentDocs::class, 'assesment_id', 'id')->orderBy('created_at','desc');
+        return $this->belongsTo(AssesmentDocs::class, 'assesment_id', 'id')->latest();
     }
 }

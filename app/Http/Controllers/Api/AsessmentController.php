@@ -1316,7 +1316,10 @@ class AsessmentController extends Controller
     public function listCurrentDocs(Request $request)
     {
         $list = AssesmentDocs::where('assesment_id', $request->assesment_id);
-        if(!$request->filled('history')){
+        if($request->filled('parent_id')){
+            $list->where('id', $request->parent_id);
+            $list->orWhere('parent_id',$request->parent_id);
+        }else{
             $list->where('current', true);
         }
 

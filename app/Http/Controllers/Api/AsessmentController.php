@@ -736,7 +736,7 @@ class AsessmentController extends Controller
 
             if($request->filled('docs_id')){
                 AssesmentDocs::find($request->docs_id)->update([
-                    'filename'=>$request->filename,
+                    'name'=>$request->filename,
                     'version' => $request->version,
                 ]);
             }

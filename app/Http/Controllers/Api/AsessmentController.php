@@ -1353,12 +1353,24 @@ class AsessmentController extends Controller
 
     public function removeDocs($id)
     {
-        $data=AssesmentDocs::find($id);
-        if(!$data){
-            return $this->errorResponse('Data tidak ditemukan',404);
+        DB::beginTransaction();
+        try {
+            $data = AssesmentDocs::find($id);
+            if (!$data) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+            $data->delete();
+
+            if($data->parent_id){
+                AssesmentDocs::where('id',$data->parent_id)->orWhere('parent_id', $data->parent_id)->delete();
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-        $data->delete();
-        return $this->successResponse();
     }
 
     public function updateDocs(Request $request,$id)

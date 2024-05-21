@@ -676,7 +676,8 @@ class AsessmentController extends Controller
 
     public function uploadReport(Request $request)
     {
-        $validate=array(
+
+        $request->validate(
             [
                 'id' => 'required|exists:assesment,id',
                 // 'docs' => 'required',
@@ -691,7 +692,6 @@ class AsessmentController extends Controller
                 'version.required' => 'version file laporan harus di isi',
             ]
         );
-        $request->validate($validate);
 
         Db::beginTransaction();
         try {

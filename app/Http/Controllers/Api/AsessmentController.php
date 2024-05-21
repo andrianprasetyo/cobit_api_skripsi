@@ -1327,13 +1327,23 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
+    public function detailDocs($id)
+    {
+        $data = AssesmentDocs::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        return $this->successResponse($data);
+    }
+
     public function removeDocs($id)
     {
         $data=AssesmentDocs::find($id);
         if(!$data){
             return $this->errorResponse('Data tidak ditemukan',404);
         }
-
+        $data->delete();
         return $this->successResponse();
     }
 

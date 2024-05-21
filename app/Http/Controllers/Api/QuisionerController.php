@@ -527,12 +527,39 @@ class QuisionerController extends Controller
     public function updateListAssesmentUser(Request $request)
     {
         $request->validate([
+            'assesment_id' => 'required|exists:assesment,id',
             'data'=>'required|array'
         ]);
 
         DB::beginTransaction();
         try {
-            foreach ($request->data as $item_user) {
+
+            $list_selected=[];
+            $not_in_selected = [];
+
+            foreach ($request->data as $item_data){
+                $not_in_selected[]=$item_data['id'];
+                $list_selected[] = array(
+                    'id' => $item_data['id'],
+                    'quesioner_processed' => $item_data['quesioner_processed']
+                );
+            }
+
+            $list_responden = AssessmentUsers::where('assesment_id', $request->assesment_id)
+                ->where('quesioner_processed', true)
+                ->whereNotIn('id',$not_in_selected)
+                ->get();
+
+
+            if (!$list_responden->isEmpty()) {
+                foreach ($list_responden as $item_responden) {
+                    $list_selected[] = array(
+                        'id' => $item_responden->id,
+                        'quesioner_processed' => $item_responden->quesioner_processed
+                    );
+                }
+            }
+            foreach ($list_selected as $item_user) {
                 $responden = AssessmentUsers::find($item_user['id']);
                 if ($responden) {
                     $responden->quesioner_processed = $item_user['quesioner_processed'];

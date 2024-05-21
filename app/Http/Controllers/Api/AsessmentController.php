@@ -683,7 +683,7 @@ class AsessmentController extends Controller
                 'id' => 'required|exists:assesment,id',
                 // 'docs' => 'required',
                 'filename' => 'required',
-                'version' => 'required',
+                'version' => ['required', 'regex:/^\d+\.\d+(\.\d+)?$/'],
             ],
             [
                 'id.required' => 'ID assement harus di isi',
@@ -691,6 +691,7 @@ class AsessmentController extends Controller
                 // 'docs.required' => 'file laporan harus di isi',
                 'filename.required' => 'nama file laporan harus di isi',
                 'version.required' => 'version file laporan harus di isi',
+                'version.regex' => ' Version format tidak valid. gunakan format : 1.0, 1.1, 1.1.0, ...',
             ]
         );
 
@@ -703,13 +704,28 @@ class AsessmentController extends Controller
 
             if ($request->hasFile('docs')) {
                 if ($request->filled('parent_id')) {
-                    // AssesmentDocs::where('assesment_id', $assesment->id)->whereNull('parent_id')->where('current', true)->update([
-                    //     'current' => false
-                    // ]);
+
                     $parent=AssesmentDocs::find($request->parent_id);
-                    if($parent && $parent->current){
-                        $parent->current = false;
-                        $parent->save();
+
+                    if($parent){
+
+                        if($parent->current){
+                            $parent->current = false;
+                            $parent->save();
+                        }
+
+                        $latest_version = AssesmentDocs::where('parent_id',$request->parent_id)->latest()->first();
+                        $current_version=null;
+                        if($latest_version){
+                            $current_version=$latest_version->version;
+                        }else{
+                            $current_version = $parent->version;
+                        }
+
+                        $version = version_compare($request->version, $current_version, '>');
+                        if (!$version) {
+                            return $this->errorResponse('Version harus lebih besar dari ' . $parent->version, 400);
+                        }
                     }
 
                     AssesmentDocs::where('assesment_id', $assesment->id)->where('parent_id', $request->parent_id)->where('current', true)->update([
@@ -721,8 +737,6 @@ class AsessmentController extends Controller
                 $filename = date('Ymdhis') . '-' . str_replace('-', '', $assesment->id) . '-' . $docs->hashName();
                 $docs->storeAs($path, $filename);
                 $filedocs = CobitHelper::Media($filename, $path, $docs);
-                // $assesment->docs=$filedocs;
-                // $assesment->save();
 
                 $ass_docs = new AssesmentDocs();
                 $ass_docs->assesment_id = $assesment->id;

@@ -700,9 +700,14 @@ class AsessmentController extends Controller
             }
             if ($request->hasFile('docs')) {
                 if ($request->filled('parent_id')) {
-                    AssesmentDocs::where('assesment_id', $assesment->id)->whereNull('parent_id')->where('current', true)->update([
-                        'current' => false
-                    ]);
+                    // AssesmentDocs::where('assesment_id', $assesment->id)->whereNull('parent_id')->where('current', true)->update([
+                    //     'current' => false
+                    // ]);
+                    $parent=AssesmentDocs::find($request->parent_id);
+                    if($parent && $parent->current){
+                        $parent->current = false;
+                        $parent->save();
+                    }
 
                     AssesmentDocs::where('assesment_id', $assesment->id)->where('parent_id', $request->parent_id)->where('current', true)->update([
                         'current' => false

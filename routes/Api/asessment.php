@@ -23,7 +23,7 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/assesment/report/design-faktor-risk-out/list', 'AsessmentController@dfRiskSkenarioOUT');
     Route::get('/assesment/report/design-faktor-risk-out/chart', 'AsessmentController@dfRiskSkenarioOUTChart');
 
-    Route::get('/assesment/docs/list', 'AsessmentController@detailDocs');
+    Route::get('/assesment/docs/list', 'AsessmentController@listCurrentDocs');
     Route::put('/assesment/docs/edit/{id}', 'AsessmentController@updateDocs');
     Route::delete('/assesment/docs/remove/{id}', 'AsessmentController@removeDocs');
 });

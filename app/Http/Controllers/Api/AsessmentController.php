@@ -39,6 +39,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -1359,14 +1360,27 @@ class AsessmentController extends Controller
             if (!$data) {
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
-            $data->delete();
 
             if($data->parent_id){
-                AssesmentDocs::where('id',$data->parent_id)->orWhere('parent_id', $data->parent_id)->delete();
+                $list_deleted = AssesmentDocs::where('id', $data->parent_id)->orWhere('parent_id', $data->parent_id)->get();
+                if(!$list_deleted->isEmpty()){
+                    foreach ($list_deleted as $item_doc) {
+                        if (Storage::exists($item_doc->file->path)) {
+                            Storage::delete($item_doc->file->path);
+                        }
+                        $item_doc->delete();
+                    }
+                }
+                // AssesmentDocs::where('id',$data->parent_id)->orWhere('parent_id', $data->parent_id)->delete();
             }
 
+            if(Storage::exists($data->file->path)){
+                Storage::delete($data->file->path);
+            }
+
+            $data->delete();
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse(Storage::exists($data->file->path));
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;

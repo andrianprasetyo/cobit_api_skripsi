@@ -23,9 +23,9 @@ class AssesmentResource extends JsonResource
             $assesment_pic = UserAssesment::where('assesment_id', $this->id)->where('users_id', $this->pic->id)->first();
         }
         $docs = null;
-        if($this->docs){
-            $docs=AssesmentDocs::where('assesment_id',$this->id)->orderByDesc('created_at')->first();
-        }
+        // if($this->docs){
+        //     $docs=AssesmentDocs::where('assesment_id',$this->id)->orderByDesc('created_at')->first();
+        // }
         // $tahun=Carbon::parse($this->tahun);
         return [
             'id'=>$this->id,
@@ -46,7 +46,7 @@ class AssesmentResource extends JsonResource
             'assesment_user'=>$assesment_pic,
             'users_count'=>$this->users_count,
             // 'docs' => $this->docs,
-            'docs' => $docs,
+            // 'docs' => $docs,
         ];
     }
 }

@@ -67,6 +67,7 @@ class Assesment extends Model
 
     public function docs()
     {
-        return $this->hasMany(AssesmentDocs::class, 'assesment_id', 'id')->orderBy('created_at','desc');
+        // return $this->hasMany(AssesmentDocs::class, 'assesment_id', 'id')->orderBy('created_at','desc');
+        return $this->belongsTo(AssesmentDocs::class, 'assesment_id', 'id')->latest();
     }
 }

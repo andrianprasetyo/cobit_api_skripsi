@@ -691,25 +691,47 @@ class AsessmentController extends Controller
                 'version.required' => 'version file laporan harus di isi',
             ]
         );
-        $assesment=Assesment::find($request->id);
-        if($request->hasFile('docs'))
-        {
-            $path = config('filesystems.path.report').'assesment/'. $assesment->id . '/report/';
-            $docs = $request->file('docs');
-            $filename = date('Ymdhis') . '-' . $assesment->id . '-' . $docs->hashName();
-            $docs->storeAs($path, $filename);
-            $filedocs = CobitHelper::Media($filename, $path, $docs);
-            $assesment->docs=$filedocs;
-            $assesment->save();
 
-            $ass_docs =new AssesmentDocs();
-            $ass_docs->assesment_id=$assesment->id;
-            $ass_docs->name = $request->filename;
-            $ass_docs->version = $request->version;
-            $ass_docs->file = $filedocs;
-            $ass_docs->save();
+        Db::beginTransaction();
+        try {
+            $assesment = Assesment::find($request->id);
+            if (!$assesment) {
+                return $this->errorResponse('Data tidak ditemukan', 404);
+            }
+            if ($request->hasFile('docs')) {
+                if ($request->filled('parent_id')) {
+                    AssesmentDocs::where('assesment_id', $assesment->id)->whereNull('parent_id')->where('current', true)->update([
+                        'current' => false
+                    ]);
+
+                    AssesmentDocs::where('assesment_id', $assesment->id)->where('parent_id', $request->parent_id)->where('current', true)->update([
+                        'current' => false
+                    ]);
+                }
+                $path = config('filesystems.path.report') . 'assesment/' . str_replace('-', '', $assesment->id) . '/report/';
+                $docs = $request->file('docs');
+                $filename = date('Ymdhis') . '-' . str_replace('-', '', $assesment->id) . '-' . $docs->hashName();
+                $docs->storeAs($path, $filename);
+                $filedocs = CobitHelper::Media($filename, $path, $docs);
+                // $assesment->docs=$filedocs;
+                // $assesment->save();
+
+                $ass_docs = new AssesmentDocs();
+                $ass_docs->assesment_id = $assesment->id;
+                $ass_docs->name = $request->filename;
+                $ass_docs->version = $request->version;
+                $ass_docs->parent_id = $request->parent_id;
+                $ass_docs->file = $filedocs;
+                $ass_docs->current = true;
+                $ass_docs->save();
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-        return $this->successResponse();
     }
 
     public function reportHasil(Request $request)
@@ -1291,9 +1313,9 @@ class AsessmentController extends Controller
         return $this->successResponse(new AssesmentResource($data));
     }
 
-    public function detailDocs(Request $request)
+    public function listCurrentDocs(Request $request)
     {
-        $data = AssesmentDocs::where('assesment_id', $request->assesment_id)->orderByDesc('created_at')->get();
+        $data = AssesmentDocs::where('assesment_id', $request->assesment_id)->where('current',true)->orderByDesc('created_at')->get();
         return $this->successResponse($data);
     }
 

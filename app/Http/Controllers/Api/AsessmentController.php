@@ -676,21 +676,22 @@ class AsessmentController extends Controller
 
     public function uploadReport(Request $request)
     {
-        $request->validate(
+        $validate=array(
             [
-                'id'=>'required|exists:assesment,id',
-                'docs'=>'required',
+                'id' => 'required|exists:assesment,id',
+                // 'docs' => 'required',
                 'filename' => 'required',
                 'version' => 'required',
             ],
             [
-                'id.required'=>'ID assement harus di isi',
+                'id.required' => 'ID assement harus di isi',
                 'id.exists' => 'Assement ID tidak terdaftar',
-                'docs.required' => 'file laporan harus di isi',
+                // 'docs.required' => 'file laporan harus di isi',
                 'filename.required' => 'nama file laporan harus di isi',
                 'version.required' => 'version file laporan harus di isi',
             ]
         );
+        $request->validate($validate);
 
         Db::beginTransaction();
         try {
@@ -698,6 +699,7 @@ class AsessmentController extends Controller
             if (!$assesment) {
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
+
             if ($request->hasFile('docs')) {
                 if ($request->filled('parent_id')) {
                     // AssesmentDocs::where('assesment_id', $assesment->id)->whereNull('parent_id')->where('current', true)->update([
@@ -729,6 +731,13 @@ class AsessmentController extends Controller
                 $ass_docs->file = $filedocs;
                 $ass_docs->current = true;
                 $ass_docs->save();
+            }
+
+            if($request->filled('docs_id')){
+                AssesmentDocs::find($request->docs_id)->update([
+                    'filename'=>$request->filename,
+                    'version' => $request->version,
+                ]);
             }
 
             DB::commit();

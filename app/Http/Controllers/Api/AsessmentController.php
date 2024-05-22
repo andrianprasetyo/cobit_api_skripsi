@@ -724,7 +724,7 @@ class AsessmentController extends Controller
 
                         $version = version_compare($request->version, $current_version, '>');
                         if (!$version) {
-                            return $this->errorResponse('Version harus lebih besar dari ' . $parent->version, 400);
+                            return $this->errorResponse('Version harus lebih besar dari ' . $current_version, 400);
                         }
                     }
 

@@ -15,6 +15,8 @@ class AssesmentDocs extends Model
     protected $table = 'assesment_docs';
     protected $keyType = 'string';
 
+    protected $fillable = ['assesment_id','name','file','version','parent_id','current'];
+
     protected $casts = [
         'file' => 'json'
     ];

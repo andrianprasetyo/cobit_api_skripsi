@@ -32,7 +32,7 @@ class UsersAssesmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = AssessmentUsers::with(['assesment']);
+        $list = AssessmentUsers::with(['assesment.organisasi']);
 
         if($request->filled('assesment_id'))
         {

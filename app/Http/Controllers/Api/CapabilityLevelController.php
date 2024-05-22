@@ -32,14 +32,23 @@ class CapabilityLevelController extends Controller
 
 
         if ($request->filled('search')) {
-            $list->where('capability_level.kode', 'ilike', '%' . $search . '%');
-            $list->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%');
+            $list->where(function ($query) use ($search) {
+                $query->where('capability_level.kode', 'ilike', '%' . $search . '%')
+                      ->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%');
+            });
+
+            $list->where('capability_level.kode', 'ilike', '%' . $search . '%')->whereNull('capability_level.deleted_at');
+            $list->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%')->whereNull('capability_level.deleted_at');
         }
         if ($request->filled('domain_id')){
-            $list->where('capability_level.domain_id',$domain_id);
+            $list->where(function ($query) use ($domain_id) {
+                $query->where('capability_level.domain_id',$domain_id);
+            });
         }
         if ($request->filled('level')) {
-            $list->where('capability_level.level', $level);
+             $list->where(function ($query) use ($level) {
+                $query->where('capability_level.level',$level);
+            });
         }
 
         $list->orderBy($sortBy, $sortType);

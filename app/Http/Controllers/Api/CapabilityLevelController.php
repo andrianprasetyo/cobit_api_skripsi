@@ -36,9 +36,6 @@ class CapabilityLevelController extends Controller
                 $query->where('capability_level.kode', 'ilike', '%' . $search . '%')
                       ->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%');
             });
-
-            $list->where('capability_level.kode', 'ilike', '%' . $search . '%')->whereNull('capability_level.deleted_at');
-            $list->orWhere('capability_level.kegiatan', 'ilike', '%' . $search . '%')->whereNull('capability_level.deleted_at');
         }
         if ($request->filled('domain_id')){
             $list->where(function ($query) use ($domain_id) {

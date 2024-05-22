@@ -25,6 +25,7 @@ use App\Models\QuisionerHasil;
 use App\Models\QuisionerJawaban;
 use App\Models\QuisionerPertanyaan;
 use App\Models\AssessmentUsers;
+use App\Models\QusisionerHasilAvg;
 use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -559,16 +560,22 @@ class QuisionerController extends Controller
                     );
                 }
             }
+
             foreach ($list_selected as $item_user) {
                 $responden = AssessmentUsers::find($item_user['id']);
                 if ($responden) {
                     $responden->quesioner_processed = $item_user['quesioner_processed'];
                     $responden->save();
 
-                    if ($item_user['quesioner_processed']) {
-                        SetProsesQuisionerHasilQueue::dispatch($responden->id);
-                        SetCanvasHasilDataJob::dispatch($responden->assesment_id);
-                    }
+                    // QusisionerHasilAvg::where('assesment_id', $responden->assesment_id)->forceDelete();
+                    // DB::table('quisioner_hasil_avg')->where('assesment_id', $responden->assesment_id)->delete();
+                    // CobitHelper::getQuisionerHasil($responden->id);
+                    // return $this->successResponse($responden);
+
+                    // if ($item_user['quesioner_processed']) {
+                    // }
+                    SetProsesQuisionerHasilQueue::dispatch($responden->id);
+                    SetCanvasHasilDataJob::dispatch($responden->assesment_id);
                 }
             }
 

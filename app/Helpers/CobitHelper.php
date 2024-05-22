@@ -54,6 +54,7 @@ class CobitHelper
                         AND au.status = 'done'
                     WHERE
                         au.assesment_id=:assesment_id
+                        AND au.quesioner_processed = true
                     GROUP BY
                         quisioner_id,
                         quisioner_pertanyaan_id,

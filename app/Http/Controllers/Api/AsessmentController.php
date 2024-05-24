@@ -943,6 +943,10 @@ class AsessmentController extends Controller
         // }
 
         $target = CapabilityTarget::find($target_id);
+        $target_name='';
+        if($target){
+            $target_name=$target->nama;
+        }
         $list_domain->where('capability_target.id', $target_id);
 
         $list_domain = $list_domain->get();
@@ -1004,7 +1008,7 @@ class AsessmentController extends Controller
                 'data' => $hasil_assesment
             ),
             array(
-                'name' => 'Target Capability Adjustment (' . $target->nama . ' )',
+                'name' => 'Target Capability Adjustment (' . $target_name . ' )',
                 'data' => $target_level
             ),
         ];

@@ -120,9 +120,10 @@ class DomainController extends Controller
 
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain.id')
+            ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
             ->where('assesment_canvas.assesment_id',$assesment_id)
             ->whereNull('domain.deleted_at')
-            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan');
+            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan','capability_target_level.target');
 
         $list->orderBy($sortBy, $sortType);
 

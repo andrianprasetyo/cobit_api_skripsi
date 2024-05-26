@@ -6,6 +6,7 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::put('/domain/edit/{id}', 'DomainController@edit');
     Route::delete('/domain/remove/{id}', 'DomainController@remove');
     Route::get('/domain/assesment/list', 'DomainController@listDomainByAssesment');
+    Route::get('/domain/assesment/chart', 'DomainController@chartDomainByAssesment');
     Route::get('/domain/assesment/capability-level/list', 'DomainController@listDomainByAssesmentCapable');
     Route::get('/domain/chart/list', 'DomainController@chartDomainResult');
     Route::get('/domain/chart/list-adjustment', 'DomainController@chartDomainAdjustmentResult');

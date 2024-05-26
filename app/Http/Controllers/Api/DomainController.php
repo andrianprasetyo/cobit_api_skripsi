@@ -131,6 +131,60 @@ class DomainController extends Controller
         return $this->successResponse($data);
     }
 
+    public function chartDomainByAssesment(Request $request)
+    {
+        $series = [];
+        $categories = [];
+        $assesment_id = $request->assesment_id;
+        $list_domain=Domain::orderBy('urutan','asc')->get();
+
+        $suggest_capability_level=[];
+        $aggreed_capability_level = [];
+        $target = [];
+        if(!$list_domain->isEmpty()){
+            foreach ($list_domain as $item_domain) {
+                $categories[]=$item_domain->kode;
+                $_data = DB::table('assesment_canvas')
+                    ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+                    ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+                    ->where('assesment_canvas.assesment_id', $assesment_id)
+                    ->where('domain.id', $item_domain->id)
+                    ->whereNull('domain.deleted_at')
+                    ->select(
+                        'assesment_canvas.origin_capability_level',
+                        'assesment_canvas.suggest_capability_level',
+                        'assesment_canvas.aggreed_capability_level',
+                        'capability_target_level.target'
+                    )->first();
+
+                $suggest_capability_level[]=$_data? $_data->suggest_capability_level : 0;
+                $aggreed_capability_level[] = $_data ? $_data->aggreed_capability_level : 0;
+                $target[] = $_data ? $_data->target : 0;
+            }
+        }
+
+
+        $series = array(
+            [
+                'name' => 'Target Capability Level',
+                'data' => $suggest_capability_level
+            ],
+            [
+                'name' => 'Hasil Adjustment',
+                'data' => $aggreed_capability_level
+            ],
+            [
+                'name' => 'Target Default',
+                'data' => $target
+            ]
+        );
+
+        $data['categories'] = $categories;
+        $data['series'] = $series;
+
+        return $this->successResponse($data);
+    }
+
     public function exportDomainByAssesment(Request $request)
     {
         $id=$request->id;
@@ -139,7 +193,8 @@ class DomainController extends Controller
         $data = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->join('assesment', 'assesment_canvas.assesment_id', '=', 'assesment.id')
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','assesment.minimum_target')
+            ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','assesment.minimum_target', 'capability_target_level.target')
             ->where('assesment_canvas.assesment_id', $id)
             ->whereNull('domain.deleted_at')
             ->whereNull('assesment.deleted_at')
@@ -162,7 +217,8 @@ class DomainController extends Controller
 
         $data = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
+            ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','capability_target_level.target')
             ->where('assesment_canvas.assesment_id', $id)
             ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'ASC')

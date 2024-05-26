@@ -27,7 +27,8 @@ class AssesmentDomain2Export implements FromArray, WithColumnWidths, WithStyles
                     $no,
                     $_item->kode . '-' . strip_tags($_item->ket),
                     $_item->suggest_capability_level,
-                    $_item->aggreed_capability_level
+                    $_item->aggreed_capability_level,
+                    $_item->target,
                 );
                 $no++;
             }
@@ -40,7 +41,7 @@ class AssesmentDomain2Export implements FromArray, WithColumnWidths, WithStyles
     public function array(): array
     {
         return [
-            ['No', 'Governance & Management Objective', 'Target Capability Level', 'Target Capability Adjustment'], // Customize your headers here
+            ['No', 'Governance & Management Objective', 'Target Capability Level', 'Hasil Adjustment','Target Default'], // Customize your headers here
             $this->data
         ];
         // return $this->data;

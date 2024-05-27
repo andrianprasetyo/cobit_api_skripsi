@@ -27,7 +27,7 @@ class CapabilityTargetLevelController extends Controller
 
         $list=DB::table('capability_target_level')
             ->join('domain','capability_target_level.domain_id','=','domain.id')
-            // ->where('capability_target_id',$target_id)
+            ->where('capability_target_id',$target_id)
             ->whereNull('capability_target_level.deleted_at')
             ->whereNull('domain.deleted_at')
             ->select('capability_target_level.*')

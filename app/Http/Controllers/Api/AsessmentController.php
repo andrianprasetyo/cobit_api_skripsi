@@ -1078,9 +1078,9 @@ class AsessmentController extends Controller
         //     $list_domain->where('assesment_canvas.domain_id', $domain_id);
         // }
 
-        if ($request->filled('target_id')) {
-            $list_domain->where('capability_target.id', $target_id);
-        }
+        // if ($request->filled('target_id')) {
+        //     $list_domain->where('capability_target.id', $target_id);
+        // }
 
         // if ($request->filled('target_id')) {
         //     $list_domain->where('capability_target.id', $target_id);
@@ -1088,11 +1088,11 @@ class AsessmentController extends Controller
         //     $list_domain->where('capability_target.default', true);
         // }
 
-        $target = CapabilityTarget::find($target_id);
-        $target_name = '';
-        if ($target) {
-            $target_name = $target->nama;
-        }
+        // $target = CapabilityTarget::find($target_id);
+        // $target_name = '';
+        // if ($target) {
+        //     $target_name = $target->nama;
+        // }
         // $list_domain->where('capability_target.id', $target_id);
 
         $list_domain = $list_domain->get();
@@ -1157,7 +1157,7 @@ class AsessmentController extends Controller
                 'data' => $hasil_assesment
             ),
             array(
-                'name' => 'Target Capability Adjustment (' . $target_name . ' )',
+                'name' => 'Target Capability Adjustment',
                 'data' => $target_level
             ),
         ];

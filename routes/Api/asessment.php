@@ -16,6 +16,7 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/assesment/upload/report', 'AsessmentController@uploadReport');
     Route::get('/assesment/report/list', 'AsessmentController@reportHasil');
     Route::get('/assesment/report/chart', 'AsessmentController@chartReportHasil');
+    Route::get('/assesment/report/chart/all-target', 'AsessmentController@chartReportHasilAllTarget');
     Route::get('/assesment/report/detail-ofi', 'AsessmentController@ReportDetailOfi');
     Route::delete('/assesment/remove/{id}', 'AsessmentController@remove');
 

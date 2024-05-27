@@ -33,6 +33,7 @@ class DomainByAssesmentResource extends JsonResource
             'step3_value'=>$this->step3_value,
             'suggest_capability_level' => $this->suggest_capability_level,
             'urutan' => $this->urutan,
+            'target' => $this->target,
             'is_assessment'=>$this->aggreed_capability_level >= $ass->minimum_target?'Ya':'Tidak'
         ];
     }

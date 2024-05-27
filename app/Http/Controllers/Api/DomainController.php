@@ -174,7 +174,7 @@ class DomainController extends Controller
                 'data' => $aggreed_capability_level
             ],
             [
-                'name' => 'Target Default',
+                'name' => 'Target BUMN',
                 'data' => $target
             ]
         );

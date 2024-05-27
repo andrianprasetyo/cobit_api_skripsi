@@ -909,12 +909,14 @@ class AsessmentController extends Controller
         if (!$assesment) {
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
+        $target_default = CapabilityTarget::where('assesment_id', $assesment_id)->where('default', true)->first();
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
             // ->join('capability_target_level', 'capability_target.id', '=', 'capability_target_level.capability_target_id')
             ->where('assesment_canvas.assesment_id', $assesment->id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->where('capability_target.id', $target_default->id)
             ->whereNull('domain.deleted_at')
             ->whereNull('capability_target.deleted_at')
             ->whereNull('domain.deleted_at')

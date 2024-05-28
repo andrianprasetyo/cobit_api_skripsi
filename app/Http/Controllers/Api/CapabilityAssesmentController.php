@@ -206,11 +206,11 @@ class CapabilityAssesmentController extends Controller
                 $capability_ass->assesment_id=$request->assesment_id;
                 $capability_ass->domain_id = $request->domain_id;
                 $capability_ass->save();
-                
+
                 $after['capability_assesment'][] = $capability_ass;
 
                 CapabilityAssesmentEvident::where('capability_assesment_id', $capability_ass->id)->delete();
-                
+
                 if(isset($evidents[$i]) && count($evidents[$i]) > 0)
                 {
                     $evident = $evidents[$i];
@@ -242,9 +242,9 @@ class CapabilityAssesmentController extends Controller
 
                     }
                 }
-                
+
                 CapabilityAssesmentOfi::where('capability_assesment_id', $capability_ass->id)->delete();
-                
+
                 if(isset($ofi[$i]) && count($ofi[$i]) > 0)
                 {
                     if (count($ofi) > 0) {
@@ -515,7 +515,7 @@ class CapabilityAssesmentController extends Controller
                     ->get();
 
                 if(!$list_levels->isEmpty())
-                {   
+                {
                     foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
                         $_level = DB::table('capability_assesment')
@@ -636,10 +636,10 @@ class CapabilityAssesmentController extends Controller
                     }
 
                     $current_total_list_level = count($_list_level);
-                    
+
                     if(isset($_list_level[1]) && $current_total_list_level < 5){
                         $remaining_list = 5 - $current_total_list_level;
-                        
+
                         for ($x = 1; $x < $remaining_list; $x++) {
                             array_push($_list_level, array(
                                 'level' => $current_total_list_level + $remaining_list,
@@ -647,10 +647,10 @@ class CapabilityAssesmentController extends Controller
                                 'label' => "N/A",
                             ));
                           }
-                        
+
                     };
-                }  
-                
+                }
+
 
                 $list[] = array(
                     'id' => $_item_domain->id,
@@ -705,7 +705,7 @@ class CapabilityAssesmentController extends Controller
         if (!$list_domain->isEmpty()) {
             foreach ($list_domain as $_item_domain) {
 
-                
+
                 $_list_level = [];
                 $_total_all=[];
 
@@ -717,10 +717,10 @@ class CapabilityAssesmentController extends Controller
                     ->orderBy('level', 'asc')
                     ->get();
 
-     
+
 
                 if(!$list_levels->isEmpty())
-                {   
+                {
                     foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
 
@@ -820,15 +820,15 @@ class CapabilityAssesmentController extends Controller
                         }
 
                     }
-                }  
-                
+                }
+
 
                 $list[] = array(
                     'id' => $_item_domain->id,
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,
-                    'total' => round(array_sum($_total_all), 2),
+                    'total' => $_total_all != 0 ? round(array_sum($_total_all + 1), 2) : $_total_all,
                 );
             }
         }
@@ -876,7 +876,7 @@ class CapabilityAssesmentController extends Controller
         if (!$list_domain->isEmpty()) {
             foreach ($list_domain as $_item_domain) {
 
-                
+
                 $_list_level = [];
                 $_total_all=[];
 
@@ -888,10 +888,10 @@ class CapabilityAssesmentController extends Controller
                     ->orderBy('level', 'asc')
                     ->get();
 
-     
+
 
                 if(!$list_levels->isEmpty())
-                {   
+                {
                     foreach ($list_levels as $key=>$_item_level) {
                         $daftar_level[]=$_item_level->level;
 
@@ -991,8 +991,8 @@ class CapabilityAssesmentController extends Controller
                         }
 
                     }
-                }  
-                
+                }
+
 
                 $list[] = array(
                     'id' => $_item_domain->id,
@@ -1030,6 +1030,6 @@ class CapabilityAssesmentController extends Controller
         $data = $this->paging($list,$limit,$page, HistoryCapabilityResources::class);
         return $this->successResponse($data);
 
-        
+
     }
 }

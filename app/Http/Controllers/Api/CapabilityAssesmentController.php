@@ -823,12 +823,13 @@ class CapabilityAssesmentController extends Controller
                 }
 
 
+                $sum_= array_sum($_total_all);
                 $list[] = array(
                     'id' => $_item_domain->id,
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,
-                    'total' => $_total_all != 0 ? round(array_sum($_total_all + 1), 2) : $_total_all,
+                    'total' => $sum_ != 0 ? round($sum_ + 1, 2) : $sum_,
                 );
             }
         }

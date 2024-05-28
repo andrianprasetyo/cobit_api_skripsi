@@ -1045,7 +1045,7 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function chartReportHasilAllTarget(Request $request)
+    public function chartReportHasilAllTargetBACKUP(Request $request)
     {
         $domain_id = $request->domain_id;
         $target_id = $request->target_id;
@@ -1207,6 +1207,125 @@ class AsessmentController extends Controller
                 );
             }
         }
+
+        $data['categories'] = $categories;
+        $data['series'] = $series;
+        return $this->successResponse($data);
+    }
+
+    public function chartReportHasilAllTarget(Request $request)
+    {
+        $assesment_id=$request->assesment_id;
+        $categories=[];
+        $series=[];
+
+        $assesment = Assesment::find($assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+
+        $get_ist_domain = CapabilityTargetLevel::whereIn('capability_target_id',function($q) use($assesment_id){
+            $q->select('id')
+                ->from('capability_target')
+                ->where('assesment_id',$assesment_id)
+                ->whereNull('deleted_at');
+        })
+        ->join('domain','capability_target_level.domain_id','=','domain.id')
+        ->select('domain.id','domain.kode')
+        ->orderBy('domain.urutan','asc')
+        ->groupBy('domain.id', 'domain.kode')
+        ->get();
+
+        $list_domain_id=[];
+        if(!$get_ist_domain->isEmpty()){
+            foreach ($get_ist_domain as $item_domain) {
+                $list_domain_id[]=$item_domain->id;
+                $categories[]= $item_domain->kode;
+            }
+        }
+
+        $assesment_canvas = AssesmentCanvas::where('assesment_id',$assesment_id)
+            ->whereIn('domain_id',$list_domain_id)
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->orderBy('domain.urutan','asc')
+            ->whereNull('domain.deleted_at')
+            ->select('assesment_canvas.origin_capability_level', 'assesment_canvas.aggreed_capability_level')
+            ->get();
+
+
+        $hasil_assesment=[];
+        $hasil_adjusment = [];
+        if(!$assesment_canvas->isEmpty()){
+            foreach ($assesment_canvas as $item_canvas) {
+                $hasil_assesment[]=$item_canvas->origin_capability_level;
+                $hasil_adjusment[] = $item_canvas->aggreed_capability_level;
+            }
+        }
+
+        $series = [
+            array(
+                'name' => 'Hasil Assesment & Klarifikasi',
+                'data' => $hasil_assesment
+            ),
+            array(
+                'name' => 'Target Capability Adjustment',
+                'data' => $hasil_adjusment
+            ),
+        ];
+        $_target = CapabilityTarget::where('assesment_id', $assesment_id)
+            ->orderBy('default', 'desc')
+            ->get();
+
+        if (!$_target->isEmpty()) {
+            foreach ($_target as $item_target) {
+                $_target_level = CapabilityTargetLevel::where('capability_target_id', $item_target->id)
+                    ->whereIn('domain_id',$list_domain_id)
+                    ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
+                    ->orderBy('domain.urutan', 'asc')
+                    ->get();
+
+                $list_levels = [];
+                // if(!$_target_level->isEmpty()){
+                // }
+                foreach ($_target_level as $item_level) {
+                    $list_levels[] = $item_level->target ? (int)$item_level->target : 0;
+                }
+                $series[] = array(
+                    'name' => $item_target->nama == 'Organisasi' ? 'Target BUMN' : $item_target->nama,
+                    'data' => $list_levels
+                );
+            }
+        }
+
+        // $target_level = CapabilityTargetLevel::whereIn('capability_target_id', function ($q) use ($assesment_id) {
+        //         $q->select('id')
+        //             ->from('capability_target')
+        //             ->where('assesment_id', $assesment_id)
+        //             ->whereNull('deleted_at');
+        //     })
+        //     ->whereIn('domain_id',$list_domain_id)
+        //     ->get();
+
+        // $_target = CapabilityTarget::where('assesment_id', $assesment_id)
+        //     ->orderBy('default', 'desc')
+        //     ->get();
+
+        // if(!$_target->isEmpty()){
+        //     foreach ($_target as $item_target) {
+        //         $_target_level = CapabilityTargetLevel::where('capability_target_id', $item_target->id)->whereIn('domain_id', $list_domain_id)->get();
+        //         $list_levels = [];
+        //         foreach ($_target_level as $item_level) {
+        //             // $list_levels[] = $item_level->target ? $item_level->target : 0;
+        //             $list_levels[] = $item_level->target;
+        //         }
+        //         $series[] = array(
+        //             'name' => $item_target->nama,
+        //             'data' => $list_levels
+        //         );
+        //     }
+        // }
+
+
 
         $data['categories'] = $categories;
         $data['series'] = $series;

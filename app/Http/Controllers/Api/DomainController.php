@@ -120,10 +120,10 @@ class DomainController extends Controller
         // $list = AssesmentCanvas::with(['domain'])
         //     ->where('assesment_id', $assesment_id);
 
-        $capability_target_default=CapabilityTarget::where('assesment_id',$assesment_id)->where('default',true)->first();
-        if(!$capability_target_default){
-            return $this->errorResponse('data tidak ditemukan',404);
-        }
+        // $capability_target_default=CapabilityTarget::where('assesment_id',$assesment_id)->where('default',true)->first();
+        // if(!$capability_target_default){
+        //     return $this->errorResponse('data tidak ditemukan',404);
+        // }
 
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain.id')

@@ -1354,9 +1354,11 @@ class AsessmentController extends Controller
             ->orderBy('domain.urutan','asc')
             ->whereNull('domain.deleted_at')
             ->select(
-                DB::raw('assesment_canvas.domain_id,assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level, (SELECT (sum(bobot)+1) from capability_assesment JOIN capability_answer ON capability_answer.id=capability_assesment.capability_answer_id WHERE capability_assesment.assesment_id=assesment_canvas.assesment_id AND capability_assesment.domain_id="domain"."id" AND capability_assesment.deleted_at IS NULL) as hasil_assesment'),
-                'assesment_canvas.origin_capability_level',
-                'assesment_canvas.aggreed_capability_level')
+                DB::raw('
+                assesment_canvas.domain_id,
+                assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level,
+                (SELECT sum(bobot) from capability_assesment JOIN capability_answer ON capability_answer.id=capability_assesment.capability_answer_id WHERE capability_assesment.assesment_id=assesment_canvas.assesment_id AND capability_assesment.domain_id="domain"."id" AND capability_assesment.deleted_at IS NULL) as hasil_assesment'),
+                )
             ->get();
 
 

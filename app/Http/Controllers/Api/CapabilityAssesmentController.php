@@ -824,7 +824,7 @@ class CapabilityAssesmentController extends Controller
                 $sum_= array_sum($_total_all);
                 $list[] = array(
                     'id' => $_item_domain->id,
-                    'adjustment' => $_item_domain->adjustment,
+                    'target_adjustment' => $_item_domain->aggreed_capability_level,
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,

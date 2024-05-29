@@ -692,7 +692,7 @@ class CapabilityAssesmentController extends Controller
 
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('domain.id', 'domain.kode','domain.ket','assesment_canvas.adjustment')
+            ->select('domain.id', 'domain.kode','domain.ket','assesment_canvas.aggreed_capability_level')
             ->where('assesment_canvas.assesment_id', $assesment->id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at')

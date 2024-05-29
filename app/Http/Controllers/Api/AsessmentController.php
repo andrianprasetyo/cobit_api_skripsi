@@ -1353,15 +1353,27 @@ class AsessmentController extends Controller
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->orderBy('domain.urutan','asc')
             ->whereNull('domain.deleted_at')
-            ->select('assesment_canvas.origin_capability_level', 'assesment_canvas.aggreed_capability_level')
+            ->select(
+                DB::raw('assesment_canvas.domain_id,assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level, (SELECT (sum(bobot)+1) from capability_assesment JOIN capability_answer ON capability_answer.id=capability_assesment.capability_answer_id WHERE capability_assesment.assesment_id=assesment_canvas.assesment_id AND capability_assesment.domain_id="domain"."id" AND capability_assesment.deleted_at IS NULL) as hasil_assesment'),
+                'assesment_canvas.origin_capability_level',
+                'assesment_canvas.aggreed_capability_level')
             ->get();
 
 
         $hasil_assesment=[];
         $hasil_adjusment = [];
         if(!$assesment_canvas->isEmpty()){
+
             foreach ($assesment_canvas as $item_canvas) {
-                $hasil_assesment[]=$item_canvas->origin_capability_level;
+                $_bobot = DB::table('capability_level')
+                    ->where('domain_id', $item_canvas->domain_id)
+                    ->whereNull('capability_level.deleted_at')
+                    ->select(DB::raw("SUM(bobot) as bobot_level"))
+                    ->first();
+
+                $hasil = $item_canvas->hasil_assesment != 0 || $item_canvas->hasil_assesment != null ? round(($item_canvas->hasil_assesment / $_bobot->bobot_level) + 1, 2) : 0;
+                // $hasil_assesment[] = $item_canvas->origin_capability_level;
+                $hasil_assesment[]= $hasil;
                 $hasil_adjusment[] = $item_canvas->aggreed_capability_level;
             }
         }

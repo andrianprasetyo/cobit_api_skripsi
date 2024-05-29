@@ -949,6 +949,7 @@ class AsessmentController extends Controller
 
                 $_result->target_organisasi = $target_org;
                 $_result->target_level = $target_org && $target_org->target != null ? (int) $target_org->target : null;
+
                 $_level = DB::table('capability_assesment')
                     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
                     ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
@@ -1357,7 +1358,16 @@ class AsessmentController extends Controller
                 DB::raw('
                 assesment_canvas.domain_id,
                 assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level,
-                (SELECT sum(bobot) from capability_assesment JOIN capability_answer ON capability_answer.id=capability_assesment.capability_answer_id WHERE capability_assesment.assesment_id=assesment_canvas.assesment_id AND capability_assesment.domain_id="domain"."id" AND capability_assesment.deleted_at IS NULL) as hasil_assesment'),
+                (
+                    select coalesce(sum(rata)+1,0) as compliance from (
+                        SELECT
+                            cl."level",
+                            (select avg(COALESCE(caa2.bobot,0)) FROM capability_assesment ca2 left JOIN capability_level cl2 ON ca2.capability_level_id=cl2.id left JOIN capability_answer caa2 ON caa2.id=ca2.capability_answer_id WHERE ca2.assesment_id=ca.assesment_id AND cl2."level"=cl."level" AND cl2.domain_id=cl.domain_id) as rata
+                        FROM capability_assesment ca JOIN capability_level cl ON cl.id=ca.capability_level_id WHERE ca.assesment_id = assesment_canvas.assesment_id AND ca.domain_id = "domain".id
+                            AND ca.deleted_at IS NULL GROUP BY cl."level",cl.domain_id,ca.assesment_id
+                        ) as tbl
+
+                ) as hasil_assesment'),
                 )
             ->get();
 
@@ -1367,15 +1377,16 @@ class AsessmentController extends Controller
         if(!$assesment_canvas->isEmpty()){
 
             foreach ($assesment_canvas as $item_canvas) {
-                $_bobot = DB::table('capability_level')
-                    ->where('domain_id', $item_canvas->domain_id)
-                    ->whereNull('capability_level.deleted_at')
-                    ->select(DB::raw("SUM(bobot) as bobot_level"))
-                    ->first();
+                // $_bobot = DB::table('capability_level')
+                //     ->where('domain_id', $item_canvas->domain_id)
+                //     ->whereNull('capability_level.deleted_at')
+                //     ->select(DB::raw("SUM(bobot) as bobot_level"))
+                //     ->first();
 
-                $hasil = $item_canvas->hasil_assesment != 0 || $item_canvas->hasil_assesment != null ? round(($item_canvas->hasil_assesment / $_bobot->bobot_level) + 1, 2) : 0;
-                // $hasil_assesment[] = $item_canvas->origin_capability_level;
-                $hasil_assesment[]= $hasil;
+                // $hasil = $item_canvas->hasil_assesment != 0 || $item_canvas->hasil_assesment != null ? round(($item_canvas->hasil_assesment / $_bobot->bobot_level) + 1, 2) : 0;
+                $hasil = $item_canvas->hasil_assesment != 0 || $item_canvas->hasil_assesment != null ? round($item_canvas->hasil_assesment, 2) : 0;
+                $hasil_assesment[] = $hasil;
+                // $hasil_assesment[]= $hasil;
                 $hasil_adjusment[] = $item_canvas->aggreed_capability_level;
             }
         }

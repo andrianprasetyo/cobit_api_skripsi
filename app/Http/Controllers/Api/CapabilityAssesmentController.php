@@ -692,7 +692,7 @@ class CapabilityAssesmentController extends Controller
 
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('domain.id', 'domain.kode','domain.ket')
+            ->select('domain.id', 'domain.kode','domain.ket','assesment_canvas.adjustment')
             ->where('assesment_canvas.assesment_id', $assesment->id)
             ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at')
@@ -716,8 +716,6 @@ class CapabilityAssesmentController extends Controller
                     ->groupBy('level')
                     ->orderBy('level', 'asc')
                     ->get();
-
-
 
                 if(!$list_levels->isEmpty())
                 {
@@ -826,6 +824,7 @@ class CapabilityAssesmentController extends Controller
                 $sum_= array_sum($_total_all);
                 $list[] = array(
                     'id' => $_item_domain->id,
+                    'adjustment' => $_item_domain->adjustment,
                     'kode' => $_item_domain->kode,
                     'ket' => $_item_domain->ket,
                     'level' => $_list_level,

@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Domain;
 
 use App\Models\Assesment;
+use App\Models\CapabilityTarget;
+use App\Models\CapabilityTargetLevel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +18,16 @@ class DomainByAssesmentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $ass=Assesment::find($this->assesment_id);
+        $capability_target_default = CapabilityTarget::where('assesment_id', $this->assesment_id)->where('default', true)->first();
+        $target=null;
+        if($capability_target_default){
+            $target_level = CapabilityTargetLevel::where('capability_target_id',$capability_target_default->id)
+                ->where('domain_id',$this->domain_id)
+                ->first();
+            if($target_level){
+                $target= (int)$target_level->target;
+            }
+        }
         return [
             'id'=>$this->id,
             'adjustment'=>$this->adjustment,
@@ -33,7 +45,7 @@ class DomainByAssesmentResource extends JsonResource
             'step3_value'=>$this->step3_value,
             'suggest_capability_level' => $this->suggest_capability_level,
             'urutan' => $this->urutan,
-            'target' => $this->target,
+            'target' => $target,
             'is_assessment'=>$this->aggreed_capability_level >= $ass->minimum_target?'Ya':'Tidak'
         ];
     }

@@ -11,6 +11,8 @@ use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentHasil;
 use App\Models\CapabilityLevel;
+use App\Models\CapabilityTarget;
+use App\Models\CapabilityTargetLevel;
 use App\Models\DesignFaktor;
 use App\Models\Domain;
 use App\Traits\JsonResponse;
@@ -118,12 +120,22 @@ class DomainController extends Controller
         // $list = AssesmentCanvas::with(['domain'])
         //     ->where('assesment_id', $assesment_id);
 
+        $capability_target_default=CapabilityTarget::where('assesment_id',$assesment_id)->where('default',true)->first();
+        if(!$capability_target_default){
+            return $this->errorResponse('data tidak ditemukan',404);
+        }
+
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain.id')
-            ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+            // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+            // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
             ->where('assesment_canvas.assesment_id',$assesment_id)
+            // ->where('capability_target_level.capability_target_id', $capability_target_default->id)
+            // ->where('capability_target.default', true)
             ->whereNull('domain.deleted_at')
-            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan','capability_target_level.target');
+            // ->whereNull('capability_target_level.deleted_at')
+            // ->whereNull('capability_target.deleted_at')
+            ->select('assesment_canvas.*','domain.kode','domain.ket','domain.urutan');
 
         $list->orderBy($sortBy, $sortType);
 

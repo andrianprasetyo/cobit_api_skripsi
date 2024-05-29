@@ -227,20 +227,35 @@ class DomainController extends Controller
         $assesment = Assesment::find($id);
         // $data = AssesmentCanvas::with(['assesment', 'domain'])->where('assesment_id', $id)->get();
 
-        $data = DB::table('assesment_canvas')
-            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','capability_target_level.target')
-            ->where('assesment_canvas.assesment_id', $id)
-            ->whereNull('domain.deleted_at')
-            ->orderBy('domain.urutan', 'ASC')
-            ->get();
+        // $data = DB::table('assesment_canvas')
+        //     ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+        //     ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+        //     ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan','capability_target_level.target')
+        //     ->where('assesment_canvas.assesment_id', $id)
+        //     ->whereNull('domain.deleted_at')
+        //     ->orderBy('domain.urutan', 'ASC')
+        //     ->get();
 
         if (!$assesment) {
             return $this->errorResponse('Assesment ID tidak terdaftar', 404);
         }
 
-        return Excel::download(new AssesmentDomain2Export($data), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
+        $data = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+            // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
+            ->where('assesment_canvas.assesment_id', $id)
+            // ->where('capability_target_level.capability_target_id', $capability_target_default->id)
+            // ->where('capability_target.default', true)
+            ->whereNull('domain.deleted_at')
+            // ->whereNull('capability_target_level.deleted_at')
+            // ->whereNull('capability_target.deleted_at')
+            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
+            ->orderBy('domain.urutan','asc')
+            ->get();
+
+
+        return Excel::download(new AssesmentDomain2Export($data,$assesment), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
     }
 
     public function chartDomainResultBACKUP(Request $request)

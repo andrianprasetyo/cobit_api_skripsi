@@ -910,6 +910,9 @@ class AsessmentController extends Controller
         if (!$assesment) {
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
+
+        // $tes=DB::selectOne('select get_compliance_value  from get_compliance_value(?,?)',['9c19ba8d-e9ad-4c65-b834-7d9984a4e545','99f935dd-62c6-47bc-a0ef-a0c8ad3dd42c']);
+        // return $this->successResponse($tes);
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
@@ -950,29 +953,32 @@ class AsessmentController extends Controller
                 $_result->target_organisasi = $target_org;
                 $_result->target_level = $target_org && $target_org->target != null ? (int) $target_org->target : null;
 
-                $_level = DB::table('capability_assesment')
-                    ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
-                    ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
-                    ->where('capability_level.domain_id', $_item_domain->domain_id)
-                    ->whereNull('capability_assesment.deleted_at')
-                    ->whereNull('capability_level.deleted_at')
-                    ->whereNull('capability_answer.deleted_at')
-                    ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
-                    ->first();
+                // $_level = DB::table('capability_assesment')
+                //     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
+                //     ->join('capability_answer', 'capability_assesment.capability_answer_id', '=', 'capability_answer.id')
+                //     ->where('capability_level.domain_id', $_item_domain->domain_id)
+                //     ->whereNull('capability_assesment.deleted_at')
+                //     ->whereNull('capability_level.deleted_at')
+                //     ->whereNull('capability_answer.deleted_at')
+                //     ->select(DB::raw("SUM(capability_answer.bobot) as compilance"))
+                //     ->first();
 
-                $_bobot = DB::table('capability_level')
-                    ->where('domain_id', $_item_domain->domain_id)
-                    ->select(DB::raw("SUM(bobot) as bobot_level"))
-                    ->first();
+                // $_bobot = DB::table('capability_level')
+                //     ->where('domain_id', $_item_domain->domain_id)
+                //     ->select(DB::raw("SUM(bobot) as bobot_level"))
+                //     ->first();
 
-                $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
-                $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
+                // $_total_sum_compilance = $_level->compilance != null ? (float) $_level->compilance : null;
+                // $_bobot_level = $_bobot->bobot_level ? $_bobot->bobot_level : 0;
 
-                $_total_compilance = 0;
-                if ($_total_sum_compilance != null && $_result->target_level) {
-                    $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
-                }
+                // $_total_compilance = 0;
+                // if ($_total_sum_compilance != null && $_result->target_level) {
+                //     $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
+                // }
 
+                // $_total_compilance = DB::select
+                $get_compliance_value = DB::selectOne('select get_compliance_value  from get_compliance_value(?,?)', [$id, $_item_domain->domain_id]);
+                $_total_compilance = floatval($get_compliance_value->get_compliance_value);
                 $target_name = '-';
                 if($target_org && $target_org->target != null) {
                     $target = CapabilityTarget::find($target_id);
@@ -1358,16 +1364,7 @@ class AsessmentController extends Controller
                 DB::raw('
                 assesment_canvas.domain_id,
                 assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level,
-                (
-                    select coalesce(sum(rata)+1,0) as compliance from (
-                        SELECT
-                            cl."level",
-                            (select avg(COALESCE(caa2.bobot,0)) FROM capability_assesment ca2 left JOIN capability_level cl2 ON ca2.capability_level_id=cl2.id left JOIN capability_answer caa2 ON caa2.id=ca2.capability_answer_id WHERE ca2.assesment_id=ca.assesment_id AND cl2."level"=cl."level" AND cl2.domain_id=cl.domain_id) as rata
-                        FROM capability_assesment ca JOIN capability_level cl ON cl.id=ca.capability_level_id WHERE ca.assesment_id = assesment_canvas.assesment_id AND ca.domain_id = "domain".id
-                            AND ca.deleted_at IS NULL GROUP BY cl."level",cl.domain_id,ca.assesment_id
-                        ) as tbl
-
-                ) as hasil_assesment'),
+                get_compliance_value(assesment_canvas.assesment_id,assesment_canvas.domain_id) as hasil_assesment'),
                 )
             ->get();
 

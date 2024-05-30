@@ -911,8 +911,6 @@ class AsessmentController extends Controller
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
 
-        // $tes=DB::selectOne('select get_compliance_value  from get_compliance_value(?,?)',['9c19ba8d-e9ad-4c65-b834-7d9984a4e545','99f935dd-62c6-47bc-a0ef-a0c8ad3dd42c']);
-        // return $this->successResponse($tes);
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
@@ -978,7 +976,7 @@ class AsessmentController extends Controller
 
                 // $_total_compilance = DB::select
                 $get_compliance_value = DB::selectOne('select get_compliance_value  from get_compliance_value(?,?)', [$id, $_item_domain->domain_id]);
-                $_total_compilance = floatval($get_compliance_value->get_compliance_value);
+                $_total_compilance = round(floatval($get_compliance_value->get_compliance_value),2);
                 $target_name = '-';
                 if($target_org && $target_org->target != null) {
                     $target = CapabilityTarget::find($target_id);

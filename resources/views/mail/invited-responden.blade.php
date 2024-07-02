@@ -16,7 +16,7 @@
         <p style="margin: 20px 0 10px 0;">
             Sehubungan dengan adanya Assesment Cobit 19 pada <b>{{$data->organisasi}}</b>,
             <br/>
-            mohon sedianya Bapak/Ibu untuk mengisi Kuesioner  yang telah kami sediakan, silahkan klik tombol dibawah ini untuk melakukan pengisian Kuesioner
+            Mohon sedianya Bapak/Ibu untuk mengisi Kuesioner  yang telah kami sediakan, silahkan klik tombol dibawah ini untuk melakukan pengisian Kuesioner
         </p>
 
         <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;" cellpadding="0" cellspacing="0" role="presentation">
@@ -34,7 +34,7 @@
             Salam
             <br/>
             <span>
-                PT. Millenia Solusi Informatika
+                PT. Millennia Solusi Informatika
             </span>
         </p>
 

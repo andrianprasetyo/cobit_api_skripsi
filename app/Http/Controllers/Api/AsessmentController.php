@@ -1895,12 +1895,14 @@ class AsessmentController extends Controller
         try {
 
             $org_id=null;
+            $data = null;
             $assesment = Assesment::find($id);
             if (!$assesment) {
                 return $this->errorResponse('Project tidak ditemukan', 404);
             }
             if($request->filled('organisasi_id')){
                 $org_id=$request->organisasi_id;
+                $data=Organisasi::find($request->organisasi_id);
             }else{
                 $organisasi = new Organisasi();
                 $organisasi->nama = $request->organisasi_nama;
@@ -1908,13 +1910,14 @@ class AsessmentController extends Controller
                 $organisasi->save();
 
                 $org_id=$organisasi->id;
+                $data=$organisasi;
             }
 
             $assesment->organisasi_id= $org_id;
             $assesment->save();
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($data);
         } catch (\Throwable $th) {
             DB::rollback();
             return $this->errorResponse($th->getMessage());

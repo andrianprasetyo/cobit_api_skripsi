@@ -1874,4 +1874,50 @@ class AsessmentController extends Controller
 
         return $this->successResponse();
     }
+
+    public function changeOrg(Request $request,$id)
+    {
+        $validate=[];
+        $validate_msg = [];
+        if($request->filled('organisasi_id')){
+            $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
+            $validate_msg['organisasi_id.uuid'] = 'Organisasi ID tidak valid';
+            $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
+
+        }else{
+            $validate['organisasi_nama'] = 'required|unique:organisasi,nama';
+            $validate_msg['organisasi_nama.required'] = 'Nama organisasi harus di isi';
+            $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
+        }
+        $request->validate($validate, $validate_msg);
+
+        DB::beginTransaction();
+        try {
+
+            $org_id=null;
+            $assesment = Assesment::find($id);
+            if (!$assesment) {
+                return $this->errorResponse('Project tidak ditemukan', 404);
+            }
+            if($request->filled('organisasi_id')){
+                $org_id=$request->organisasi_id;
+            }else{
+                $organisasi = new Organisasi();
+                $organisasi->nama = $request->organisasi_nama;
+                $organisasi->deskripsi = $request->organisasi_deskripsi;
+                $organisasi->save();
+
+                $org_id=$organisasi->id;
+            }
+
+            $assesment->organisasi_id= $org_id;
+            $assesment->save();
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
 }

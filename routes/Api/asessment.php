@@ -12,6 +12,7 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::put('/assesment/pic/edit/{id}', 'AsessmentController@editPIC');
     Route::put('/assesment/pic/reaktifasi/{id}', 'AsessmentController@reAktifasi');
     Route::put('/assesment/pic/expire/{id}', 'AsessmentController@editPicExpire');
+    Route::put('/assesment/org/{id}/change', 'AsessmentController@changeOrg');
 
     Route::post('/assesment/upload/report', 'AsessmentController@uploadReport');
     Route::get('/assesment/report/list', 'AsessmentController@reportHasil');

@@ -345,6 +345,9 @@ class AsessmentController extends Controller
         if ($request->filled('minimum_target')) {
             $data->minimum_target = $request->minimum_target;
         }
+        if ($request->filled('user_id')) {
+            $data->user_id = $request->user_id;
+        }
         $data->save();
 
         return $this->successResponse();

@@ -650,7 +650,14 @@ class AsessmentController extends Controller
         $user->nama = $request->pic_nama;
         $user->jabatan_id = $request->pic_jabatan_id;
         $user->divisi_id = $request->pic_divisi_id;
-        $user->email = $request->pic_email;
+        if($request->filled('email')){
+            $_mail_check=User::where('email',$request->pic_email)->where('id','!=',$user->id)->exists();
+            if($_mail_check)
+            {
+                return $this->errorResponse('Email .'.$request->pic_email.' sudah digunakan',400);
+            }
+            $user->email = $request->pic_email;
+        }
         // $user->token = $_token;
         // $user->password = $_token;
         $user->save();

@@ -106,17 +106,17 @@ class AsessmentController extends Controller
         // $validate_msg['tahun.required'] = 'Tahun assesment harus di isi';
         // $validate_msg['tahun.date_format'] = 'Tahun assesment tidak valid (Y-m)';
 
-        $validate['pic_nama']='required';
-        $validate['pic_email'] = 'required|email';
-        $validate_msg['pic_nama.required']='Nama PIC harus di isi';
-        $validate_msg['pic_email.required'] = 'Email PIC harus di isi';
-        $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
+        // $validate['pic_nama']='required';
+        // $validate['pic_email'] = 'required|email';
+        // $validate_msg['pic_nama.required']='Nama PIC harus di isi';
+        // $validate_msg['pic_email.required'] = 'Email PIC harus di isi';
+        // $validate_msg['pic_email.email'] = 'Email PIC tidak valid';
 
         // $validate_msg['pic_email.unique'] = 'Email PIC sudah digunakan';
-        $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
-        $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
-        $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
-        $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
+        // $validate['pic_expire_at'] = 'required|date_format:Y-m-d|after:today';
+        // $validate_msg['pic_expire_at.required'] = 'Tanggal kadaluarsa PIC harus di isi';
+        // $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
+        // $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
         $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
         $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
@@ -133,21 +133,21 @@ class AsessmentController extends Controller
             $validate_msg['organisasi_id.uuid']='Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
 
-            $validate['pic_divisi_id'] = 'uuid|exists:organisasi_divisi,id';
-            $validate_msg['pic_divisi_id.uuid'] = 'Jabatan ID tidak valid';
-            $validate_msg['pic_divisi_id.exists'] = 'Jabatan tidak terdaftar';
+            // $validate['pic_divisi_id'] = 'uuid|exists:organisasi_divisi,id';
+            // $validate_msg['pic_divisi_id.uuid'] = 'Jabatan ID tidak valid';
+            // $validate_msg['pic_divisi_id.exists'] = 'Jabatan tidak terdaftar';
 
-            $validate['pic_jabatan_id'] = 'uuid|exists:organisasi_divisi_jabatan,id';
-            $validate_msg['pic_jabatan_id.uuid'] = 'Divisi ID tidak valid';
-            $validate_msg['pic_jabatan_id.exists'] = 'Divisi tidak terdaftar';
+            // $validate['pic_jabatan_id'] = 'uuid|exists:organisasi_divisi_jabatan,id';
+            // $validate_msg['pic_jabatan_id.uuid'] = 'Divisi ID tidak valid';
+            // $validate_msg['pic_jabatan_id.exists'] = 'Divisi tidak terdaftar';
 
         }else{
             $validate['organisasi_nama']='required|unique:organisasi,nama';
             $validate_msg['organisasi_nama.required']='Nama organisasi harus di isi';
             $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
 
-            $validate['pic_jabatan'] = 'required|string';
-            $validate['pic_divisi'] = 'required|string';
+            // $validate['pic_jabatan'] = 'required|string';
+            // $validate['pic_divisi'] = 'required|string';
         }
 
         $request->validate($validate, $validate_msg);
@@ -1696,11 +1696,31 @@ class AsessmentController extends Controller
             ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'asc')
             ->select(
-                'assesment_hasil.*',
+                // 'assesment_hasil.*',
+                // 'assesment_hasil.id',
+                'assesment_hasil.assesment_id',
+                'assesment_hasil.design_faktor_id',
+                'assesment_hasil.domain_id',
+                'assesment_hasil.relative_importance',
+                'assesment_hasil.score',
+                'assesment_hasil.baseline_score',
                 'design_faktor.kode as df_kode',
                 'domain.kode as domain_kode',
                 'domain.ket as domain_ket',
                 'domain.urutan as domain_urutan',
+            )
+            ->groupBy(
+                // 'assesment_hasil.id',
+                'assesment_hasil.assesment_id',
+                'assesment_hasil.design_faktor_id',
+                'assesment_hasil.domain_id',
+                'assesment_hasil.relative_importance',
+                'assesment_hasil.score',
+                'assesment_hasil.baseline_score',
+                'design_faktor.kode',
+                'domain.kode',
+                'domain.ket',
+                'domain.urutan',
             );
 
         if($request->filled('search')){

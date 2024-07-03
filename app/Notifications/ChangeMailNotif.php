@@ -43,7 +43,7 @@ class ChangeMailNotif extends Notification
 
         return (new MailMessage)
             ->subject('Verifikasi Email | ' . config('app.name'))
-            ->markdown('mail.verify-akun', ['data'=> (object)$data]);
+            ->markdown('mail.change-verify', ['data'=> (object)$data]);
     }
 
     /**

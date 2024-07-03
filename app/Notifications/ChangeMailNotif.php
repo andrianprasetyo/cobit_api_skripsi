@@ -39,7 +39,7 @@ class ChangeMailNotif extends Notification
         $data['nama'] = $this->params->nama;
         $data['email'] = $this->params->email;
         $data['kode'] = $this->params->code;
-        $data['url']= config('app.url_fe') . '/account/confirm?code='. $notifiable->code.'&email='. $this->params->email;
+        $data['url']= config('app.url_fe') . '/auth/login';
 
         return (new MailMessage)
             ->subject('Verifikasi Email | ' . config('app.name'))

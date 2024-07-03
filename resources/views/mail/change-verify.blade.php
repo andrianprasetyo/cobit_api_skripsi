@@ -14,10 +14,10 @@
         <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Halo</p>
         <p style="font-weight: 700; font-size: 20px; margin-top: 0; color: #203058;">{{$data->nama}}</p>
         <p class="sm-leading-32" style="font-weight: 600; font-size: 20px; margin: 0 0 16px; color: #263238;">
-            Email anda telah di ubah, harap konfirmasi
+            Email anda telah di ubah
         </p>
         <p style="margin: 0 0 24px;">
-            Silahkan klik tombol dibawah ini untuk melakukan verifikasi email baru anda
+            Silahkan klik tombol dibawah ini untuk melakukan login dengan menggunakan email ini
         </p>
 
         <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI;" cellpadding="0" cellspacing="0" role="presentation">

@@ -31,6 +31,7 @@ use App\Models\Roles;
 use App\Models\RoleUsers;
 use App\Models\User;
 use App\Models\UserAssesment;
+use App\Notifications\ChangeMailNotif;
 use App\Notifications\InviteRespondenNotif;
 use App\Notifications\InviteUserNotif;
 use App\Traits\JsonResponse;
@@ -650,13 +651,17 @@ class AsessmentController extends Controller
         $user->nama = $request->pic_nama;
         $user->jabatan_id = $request->pic_jabatan_id;
         $user->divisi_id = $request->pic_divisi_id;
-        if($request->filled('email')){
+        if($request->filled('pic_email')){
             $_mail_check=User::where('email',$request->pic_email)->where('id','!=',$user->id)->exists();
             if($_mail_check)
             {
                 return $this->errorResponse('Email .'.$request->pic_email.' sudah digunakan',400);
             }
-            $user->email = $request->pic_email;
+            // Notification::send($user, new ChangeMailNotif($user));
+            if($user->email != $request->pic_email){
+                $user->email = $request->pic_email;
+                Notification::send($user, new ChangeMailNotif($user));
+            }
         }
         // $user->token = $_token;
         // $user->password = $_token;

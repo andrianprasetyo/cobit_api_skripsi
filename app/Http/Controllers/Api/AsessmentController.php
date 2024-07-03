@@ -650,7 +650,7 @@ class AsessmentController extends Controller
         $user->nama = $request->pic_nama;
         $user->jabatan_id = $request->pic_jabatan_id;
         $user->divisi_id = $request->pic_divisi_id;
-        if($request->filled('email')){
+        if($request->filled('pic_email')){
             $_mail_check=User::where('email',$request->pic_email)->where('id','!=',$user->id)->exists();
             if($_mail_check)
             {

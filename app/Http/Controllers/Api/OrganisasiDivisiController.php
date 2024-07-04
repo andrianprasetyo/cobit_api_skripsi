@@ -102,10 +102,10 @@ class OrganisasiDivisiController extends Controller
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
 
-            $_check_exists = OrganisasiDivisi::where('id', '!=', $id)->where('nama', $request->nama)->exists();
-            if ($_check_exists) {
-                return $this->errorResponse('divisi organisasi sudah digunakan', 400);
-            }
+            // $_check_exists = OrganisasiDivisi::where('id', '!=', $id)->where('nama', $request->nama)->exists();
+            // if ($_check_exists) {
+            //     return $this->errorResponse('divisi organisasi sudah digunakan', 400);
+            // }
 
             $divisi->nama = $request->nama;
             $divisi->is_specific_df = $request->is_specific_df;

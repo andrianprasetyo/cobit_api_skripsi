@@ -359,14 +359,7 @@ class QuisionerController extends Controller
         try {
             $assesment_user_id = $request->assesment_user_id;
             $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($assesment_user_id);
-            // $assesment=Assesment::find($responden->assesment_id);
-            // if (!$responden) {
-            //     return $this->errorResponse('Data tidak ditemukan', 404);
-            // }
 
-            // if (!$assesment) {
-            //     return $this->errorResponse('Assesment tidak ditemukan', 404);
-            // }
 
             if ($responden->status == 'diundang') {
                 return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
@@ -394,6 +387,49 @@ class QuisionerController extends Controller
             $responden->status = 'done';
             $responden->is_proses = null;
             $responden->save();
+
+            //insert df yang belum ada
+            $quisionerId=Quisioner::where('aktif',true)->first();
+            $dfList=DB::select("SELECT * FROM design_faktor where id not in (
+                    select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id GROUP BY design_faktor_id)",['assesment_users_id'=>$assesment_user_id]);
+            foreach($dfList as $df){
+                $dfKomponen=DesignFaktorKomponen::where('design_faktor_id',$df->id)->get();
+                $pertanyaanId=QuisionerPertanyaan::where('design_faktor_id',$df->id)->first();
+                if($df->kode=='DF3'){
+                    for($a=1;$a<=2;$a++){
+                        foreach($dfKomponen as $dfk){
+                            $find=QuisionerHasil::where('assesment_users_id',$assesment_user_id)->where('design_faktor_komponen_id',$dfk->id)->get()->count();
+                            if($find<=2){
+                                $ins=new QuisionerHasil();
+                                $ins->quisioner_id=$quisionerId->id;
+                                $ins->quisioner_pertanyaan_id=$pertanyaanId->id;
+                                $ins->jawaban_id=null;
+                                $ins->assesment_users_id=$assesment_user_id;
+                                $ins->bobot=null;
+                                //$ins->is_proses
+                                $ins->design_faktor_komponen_id=$dfk->id;
+                                $ins->save();
+                            }
+
+                        }
+                    }
+                }else{
+                    foreach($dfKomponen as $dfk){
+                        $find=QuisionerHasil::where('assesment_users_id',$assesment_user_id)->where('design_faktor_komponen_id',$dfk->id)->first();
+                        if(!$find){
+                            $ins=new QuisionerHasil();
+                            $ins->quisioner_id=$quisionerId->id;
+                            $ins->quisioner_pertanyaan_id=$pertanyaanId->id;
+                            $ins->jawaban_id=null;
+                            $ins->assesment_users_id=$assesment_user_id;
+                            $ins->bobot=null;
+                            //$ins->is_proses
+                            $ins->design_faktor_komponen_id=$dfk->id;
+                            $ins->save();
+                        }
+                    }
+                }
+            }
 
             // SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
             SetProsesQuisionerHasilQueue::dispatch($assesment_user_id);

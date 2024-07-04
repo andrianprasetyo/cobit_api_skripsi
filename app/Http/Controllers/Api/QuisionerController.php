@@ -144,17 +144,12 @@ class QuisionerController extends Controller
             ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
             ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)
             ->whereNull('design_faktor.deleted_at')
-            ->whereNull('quisioner_pertanyaan.deleted_at');
-
-        if ($user_assesment->divisi && $user_assesment->divisi->is_specific_df) {
-            $spesific_df=[];
-            if(!empty($user_assesment->divisi->mapsdf)){
-                foreach ($user_assesment->divisi->mapsdf as $item_df) {
-                    $spesific_df[]=$item_df->design_faktor_id;
-                }
-            }
-            $list_df->whereIn('design_faktor.id',$spesific_df);
-        }
+            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->whereIn('design_faktor.id', function ($q) use ($user_assesment) {
+                $q->select('design_faktor_id')
+                    ->from('organisasi_divisi_map_df')
+                    ->where('organisasi_divisi_id', $user_assesment->divisi_id);
+            });
         $list_df->orderBy('design_faktor.urutan', 'ASC');
         $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
 

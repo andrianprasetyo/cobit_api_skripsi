@@ -39,7 +39,7 @@ class OrganisasiDivisiController extends Controller
 
     public function detailByID($id)
     {
-        $data = OrganisasiDivisi::with('organisasi')->find($id);
+        $data = OrganisasiDivisi::with(['organisasi','mapsdf.design_faktor'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
@@ -141,6 +141,38 @@ class OrganisasiDivisiController extends Controller
 
         $data->delete();
         return $this->successResponse($data);
+    }
+
+    public function createMapDF(Request $request,$id)
+    {
+        $validate['df'] = 'array';
+        $validate_msg['df.array'] = 'DF harus berbentuk list';
+        $request->validate($validate, $validate_msg);
+        $divisi = OrganisasiDivisi::find($id);
+        if (!$divisi) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+        DB::beginTransaction();
+        try {
+
+            if ($request->filled('is_specific_df')) {
+                OrganisasiDivisiMapDF::where('organisasi_divisi_id', $id)->delete();
+                if ($request->is_specific_df) {
+                    foreach ($request->df as $item_df) {
+                        $map = new OrganisasiDivisiMapDF();
+                        $map->organisasi_divisi_id = $id;
+                        $map->design_faktor_id = $item_df;
+                        $map->save();
+                    }
+                }
+            }
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage(), $th->getCode());
+        }
     }
 
     public function deleteMapByID($id)

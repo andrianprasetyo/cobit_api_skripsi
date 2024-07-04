@@ -125,7 +125,7 @@ class QuisionerController extends Controller
         DB::beginTransaction();
         try {
 
-            $responden->code = Str::random(50);;
+            // $responden->code = Str::random(50);
             $responden->status = 'diundang';
             $responden->quesioner_processed = false;
             $responden->save();
@@ -139,7 +139,7 @@ class QuisionerController extends Controller
             QuisionerHasil::where('assesment_users_id',$id)->delete();
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($responden);
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage());

@@ -102,6 +102,48 @@ class QuisionerController extends Controller
         }
     }
 
+    public function reset(QuisionerStartRequest $request)
+    {
+        $request->validated([
+            'responden_id'=>'required',
+            'assesment_id'=>'required',
+        ]);
+
+        $id=$request->responden_id;
+        $quisioner = Quisioner::where('aktif', true)->first();
+        // $quisioner = Quisioner::find($request->quisioner_id);
+        if (!$quisioner) {
+            return $this->errorResponse('Quisioner tidak di temukan', 400);
+        }
+
+        $responden = AssessmentUsers::with(['assesment.organisasi'])->find($id);
+        if ($responden->is_proses == 'done') {
+            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $responden->status = 'diundang';
+            $responden->quesioner_processed = false;
+            $responden->save();
+
+            AssessmentQuisioner::where('assesment_id',$request->assesment_id)
+                ->where('quisioner_id', $quisioner->id)
+                ->where('organisasi_id', $responden->assesment->organisasi_id)
+                ->where('allow',true)
+                ->delete();
+
+            QuisionerHasil::where('assesment_users_id',$id)->delete();
+
+            DB::commit();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
     public function listquestion(Request $request,$id)
     {
         $offset = $request->get('question', 1);

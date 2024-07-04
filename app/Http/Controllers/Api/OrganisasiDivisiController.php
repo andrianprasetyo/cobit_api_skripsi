@@ -155,16 +155,12 @@ class OrganisasiDivisiController extends Controller
         DB::beginTransaction();
         try {
 
-            if ($request->filled('is_specific_df')) {
-                OrganisasiDivisiMapDF::where('organisasi_divisi_id', $id)->delete();
-                if ($request->is_specific_df) {
-                    foreach ($request->df as $item_df) {
-                        $map = new OrganisasiDivisiMapDF();
-                        $map->organisasi_divisi_id = $id;
-                        $map->design_faktor_id = $item_df;
-                        $map->save();
-                    }
-                }
+            OrganisasiDivisiMapDF::where('organisasi_divisi_id', $id)->delete();
+            foreach ($request->df as $item_df) {
+                $map = new OrganisasiDivisiMapDF();
+                $map->organisasi_divisi_id = $id;
+                $map->design_faktor_id = $item_df;
+                $map->save();
             }
 
             DB::commit();

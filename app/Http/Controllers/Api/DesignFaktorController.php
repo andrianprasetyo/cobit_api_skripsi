@@ -30,7 +30,11 @@ class DesignFaktorController extends Controller
         }
         $list->orderBy($sortBy, $sortType);
 
-        $data = $this->paging($list, $limit, $page);
+        if($request->filled('nopaging') && $request->get('nopaging')){
+            $data['list'] = $list->get();
+        }else{
+            $data = $this->paging($list, $limit, $page);
+        }
         return $this->successResponse($data);
     }
 

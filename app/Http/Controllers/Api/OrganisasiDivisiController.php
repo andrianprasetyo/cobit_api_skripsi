@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DesignFaktor;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiMapDF;
 use App\Traits\JsonResponse;
@@ -63,19 +64,28 @@ class OrganisasiDivisiController extends Controller
             $divisi = new OrganisasiDivisi();
             $divisi->nama = $request->nama;
             $divisi->organisasi_id = $request->organisasi_id;
-            $divisi->is_specific_df = $request->is_specific_df;
+            $divisi->is_specific_df = true;
             $divisi->save();
 
-            if ($request->filled('is_specific_df') && $request->is_specific_df) {
-                if(!empty($request->df)){
-                    foreach ($request->df as $item_df) {
-                        $map=new OrganisasiDivisiMapDF();
-                        $map->organisasi_divisi_id=$divisi->id;
-                        $map->design_faktor_id = $item_df;
-                        $map->save();
-                    }
+            $list_df=DesignFaktor::orderBy('kode','asc')->get();
+            if(!$list_df->isEmpty()){
+                foreach ($list_df as $item_df) {
+                    $map = new OrganisasiDivisiMapDF();
+                    $map->organisasi_divisi_id=$divisi->id;
+                    $map->design_faktor_id = $item_df->id;
+                    $map->save();
                 }
             }
+            // if ($request->filled('is_specific_df') && $request->is_specific_df) {
+            //     if(!empty($request->df)){
+            //         foreach ($request->df as $item_df) {
+            //             $map=new OrganisasiDivisiMapDF();
+            //             $map->organisasi_divisi_id=$divisi->id;
+            //             $map->design_faktor_id = $item_df;
+            //             $map->save();
+            //         }
+            //     }
+            // }
 
             DB::commit();
             return $this->successResponse($divisi);

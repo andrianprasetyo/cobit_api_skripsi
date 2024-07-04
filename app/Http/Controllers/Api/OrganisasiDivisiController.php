@@ -52,10 +52,10 @@ class OrganisasiDivisiController extends Controller
 
         $validate['nama']='required';
         $validate_msg['nama.required'] = 'Nama divisi harus di isi';
-        if ($request->filled('is_specific_df') && $request->is_specific_df) {
-            $validate['df'] = 'array';
-            $validate_msg['df.array'] = 'DF harus berbentuk list';
-        }
+        // if ($request->filled('is_specific_df') && $request->is_specific_df) {
+        //     $validate['df'] = 'array';
+        //     $validate_msg['df.array'] = 'DF harus berbentuk list';
+        // }
         $request->validate($validate,$validate_msg);
         DB::beginTransaction();
         try {
@@ -67,11 +67,13 @@ class OrganisasiDivisiController extends Controller
             $divisi->save();
 
             if ($request->filled('is_specific_df') && $request->is_specific_df) {
-                foreach ($request->df as $item_df) {
-                    $map=new OrganisasiDivisiMapDF();
-                    $map->organisasi_divisi_id=$divisi->id;
-                    $map->design_faktor_id = $item_df;
-                    $map->save();
+                if(!empty($request->df)){
+                    foreach ($request->df as $item_df) {
+                        $map=new OrganisasiDivisiMapDF();
+                        $map->organisasi_divisi_id=$divisi->id;
+                        $map->design_faktor_id = $item_df;
+                        $map->save();
+                    }
                 }
             }
 

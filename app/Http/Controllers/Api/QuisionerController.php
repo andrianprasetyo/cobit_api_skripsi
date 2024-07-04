@@ -105,7 +105,7 @@ class QuisionerController extends Controller
 
     public function reset(Request $request)
     {
-        $request->validated([
+        $request->validate([
             'responden_id'=>'required',
             'assesment_id'=>'required',
         ]);

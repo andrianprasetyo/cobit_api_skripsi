@@ -441,6 +441,11 @@ class ReportController extends Controller
                 dfk.urutan ASC
         ");
 
+        $whereClause='';
+        if($request->filled('assesment_users_id')) {
+            $whereClause=' WHERE qj.jawaban is not null ';
+        }
+
         $query = "
                 SELECT
                     *,
@@ -485,7 +490,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
-                                WHERE qj.jawaban is not null
+                                ".$whereClause."
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,

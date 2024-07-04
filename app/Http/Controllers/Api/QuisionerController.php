@@ -377,6 +377,11 @@ class QuisionerController extends Controller
         $assesment_id=$request->assesment_id;
         $responden_id = $request->responden_id;
 
+        $user_assesment = AssessmentUsers::find($responden_id);
+        if (!$user_assesment) {
+            return $this->errorResponse('Responden tidak terdaftar', 404);
+        }
+
         $qry_list_pertanyan = DB::table('design_faktor')
             ->select(
                 'quisioner_pertanyaan.id',
@@ -388,7 +393,13 @@ class QuisionerController extends Controller
             ->whereNull('quisioner_pertanyaan.deleted_at')
             ->orderBy('design_faktor.urutan', 'ASC')
             ->orderBy('quisioner_pertanyaan.sorting','ASC')
+            ->whereIn('design_faktor.id',function($q) use($user_assesment){
+                $q->select('design_faktor_id')
+                    ->from('organisasi_divisi_map_df')
+                    ->where('organisasi_divisi_id',$user_assesment->divisi_id);
+            })
             ->get();
+
 
         $list_pertanyaan=[];
         $list_terisi=[];

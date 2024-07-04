@@ -113,8 +113,8 @@ class OrganisasiDivisiController extends Controller
             $divisi->save();
 
             if ($request->filled('is_specific_df')) {
-                OrganisasiDivisiMapDF::where('organisasi_divisi_id',$id)->delete();
                 if($request->is_specific_df){
+                    OrganisasiDivisiMapDF::where('organisasi_divisi_id',$id)->delete();
                     foreach ($request->df as $item_df) {
                         $map = new OrganisasiDivisiMapDF();
                         $map->organisasi_divisi_id = $id;

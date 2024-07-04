@@ -92,66 +92,70 @@ class ReportController extends Controller
                 dfk.urutan ASC
         ");
         // dd($assesment_id);
+        $whereClause = '';
+        if ($request->filled('assesment_users_id')) {
+            $whereClause = ' WHERE qj.jawaban is not null ';
+        }
+
         $hasilQuesioner=DB::select("
             SELECT
-                *,
-                odj.nama as nama_jabatan,
-                od.nama as nama_divisi,
-                au.nama as nama_responden,
-                (
-                    select json_agg(tbl2) from (
-                        select
-                            json_build_object(
-                                'id',tbl.id,
-                                'kode',tbl.kode,
-                                'deskripsi',tbl.deskripsi,
-                                'dfk_id',tbl.dfk_id,
-                                'nama',tbl.nama,
-                                'komponen_deskripsi',komponen_deskripsi,
-                                'jawaban',jawaban,
-                                'bobot',bobot,
-                                'pertanyaan',pertanyaan,
-                                'assesment_users_id',assesment_users_id,
-                                'nama_grup_jawaban',nama_grup_jawaban,
-                                'jenis',jenis
-                            ) as jawaban
-                        from (
-                        SELECT
-                            df.ID,
-                            df.kode,
-                            df.deskripsi,
-                            dfk.ID AS dfk_id,
-                            dfk.nama,
-                            dfk.deskripsi as komponen_deskripsi,
-                            qj.jawaban,
-                            qh.bobot,
-                            qp.pertanyaan,
-                            qh.assesment_users_id,
-                            qgj.nama as nama_grup_jawaban,
-                            qgj.jenis
-                        FROM
-                            design_faktor_komponen dfk
-                            JOIN design_faktor df ON df.ID = dfk.design_faktor_id
-                            left JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id=dfk.id and qh.assesment_users_id=au.id
-                            left JOIN quisioner_jawaban qj ON qj.id=qh.jawaban_id
-                            left JOIN quisioner_grup_jawaban qgj ON qgj.id=qj.quisioner_grup_jawaban_id
-                            left JOIN quisioner_pertanyaan qp ON qp.id=qh.quisioner_pertanyaan_id
-                        ORDER BY
-                            df.urutan ASC,
-                            qp.sorting asc,
-                            dfk.urutan ASC
-
+                    *,
+                    odj.nama as nama_jabatan,
+                    od.nama as nama_divisi,
+                    au.nama as nama_responden,
+                    (
+                        select json_agg(tbl2) from (
+                            select
+                                json_build_object(
+                                    'id', tbl.id,
+                                    'kode', tbl.kode,
+                                    'deskripsi', tbl.deskripsi,
+                                    'dfk_id', tbl.dfk_id,
+                                    'nama', tbl.nama,
+                                    'komponen_deskripsi', komponen_deskripsi,
+                                    'jawaban', jawaban,
+                                    'bobot', bobot,
+                                    'pertanyaan', pertanyaan,
+                                    'assesment_users_id', assesment_users_id,
+                                    'nama_grup_jawaban', nama_grup_jawaban,
+                                    'jenis', jenis
+                                ) as jawaban
+                            from (
+                            SELECT
+                                df.ID,
+                                df.kode,
+                                df.deskripsi,
+                                dfk.ID AS dfk_id,
+                                dfk.nama,
+                                dfk.deskripsi as komponen_deskripsi,
+                                qj.jawaban,
+                                qh.bobot,
+                                qp.pertanyaan,
+                                qh.assesment_users_id,
+                                qgj.nama as nama_grup_jawaban,
+                                qgj.jenis
+                            FROM
+                                design_faktor_komponen dfk
+                                JOIN design_faktor df ON df.ID = dfk.design_faktor_id
+                                LEFT JOIN quisioner_hasil qh ON qh.design_faktor_komponen_id = dfk.id AND qh.assesment_users_id = au.id
+                                LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
+                                LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
+                                LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
+                                " . $whereClause . "
+                            ORDER BY
+                                df.urutan ASC,
+                                qp.sorting ASC,
+                                dfk.urutan ASC
                             ) as tbl
-
-                    ) as tbl2
-                ) as jawaban_quesioner
-            FROM
-                assesment_users au
-                LEFT JOIN organisasi_divisi_jabatan odj on odj.id=au.jabatan_id
-                LEFT JOIN organisasi_divisi od on od.id=odj.organisasi_divisi_id
-            WHERE
-                au.status = 'done'
-                and au.assesment_id=:assesment_id
+                        ) as tbl2
+                    ) as jawaban_quesioner
+                FROM
+                    assesment_users au
+                    LEFT JOIN organisasi_divisi_jabatan odj ON odj.id = au.jabatan_id
+                    LEFT JOIN organisasi_divisi od ON od.id = odj.organisasi_divisi_id
+                WHERE
+                    au.status = 'done'
+                    AND au.assesment_id = :assesment_id
         ",[
             'assesment_id'=>$assesment_id
         ]);

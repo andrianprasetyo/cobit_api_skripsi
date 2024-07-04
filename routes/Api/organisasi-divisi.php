@@ -5,4 +5,5 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::post('/organisasi-divisi/add', 'OrganisasiDivisiController@add');
     Route::put('/organisasi-divisi/edit/{id}', 'OrganisasiDivisiController@edit');
     Route::delete('/organisasi-divisi/remove/{id}', 'OrganisasiDivisiController@deleteByID');
+    Route::delete('/organisasi-divisi/remove-map/{id}', 'OrganisasiDivisiController@deleteMapByID');
 });

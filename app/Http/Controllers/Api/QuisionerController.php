@@ -30,6 +30,7 @@ use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class QuisionerController extends Controller
 {
@@ -124,6 +125,7 @@ class QuisionerController extends Controller
         DB::beginTransaction();
         try {
 
+            $responden->code = Str::random(50);;
             $responden->status = 'diundang';
             $responden->quesioner_processed = false;
             $responden->save();

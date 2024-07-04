@@ -78,7 +78,7 @@ class OrganisasiDivisiController extends Controller
             }
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($divisi);
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage(),$th->getCode());
@@ -127,7 +127,7 @@ class OrganisasiDivisiController extends Controller
             }
 
             DB::commit();
-            return $this->successResponse();
+            return $this->successResponse($divisi);
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage(), $th->getCode());

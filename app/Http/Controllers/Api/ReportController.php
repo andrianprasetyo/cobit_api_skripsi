@@ -447,9 +447,9 @@ class ReportController extends Controller
 
         $whereClause=' 1=1 ';
         if($request->filled('assesment_users_id')) {
-            $whereClause=' qj.jawaban is not null ';
+            $whereClause=' qj.jawaban is not null AND  qh.bobot is not null ';
         }
-        $whereClause.=' AND  qh.bobot is not null ';
+//        $whereClause.='  ';
         $query = "
                 SELECT
                     *,

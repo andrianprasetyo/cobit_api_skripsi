@@ -108,7 +108,7 @@ class QuisionerController extends Controller
         $limit=1;
         $page = ($offset * $limit) - $limit;
 
-        $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($id);
+        $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner','divisi.mapsdf'])->find($id);
         if(!$user_assesment)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -123,6 +123,7 @@ class QuisionerController extends Controller
         {
             return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
         }
+
 
         // return $this->successResponse($user_assesment);
 
@@ -145,6 +146,15 @@ class QuisionerController extends Controller
             ->whereNull('design_faktor.deleted_at')
             ->whereNull('quisioner_pertanyaan.deleted_at');
 
+        if ($user_assesment->divisi && $user_assesment->divisi->is_specific_df) {
+            $spesific_df=[];
+            if(!empty($user_assesment->divisi->mapsdf)){
+                foreach ($user_assesment->divisi->mapsdf as $item_df) {
+                    $spesific_df[]=$item_df->design_faktor_id;
+                }
+            }
+            $list_df->whereIn('design_faktor.id',$spesific_df);
+        }
         $list_df->orderBy('design_faktor.urutan', 'ASC');
         $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
 

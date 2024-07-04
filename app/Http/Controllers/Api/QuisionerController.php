@@ -103,7 +103,7 @@ class QuisionerController extends Controller
         }
     }
 
-    public function reset(QuisionerStartRequest $request)
+    public function reset(Request $request)
     {
         $request->validated([
             'responden_id'=>'required',

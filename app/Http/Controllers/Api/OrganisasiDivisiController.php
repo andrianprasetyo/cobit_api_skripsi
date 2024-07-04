@@ -89,10 +89,10 @@ class OrganisasiDivisiController extends Controller
     {
         $validate['nama'] = 'required';
         $validate_msg['nama.required'] = 'Nama divisi harus di isi';
-        if ($request->filled('is_specific_df') && $request->is_specific_df) {
-            $validate['df'] = 'array';
-            $validate_msg['df.array'] = 'DF harus berbentuk list';
-        }
+        // if ($request->filled('is_specific_df') && $request->is_specific_df) {
+        //     $validate['df'] = 'array';
+        //     $validate_msg['df.array'] = 'DF harus berbentuk list';
+        // }
         $request->validate($validate, $validate_msg);
 
         DB::beginTransaction();

@@ -52,6 +52,7 @@ class CobitHelper
                         AND au.deleted_at IS NULL
                         AND qh.deleted_at IS NULL
                         AND au.status = 'done'
+                        AND qh.bobot is not null
                     WHERE
                         au.assesment_id=:assesment_id
                         AND au.quesioner_processed = true

@@ -485,6 +485,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
+                                WHERE qj.jawaban is not null
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,
@@ -509,50 +510,6 @@ class ReportController extends Controller
             $params['assesment_users_id'] = $request->assesment_users_id;
         }
         $hasilQuesioner = DB::select($query, $params);
-        // $results = AssessmentUsers::with([
-        //     'jabatan.divisi',
-        //     'assesmentquisionerhasil' => function ($query) {
-        //         $query->select(
-        //             'design_faktor_komponen_id',
-        //             'jawaban_id',
-        //             'bobot',
-        //             'assesment_users_id',
-        //             'quisioner_pertanyaan_id'
-        //         )
-        //             ->with([
-        //                 'dfkomponen.designfaktor',
-        //                 'pertanyaan.grup_jawaban',
-        //                 'pertanyaan',
-        //                 'jawaban'
-        //             ]);
-        //             // ->orderBy('dfkomponen.designfaktor.urutan');
-        //             // ->orderBy('quisioner_pertanyaan.sorting');
-        //     }
-        // ])->where('status', 'done')
-        //     ->where('assesment_id', $request->assesment_id)
-        //     ->get()
-        //     ->map(function ($user) {
-        //         $user->nama_jabatan = $user->jabatan->nama;
-        //         $user->nama_divisi = $user->jabatan->divisi->nama;
-        //         $user->nama_responden = $user->nama;
-        //         $user->jawaban_quesioner = $user->assesmentquisionerhasil->map(function ($hasil) {
-        //             return [
-        //                 'id' => $hasil->dfkomponen->designfaktor->id,
-        //                 'kode' => $hasil->dfkomponen->designfaktor->kode,
-        //                 'deskripsi' => $hasil->dfkomponen->designfaktor->deskripsi,
-        //                 'dfk_id' => $hasil->dfkomponen->id,
-        //                 'nama' => $hasil->dfkomponen->nama,
-        //                 'komponen_deskripsi' => $hasil->dfkomponen->deskripsi,
-        //                 'jawaban' => $hasil->jawaban,
-        //                 'bobot' => $hasil->bobot,
-        //                 'pertanyaan' => $hasil->pertanyaan->pertanyaan,
-        //                 'assesment_users_id' => $hasil->assesment_users_id,
-        //                 'nama_grup_jawaban' => $hasil->pertanyaan->grup_jawaban->nama,
-        //                 'jenis' => $hasil->pertanyaan->grup_jawaban->jenis
-        //             ];
-        //         });
-        //         return $user;
-        //     });
 
         foreach ($hasilQuesioner as $item) {
             $item->jawaban_quesioner = json_decode($item->jawaban_quesioner, true);

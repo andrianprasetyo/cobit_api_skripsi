@@ -141,7 +141,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
-                                " . $whereClause . " AND qh.deleted_at is null
+                                " . $whereClause . "
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,
@@ -451,7 +451,6 @@ class ReportController extends Controller
             $whereClause=' qj.jawaban is not null AND  qh.bobot is not null ';
         }
 //        $whereClause.='  ';
-
         $query = "
                 SELECT
                     *,
@@ -496,7 +495,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
-                                WHERE ".$whereClause." AND qh.deleted_at is null
+                                WHERE ".$whereClause."
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,

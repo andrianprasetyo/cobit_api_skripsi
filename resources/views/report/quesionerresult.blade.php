@@ -36,7 +36,12 @@
                         <td>{{$j->jawaban->jawaban}}</td>
                         <td>{{$j->jawaban->bobot}}</td>
                     @else
+                        @if ($j->jawaban->bobot)
                         <td colspan="2">{{$j->jawaban->bobot}}</td>
+                        @else
+                        <td></td>
+                        <td></td>
+                        @endif
                     @endif
                 @endforeach
                 {{-- <td>{{$item->jawaban_quesioner}}</td> --}}

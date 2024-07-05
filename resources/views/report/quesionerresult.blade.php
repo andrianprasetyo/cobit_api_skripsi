@@ -37,7 +37,8 @@
                         <td>{{$j->jawaban->bobot}}</td>
                     @else
                         @if ($j->jawaban->bobot)
-                        <td colspan="2">{{$j->jawaban->bobot}}</td>
+                        <td></td>
+                        <td>{{$j->jawaban->bobot}}</td>
                         @else
                         <td></td>
                         <td></td>

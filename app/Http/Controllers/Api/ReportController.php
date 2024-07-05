@@ -156,6 +156,7 @@ class ReportController extends Controller
                 WHERE
                     au.status = 'done'
                     AND au.assesment_id = :assesment_id
+                    AND au.quesioner_processed=true
         ",[
             'assesment_id'=>$assesment_id
         ]);

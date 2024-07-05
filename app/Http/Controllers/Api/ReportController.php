@@ -141,7 +141,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
-                                " . $whereClause . "
+                                " . $whereClause . " AND qh.deleted_at is null
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,
@@ -165,7 +165,6 @@ class ReportController extends Controller
         //     'hasil'=>$hasilQuesioner
         // ]);
         return Excel::download(new QuesionerResultExport($hasilQuesioner,$header), 'hasilquesioner-'.$assesmen->nama.'.xlsx');
-        dd($hasilQuesioner);
     }
     public function downloadExcel(Request $request)
     {
@@ -495,7 +494,7 @@ class ReportController extends Controller
                                 LEFT JOIN quisioner_jawaban qj ON qj.id = qh.jawaban_id
                                 LEFT JOIN quisioner_grup_jawaban qgj ON qgj.id = qj.quisioner_grup_jawaban_id
                                 LEFT JOIN quisioner_pertanyaan qp ON qp.id = qh.quisioner_pertanyaan_id
-                                WHERE ".$whereClause."
+                                WHERE ".$whereClause." AND qh.deleted_at is null
                             ORDER BY
                                 df.urutan ASC,
                                 qp.sorting ASC,

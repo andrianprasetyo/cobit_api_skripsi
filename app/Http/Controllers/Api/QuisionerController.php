@@ -30,6 +30,7 @@ use App\Traits\JsonResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class QuisionerController extends Controller
 {
@@ -102,13 +103,56 @@ class QuisionerController extends Controller
         }
     }
 
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'responden_id'=>'required',
+            'assesment_id'=>'required',
+        ]);
+
+        $id=$request->responden_id;
+        $quisioner = Quisioner::where('aktif', true)->first();
+        // $quisioner = Quisioner::find($request->quisioner_id);
+        if (!$quisioner) {
+            return $this->errorResponse('Quisioner tidak di temukan', 400);
+        }
+
+        $responden = AssessmentUsers::with(['assesment.organisasi'])->find($id);
+        if ($responden->is_proses == 'done') {
+            return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            // $responden->code = Str::random(50);
+            $responden->status = 'diundang';
+            $responden->quesioner_processed = false;
+            $responden->save();
+
+            AssessmentQuisioner::where('assesment_id',$request->assesment_id)
+                ->where('quisioner_id', $quisioner->id)
+                ->where('organisasi_id', $responden->assesment->organisasi_id)
+                ->where('allow',true)
+                ->delete();
+
+            QuisionerHasil::where('assesment_users_id',$id)->delete();
+
+            DB::commit();
+            return $this->successResponse($responden);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
     public function listquestion(Request $request,$id)
     {
         $offset = $request->get('question', 1);
         $limit=1;
         $page = ($offset * $limit) - $limit;
 
-        $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner'])->find($id);
+        $user_assesment=AssessmentUsers::with(['assesment','assesmentquisioner','divisi.mapsdf'])->find($id);
         if(!$user_assesment)
         {
             return $this->errorResponse('Data tidak ditemukan',404);
@@ -123,6 +167,7 @@ class QuisionerController extends Controller
         {
             return $this->errorResponse('Anda sudah melakukan pengisian quisioner', 400);
         }
+
 
         // return $this->successResponse($user_assesment);
 
@@ -143,8 +188,12 @@ class QuisionerController extends Controller
             ->join('quisioner_pertanyaan','design_faktor.id','=','quisioner_pertanyaan.design_faktor_id')
             ->where('quisioner_pertanyaan.quisioner_id', $user_assesment->assesmentquisioner->quisioner_id)
             ->whereNull('design_faktor.deleted_at')
-            ->whereNull('quisioner_pertanyaan.deleted_at');
-
+            ->whereNull('quisioner_pertanyaan.deleted_at')
+            ->whereIn('design_faktor.id', function ($q) use ($user_assesment) {
+                $q->select('design_faktor_id')
+                    ->from('organisasi_divisi_map_df')
+                    ->where('organisasi_divisi_id', $user_assesment->divisi_id);
+            });
         $list_df->orderBy('design_faktor.urutan', 'ASC');
         $list_df->orderBy('quisioner_pertanyaan.sorting','ASC');
 
@@ -273,7 +322,7 @@ class QuisionerController extends Controller
                             'hasil' => $_item_grup['hasil'],
                         );
 
-                        if($_item_grup['hasil'] != null)
+                        if($_item_grup['hasil'] !== null)
                         {
                             $save=QuisionerHasil::firstOrNew([
                                 'quisioner_id'=> $quisioner_id,
@@ -310,14 +359,7 @@ class QuisionerController extends Controller
         try {
             $assesment_user_id = $request->assesment_user_id;
             $responden = AssessmentUsers::with(['assesment', 'assesmentquisioner'])->find($assesment_user_id);
-            // $assesment=Assesment::find($responden->assesment_id);
-            // if (!$responden) {
-            //     return $this->errorResponse('Data tidak ditemukan', 404);
-            // }
 
-            // if (!$assesment) {
-            //     return $this->errorResponse('Assesment tidak ditemukan', 404);
-            // }
 
             if ($responden->status == 'diundang') {
                 return $this->errorResponse('Status masih pending, harap lengkapi data untuk mengikuti quisioner', 400);
@@ -346,6 +388,49 @@ class QuisionerController extends Controller
             $responden->is_proses = null;
             $responden->save();
 
+            //insert df yang belum ada
+            $quisionerId=Quisioner::where('aktif',true)->first();
+            $dfList=DB::select("SELECT * FROM design_faktor where id not in (
+                    select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id GROUP BY design_faktor_id)",['assesment_users_id'=>$assesment_user_id]);
+            foreach($dfList as $df){
+                $dfKomponen=DesignFaktorKomponen::where('design_faktor_id',$df->id)->get();
+                $pertanyaanId=QuisionerPertanyaan::where('design_faktor_id',$df->id)->first();
+                if($df->kode=='DF3'){
+                    for($a=1;$a<=2;$a++){
+                        foreach($dfKomponen as $dfk){
+                            $find=QuisionerHasil::where('assesment_users_id',$assesment_user_id)->where('design_faktor_komponen_id',$dfk->id)->get()->count();
+                            if($find<=2){
+                                $ins=new QuisionerHasil();
+                                $ins->quisioner_id=$quisionerId->id;
+                                $ins->quisioner_pertanyaan_id=$pertanyaanId->id;
+                                $ins->jawaban_id=null;
+                                $ins->assesment_users_id=$assesment_user_id;
+                                $ins->bobot=null;
+                                //$ins->is_proses
+                                $ins->design_faktor_komponen_id=$dfk->id;
+                                $ins->save();
+                            }
+
+                        }
+                    }
+                }else{
+                    foreach($dfKomponen as $dfk){
+                        $find=QuisionerHasil::where('assesment_users_id',$assesment_user_id)->where('design_faktor_komponen_id',$dfk->id)->first();
+                        if(!$find){
+                            $ins=new QuisionerHasil();
+                            $ins->quisioner_id=$quisionerId->id;
+                            $ins->quisioner_pertanyaan_id=$pertanyaanId->id;
+                            $ins->jawaban_id=null;
+                            $ins->assesment_users_id=$assesment_user_id;
+                            $ins->bobot=null;
+                            //$ins->is_proses
+                            $ins->design_faktor_komponen_id=$dfk->id;
+                            $ins->save();
+                        }
+                    }
+                }
+            }
+
             // SetProsesQuisionerHasilQueue::dispatch($responden->assesment_id);
             SetProsesQuisionerHasilQueue::dispatch($assesment_user_id);
             SetCanvasHasilDataJob::dispatch($responden->assesment_id);
@@ -367,6 +452,11 @@ class QuisionerController extends Controller
         $assesment_id=$request->assesment_id;
         $responden_id = $request->responden_id;
 
+        $user_assesment = AssessmentUsers::find($responden_id);
+        if (!$user_assesment) {
+            return $this->errorResponse('Responden tidak terdaftar', 404);
+        }
+
         $qry_list_pertanyan = DB::table('design_faktor')
             ->select(
                 'quisioner_pertanyaan.id',
@@ -378,7 +468,13 @@ class QuisionerController extends Controller
             ->whereNull('quisioner_pertanyaan.deleted_at')
             ->orderBy('design_faktor.urutan', 'ASC')
             ->orderBy('quisioner_pertanyaan.sorting','ASC')
+            ->whereIn('design_faktor.id',function($q) use($user_assesment){
+                $q->select('design_faktor_id')
+                    ->from('organisasi_divisi_map_df')
+                    ->where('organisasi_divisi_id',$user_assesment->divisi_id);
+            })
             ->get();
+
 
         $list_pertanyaan=[];
         $list_terisi=[];

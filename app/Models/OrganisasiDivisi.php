@@ -30,4 +30,9 @@ class OrganisasiDivisi extends Model
     {
         return $this->hasMany(OrganisasiDivisiJabatan::class,'organisasi_divisi_id','id');
     }
+
+    public function mapsdf()
+    {
+        return $this->hasMany(OrganisasiDivisiMapDF::class, 'organisasi_divisi_id', 'id');
+    }
 }

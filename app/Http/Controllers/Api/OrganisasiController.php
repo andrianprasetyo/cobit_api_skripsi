@@ -76,6 +76,7 @@ class OrganisasiController extends Controller
                 $_divisi=new OrganisasiDivisi();
                 $_divisi->nama=$request->divisi;
                 $_divisi->organisasi_id=$organisasi->id;
+                // $_divisi->is_specific_df =false;
                 $_divisi->save();
 
                 if($request->filled('divisi_jabatan'))

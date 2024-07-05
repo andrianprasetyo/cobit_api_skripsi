@@ -81,7 +81,11 @@ class QuisionerController extends Controller
         DB::beginTransaction();
         try {
             $responden->nama = $request->nama;
-            $responden->jabatan_id = $request->jabatan_id;
+          
+            if($request->jabatan_id != null){
+                $responden->jabatan_id = $request->jabatan_id;
+            }
+
             $responden->divisi_id = $request->divisi_id;
             $responden->status = 'active';
             // $responden->code=null;

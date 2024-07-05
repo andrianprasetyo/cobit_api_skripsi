@@ -322,7 +322,7 @@ class QuisionerController extends Controller
                             'hasil' => $_item_grup['hasil'],
                         );
 
-                        if(isset($_item_grup['hasil']))
+                        if($_item_grup['hasil'] !== null)
                         {
                             $save=QuisionerHasil::firstOrNew([
                                 'quisioner_id'=> $quisioner_id,

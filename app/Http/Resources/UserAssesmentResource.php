@@ -27,6 +27,7 @@ class UserAssesmentResource extends JsonResource
             'created_at' => $this->created_at,
             'assesment'=>$this->assesment,
             'quesioner_processed' => $this->quesioner_processed,
+            'quesioner_link'=> config('app.url_fe') . '/kuesioner/responden?code=' . $this->code
         ];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class UserRespondenExport implements FromArray
 {
@@ -21,6 +23,7 @@ class UserRespondenExport implements FromArray
                     $_item->nama ? $_item->nama : '',
                     $_item->divisi ? $_item->divisi->nama : '',
                     $_item->jabatan ? $_item->jabatan->nama : '',
+                    $_item->code ? config('app.url_fe') . '/kuesioner/responden?code=' . $_item->code : '',
                 );
 
                 $no++;
@@ -38,10 +41,21 @@ class UserRespondenExport implements FromArray
     public function array(): array
     {
         return [
-            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan'], // Customize your headers here
+            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Link'], // Customize your headers here
             $this->data
         ];
         // return $this->data;
+    }
+
+    public function withHyperlinks(Worksheet $sheet)
+    {
+        foreach ($this->data as $index => $row) {
+            if (isset($row[4]) && !empty($row[4])) {
+                $cell = 'E' . ($index + 2); // Kolom E dan baris mulai dari 2
+                $sheet->getCell($cell)->setValue('Link');
+                $sheet->getCell($cell)->getHyperlink()->setUrl($row[4]);
+            }
+        }
     }
 
     // public function view(): View

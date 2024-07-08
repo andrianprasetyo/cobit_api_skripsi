@@ -23,6 +23,7 @@ class UserRespondenExport implements FromArray
                     $_item->nama ? $_item->nama : '',
                     $_item->divisi ? $_item->divisi->nama : '',
                     $_item->jabatan ? $_item->jabatan->nama : '',
+                    $_item->quesioner_processed ? 'Ya' : 'Tidak',
                     $_item->code ? config('app.url_fe') . '/kuesioner/responden?code=' . $_item->code : '',
                 );
 
@@ -41,21 +42,37 @@ class UserRespondenExport implements FromArray
     public function array(): array
     {
         return [
-            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Link'], // Customize your headers here
+            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Di Proses','Link'], // Customize your headers here
             $this->data
         ];
         // return $this->data;
     }
 
-    public function withHyperlinks(Worksheet $sheet)
+    // public function withHyperlinks(Worksheet $sheet)
+    // {
+    //     foreach ($this->data as $index => $row) {
+    //         if (isset($row[4]) && !empty($row[4])) {
+    //             $cell = 'E' . ($index + 2); // Kolom E dan baris mulai dari 2
+    //             $sheet->getCell($cell)->setValue('Link');
+    //             $sheet->getCell($cell)->getHyperlink()->setUrl($row[4]);
+    //         }
+    //     }
+    // }
+
+    public function registerEvents(): array
     {
-        foreach ($this->data as $index => $row) {
-            if (isset($row[4]) && !empty($row[4])) {
-                $cell = 'E' . ($index + 2); // Kolom E dan baris mulai dari 2
-                $sheet->getCell($cell)->setValue('Link');
-                $sheet->getCell($cell)->getHyperlink()->setUrl($row[4]);
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                foreach ($this->data as $index => $row) {
+                    if (isset($row[4]) && !empty($row[4])) {
+                        $cell = 'E' . ($index + 2); // Kolom E dan baris mulai dari 2
+                        $sheet->getCell($cell)->setValue('Link URL Web'); // Menetapkan teks yang ditampilkan
+                        $sheet->getCell($cell)->getHyperlink()->setUrl($row[4]); // Menetapkan URL hyperlink
+                    }
+                }
             }
-        }
+        ];
     }
 
     // public function view(): View

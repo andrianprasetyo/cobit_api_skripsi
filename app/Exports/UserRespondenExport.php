@@ -18,13 +18,16 @@ class UserRespondenExport implements FromArray
         {
             $no=1;
             foreach ($data as $_item) {
+                $link = $_item->code ? config('app.url_fe') . '/kuesioner/responden?code=' . $_item->code : '';
                 $list[]=array(
                     $no,
                     $_item->nama ? $_item->nama : '',
                     $_item->divisi ? $_item->divisi->nama : '',
                     $_item->jabatan ? $_item->jabatan->nama : '',
+                    $_item->status ? ucfirst($_item->status) : '',
                     $_item->quesioner_processed ? 'Ya' : 'Tidak',
-                    $_item->code ? config('app.url_fe') . '/kuesioner/responden?code=' . $_item->code : '',
+                    // $_item->code ? '=HYPERLINK("https://www.google.com/";"coba")' : '',
+                    $link,
                 );
 
                 $no++;
@@ -42,7 +45,7 @@ class UserRespondenExport implements FromArray
     public function array(): array
     {
         return [
-            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Di Proses','Link'], // Customize your headers here
+            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Status','Di Proses','Link'], // Customize your headers here
             $this->data
         ];
         // return $this->data;

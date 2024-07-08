@@ -450,6 +450,7 @@ class ReportController extends Controller
             $whereClause=' qj.jawaban is not null AND  qh.bobot is not null ';
         }
 //        $whereClause.='  ';
+
         $query = "
                 SELECT
                     *,

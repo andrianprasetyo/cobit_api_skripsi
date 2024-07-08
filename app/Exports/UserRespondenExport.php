@@ -21,6 +21,7 @@ class UserRespondenExport implements FromArray
                     $_item->nama ? $_item->nama : '',
                     $_item->divisi ? $_item->divisi->nama : '',
                     $_item->jabatan ? $_item->jabatan->nama : '',
+                    $_item->code ? config('app.url_fe') . '/kuesioner/responden?code=' . $_item->code : '',
                 );
 
                 $no++;
@@ -38,7 +39,7 @@ class UserRespondenExport implements FromArray
     public function array(): array
     {
         return [
-            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan'], // Customize your headers here
+            ['No', 'Nama Lengkap', 'Divisi/Bagian','Jabatan','Link'], // Customize your headers here
             $this->data
         ];
         // return $this->data;

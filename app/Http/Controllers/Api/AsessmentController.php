@@ -1994,6 +1994,7 @@ class AsessmentController extends Controller
             $user_ass->default = false;
             $user_ass->save();
             DB::commit();
+            //
         } catch (\Throwable $th) {
             DB::rollback();
             return $this->errorResponse($th->getMessage());

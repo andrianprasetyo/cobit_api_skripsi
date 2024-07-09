@@ -1939,6 +1939,7 @@ class AsessmentController extends Controller
         }
     }
 
+    // jangan digunakan dulu
     public function addNewPIC(Request $request)
     {
         $validation['nama'] = 'required';

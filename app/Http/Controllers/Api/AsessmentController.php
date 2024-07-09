@@ -1938,4 +1938,65 @@ class AsessmentController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    public function addNewPIC(Request $request)
+    {
+        $validation['nama'] = 'required';
+        $msg_val['nama.required'] = 'Nama harus di isi';
+        $validation['username'] = 'required';
+        $msg_val['username.required'] = 'Username harus di isi';
+
+        $validation['email'] = 'email|unique:users,email';
+        $msg_val['email.email'] = 'Email tidak valid';
+        $msg_val['email.unique'] = 'Email sudah digunakan';
+
+        $validation['role_id'] = 'required|uuid|exists:roles,id';
+        $msg_val['role_id.required'] = 'Role harus di isi';
+        $msg_val['role_id.uuid'] = 'Role ID tidak valid';
+        $msg_val['role_id.exists'] = 'Role tidak terdaftar';
+
+        $validation['organisasi_id'] = 'required|uuid|exists:organisasi,id';
+        $msg_val['organisasi_id.required'] = 'Organisasi harus di isi';
+        $msg_val['organisasi_id.uuid'] = 'Organisasi ID tidak valid';
+        $msg_val['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
+
+        $validation['assesment_id'] = 'required|uuid|exists:assesment,id';
+        $msg_val['assesment_id.required'] = 'Assesment harus di isi';
+        $msg_val['assesment_id.uuid'] = 'Assesment ID tidak valid';
+        $msg_val['assesment_id.exists'] = 'Assesment tidak terdaftar';
+        $request->validate($validation, $msg_val);
+
+        $role = Roles::where('code', 'eksternal')->first();
+        if (!$role) {
+            return $this->errorResponse('Role Eksternal tidak tersedia', 404);
+        }
+        DB::beginTransaction();
+        try {
+            $user = new User();
+            $user->email = $request->email;
+            $user->status = 'active';
+            $user->internal = false;
+            $user->organisasi_id = $request->organisasi_id;
+            // $user->token = $_token;
+            $user->password = 'admin';
+            $user->username = $request->username;
+            $user->save();
+
+            $role_user = new RoleUsers();
+            $role_user->users_id = $user->id;
+            $role_user->roles_id = $role->id;
+            $role_user->default = true;
+            $role_user->save();
+
+            $user_ass = new UserAssesment();
+            $user_ass->users_id = $user->id;
+            $user_ass->assesment_id = $request->assesment_id;
+            $user_ass->default = false;
+            $user_ass->save();
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
 }

@@ -1980,6 +1980,7 @@ class AsessmentController extends Controller
             // $user->token = $_token;
             $user->password = 'admin';
             $user->username = $request->username;
+            $user->pic_assesment_id = $request->assesment_id;
             $user->save();
 
             $role_user = new RoleUsers();

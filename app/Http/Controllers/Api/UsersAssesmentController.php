@@ -35,7 +35,8 @@ class UsersAssesmentController extends Controller
         $list = AssessmentUsers::select('assesment_users.*')
             ->join('assesment', 'assesment_users.assesment_id', '=', 'assesment.id')
             ->join('organisasi', 'assesment.organisasi_id', '=', 'organisasi.id')
-            ->join('organisasi_divisi', 'assesment_users.divisi_id', '=', 'organisasi_divisi.id');
+            ->join('organisasi_divisi', 'assesment_users.divisi_id', '=', 'organisasi_divisi.id')
+            ->join('organisasi_divisi_jabatan', 'organisasi_divisi_jabatan.organisasi_divisi_id', '=', 'organisasi_divisi.id');
 
         if ($request->filled('assesment_id')) {
             $list->where('assesment_users.assesment_id', $request->assesment_id);
@@ -48,10 +49,17 @@ class UsersAssesmentController extends Controller
             });
         }
 
-        if($sortBy == 'divisi'){
-            $list->orderBy('organisasi_divisi', $sortType);
-        }else{
-            $list->orderBy($sortBy, $sortType);
+        switch ($sortBy) {
+            case 'divisi':
+                $list->orderBy('organisasi_divisi.nama', $sortType);
+                break;
+            case 'jabatan':
+                $list->orderBy('organisasi_divisi_jabatan.nama', $sortType);
+                break;
+
+            default:
+                $list->orderBy($sortBy, $sortType);
+                break;
         }
 
         $data = $this->paging($list, $request->filled('nopaging') ? null : $limit, $request->filled('nopaging') ? null : $page, UserAssesmentResource::class);

@@ -81,7 +81,7 @@ class QuisionerController extends Controller
         DB::beginTransaction();
         try {
             $responden->nama = $request->nama;
-          
+
             if($request->jabatan_id != null){
                 $responden->jabatan_id = $request->jabatan_id;
             }
@@ -395,7 +395,7 @@ class QuisionerController extends Controller
             //insert df yang belum ada
             $quisionerId=Quisioner::where('aktif',true)->first();
             $dfList=DB::select("SELECT * FROM design_faktor where id not in (
-                    select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id GROUP BY design_faktor_id)",['assesment_users_id'=>$assesment_user_id]);
+                    select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id AND qh.deleted_at is null GROUP BY design_faktor_id)",['assesment_users_id'=>$assesment_user_id]);
             foreach($dfList as $df){
                 $dfKomponen=DesignFaktorKomponen::where('design_faktor_id',$df->id)->get();
                 $pertanyaanId=QuisionerPertanyaan::where('design_faktor_id',$df->id)->first();

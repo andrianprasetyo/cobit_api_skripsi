@@ -15,6 +15,12 @@ class OrganisasiDivisiMapDF extends Model
     protected $keyType = 'string';
     protected $fillable = ['organisasi_divisi_id', 'design_faktor_id', 'assesment_id'];
 
+    protected $hidden = [
+        'assesment_id',
+        'created_at',
+        'updated_at'
+    ];
+
     public function divisi()
     {
         return $this->belongsTo(OrganisasiDivisi::class, 'organisasi_divisi_id');

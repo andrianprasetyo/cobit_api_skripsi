@@ -12,4 +12,5 @@ Route::group([], function ($router) {
     Route::post('/quisioner/responden/reset', 'QuisionerController@reset');
     // Route::put('/quisioner/responden/{id}', 'QuisionerController@updateQuesioner');
     Route::put('/quisioner/responden/update-all', 'QuisionerController@updateListAssesmentUser');
+    Route::post('/quisioner/responden/tes-reset', 'QuisionerController@tesReset');
 });

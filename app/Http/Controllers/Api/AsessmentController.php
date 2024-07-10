@@ -11,6 +11,8 @@ use App\Http\Resources\Assesment\AssesmentDFInputSectionResource;
 use App\Http\Resources\Assesment\AssesmentGapReportResource;
 use App\Http\Resources\AssesmentResource;
 use App\Imports\RespondenImport;
+use App\Jobs\SetCanvasHasilDataJob;
+use App\Jobs\SetProsesQuisionerHasilQueue;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
 use App\Models\AssesmentDocs;
@@ -21,11 +23,14 @@ use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentOfi;
 use App\Models\CapabilityTarget;
 use App\Models\CapabilityTargetLevel;
+use App\Models\DesignFaktorKomponen;
 use App\Models\Domain;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiJabatan;
 use App\Models\Quisioner;
+use App\Models\QuisionerHasil;
+use App\Models\QuisionerPertanyaan;
 use App\Models\QusisionerHasilAvg;
 use App\Models\Roles;
 use App\Models\RoleUsers;
@@ -56,15 +61,14 @@ class AsessmentController extends Controller
         $sortType = $request->get('sortType', 'desc');
         $search = $request->search;
 
-        $list = Assesment::with(['organisasi','pic'])->withCount('users')->expire();
+        $list = Assesment::with(['organisasi', 'pic'])->withCount('users')->expire();
 
         if ($request->filled('search')) {
             $list->where('nama', 'ilike', '%' . $search . '%');
         }
 
-        if($request->filled('status'))
-        {
-            $list->where('status',$request->status);
+        if ($request->filled('status')) {
+            $list->where('status', $request->status);
         }
 
         if ($request->filled('organisasi_id')) {
@@ -72,16 +76,15 @@ class AsessmentController extends Controller
         }
 
         $list->orderBy($sortBy, $sortType);
-        $data = $this->paging($list, $limit, $page,AssesmentResource::class);
+        $data = $this->paging($list, $limit, $page, AssesmentResource::class);
         return $this->successResponse($data);
     }
 
     public function detailByID($id)
     {
-        $data=Assesment::with('pic.divisi','pic.jabatan')->find($id);
-        if(!$data)
-        {
-            return $this->errorResponse('Data tidak ditemukan',404);
+        $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
         return $this->successResponse(new AssesmentResource($data));
@@ -89,21 +92,21 @@ class AsessmentController extends Controller
 
     public function add(Request $request)
     {
-        $today=Carbon::today()->format('Y-m-d');
-        $validate['asessment']='required';
+        $today = Carbon::today()->format('Y-m-d');
+        $validate['asessment'] = 'required';
         // $validate['tahun'] = 'required|date_format:Y-m';
 
-        $validate['start_date'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
+        $validate['start_date'] = 'required|date_format:Y-m-d|after_or_equal:' . $today;
         $validate['end_date'] = 'required|date_format:Y-m-d|after:start_date';
 
-        $validate_msg['start_date.required']='Tanggal mulai harus di isi';
+        $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
         $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
         $validate_msg['start_date.after_or_equal'] = 'Tanggal mulai harus setelah tanggal sekarang';
         $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
         $validate_msg['end_date.date_format'] = 'Tanggal format (Y-m-d)';
         $validate_msg['end_date.after'] = 'Tanggal selesai harus sesudah tanggal mulai';
 
-        $validate_msg['asessment.required']='Nama assesment harus di isi';
+        $validate_msg['asessment.required'] = 'Nama assesment harus di isi';
         // $validate_msg['tahun.required'] = 'Tahun assesment harus di isi';
         // $validate_msg['tahun.date_format'] = 'Tahun assesment tidak valid (Y-m)';
 
@@ -119,7 +122,7 @@ class AsessmentController extends Controller
         // $validate_msg['pic_expire_at.date_format'] = 'Tanggal kadaluarsa PIC tidak valid (Y-m-d)';
         // $validate_msg['pic_expire_at.after'] = 'Tanggal kadaluarsa harus setelah hari ini';
 
-        $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after_or_equal:'.$today;
+        $validate['start_date_quisioner'] = 'required|date_format:Y-m-d|after_or_equal:' . $today;
         $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
         $validate_msg['start_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
         $validate_msg['start_date_quisioner.after_or_equal'] = 'Tanggal mulai quisioner harus setelah tanggal mulai assesment';
@@ -131,7 +134,7 @@ class AsessmentController extends Controller
 
         if ($request->filled('organisasi_id')) {
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
-            $validate_msg['organisasi_id.uuid']='Organisasi ID tidak valid';
+            $validate_msg['organisasi_id.uuid'] = 'Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
 
             // $validate['pic_divisi_id'] = 'uuid|exists:organisasi_divisi,id';
@@ -142,9 +145,9 @@ class AsessmentController extends Controller
             // $validate_msg['pic_jabatan_id.uuid'] = 'Divisi ID tidak valid';
             // $validate_msg['pic_jabatan_id.exists'] = 'Divisi tidak terdaftar';
 
-        }else{
-            $validate['organisasi_nama']='required|unique:organisasi,nama';
-            $validate_msg['organisasi_nama.required']='Nama organisasi harus di isi';
+        } else {
+            $validate['organisasi_nama'] = 'required|unique:organisasi,nama';
+            $validate_msg['organisasi_nama.required'] = 'Nama organisasi harus di isi';
             $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
 
             // $validate['pic_jabatan'] = 'required|string';
@@ -156,7 +159,7 @@ class AsessmentController extends Controller
         DB::beginTransaction();
         try {
 
-            $pic_email=$request->pic_email;
+            $pic_email = $request->pic_email;
             $organisasi_id = $request->organisasi_id;
             $pic_jabatan_id = $request->pic_jabatan_id;
             $pic_divisi_id = $request->pic_divisi_id;
@@ -186,8 +189,8 @@ class AsessmentController extends Controller
                     $pic_jabatan_id = $jabatan->id;
                 }
             }
-            if(!$this->account->internal){
-                $organisasi_id=$this->account->organisasi->id;
+            if (!$this->account->internal) {
+                $organisasi_id = $this->account->organisasi->id;
             }
 
             // $verify_code=Str::random(50);
@@ -201,50 +204,48 @@ class AsessmentController extends Controller
             // $user_ass->status='invited';
             // $user_ass->save();
 
-            $role=Roles::where('code','eksternal')->first();
-            if(!$role)
-            {
-                return $this->errorResponse('Role Eksternal tidak tersedia',404);
+            $role = Roles::where('code', 'eksternal')->first();
+            if (!$role) {
+                return $this->errorResponse('Role Eksternal tidak tersedia', 404);
             }
 
             $_check_mail_exists = User::where('email', $pic_email)->first();
-            $user_id=null;
+            $user_id = null;
             // if (!$this->account->internal) {
             //     $user_id = $this->account->id;
             // }
-            $default_ass=false;
-            if(!$_check_mail_exists)
-            {
-                $_token=Str::random(50);
-                $user=new User();
-                $user->nama=$request->pic_nama;
+            $default_ass = false;
+            if (!$_check_mail_exists) {
+                $_token = Str::random(50);
+                $user = new User();
+                $user->nama = $request->pic_nama;
                 $user->divisi = $request->pic_divisi;
                 $user->posisi = $request->pic_jabatan;
                 $user->email = $request->pic_email;
-                $user->status='pending';
-                $user->internal=false;
-                $user->organisasi_id=$organisasi_id;
+                $user->status = 'pending';
+                $user->internal = false;
+                $user->organisasi_id = $organisasi_id;
                 $user->jabatan_id = $pic_jabatan_id;
-                $user->divisi_id=$pic_divisi_id;
-                $user->token=$_token;
-                $user->password= $_token;
-                $user->username=Str::slug($request->pic_nama, '.');
+                $user->divisi_id = $pic_divisi_id;
+                $user->token = $_token;
+                $user->password = $_token;
+                $user->username = Str::slug($request->pic_nama, '.');
                 $user->save();
 
-                $role_user=new RoleUsers();
+                $role_user = new RoleUsers();
                 $role_user->users_id = $user->id;
-                $role_user->roles_id=$role->id;
-                $role_user->default=true;
+                $role_user->roles_id = $role->id;
+                $role_user->default = true;
                 $role_user->save();
 
                 // if($this->account->internal){
                 //     $user_id=$user->id;
                 // }
                 $user_id = $user->id;
-                $default_ass=true;
-            }else{
-                $user=$_check_mail_exists;
-                $user_id=$_check_mail_exists->id;
+                $default_ass = true;
+            } else {
+                $user = $_check_mail_exists;
+                $user_id = $_check_mail_exists->id;
                 $default_ass = false;
             }
 
@@ -262,10 +263,10 @@ class AsessmentController extends Controller
             $assesment->start_date = $request->start_date;
             $assesment->end_date = $request->end_date;
             $assesment->start_date_quisioner = $request->start_date_quisioner;
-            $assesment->end_date_quisioner=$request->end_date_quisioner;
+            $assesment->end_date_quisioner = $request->end_date_quisioner;
             $assesment->status = 'ongoing';
-            $assesment->users_id=$user_id;
-            $assesment->minimum_target=$request->filled('minimum_target')?$request->minimum_target:3;
+            $assesment->users_id = $user_id;
+            $assesment->minimum_target = $request->filled('minimum_target') ? $request->minimum_target : 3;
             $assesment->save();
 
             $user_ass = new UserAssesment();
@@ -277,8 +278,7 @@ class AsessmentController extends Controller
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
-            if (!$_check_mail_exists)
-            {
+            if (!$_check_mail_exists) {
                 Notification::send($user, new InviteUserNotif($user));
             }
 
@@ -289,17 +289,17 @@ class AsessmentController extends Controller
             return $this->errorResponse($e->getMessage());
         }
     }
-    public function edit(Request $request,$id)
+    public function edit(Request $request, $id)
     {
-        $today=Carbon::today()->format('Y-m-d');
-        if($request->filled('start_date')){
+        $today = Carbon::today()->format('Y-m-d');
+        if ($request->filled('start_date')) {
             $validate['start_date'] = 'required|date_format:Y-m-d';
             $validate_msg['start_date.required'] = 'Tanggal mulai harus di isi';
             $validate_msg['start_date.date_format'] = 'Tanggal format (Y-m-d)';
             // $validate_msg['start_date.after_or_equal'] = 'Tanggal mulai harus setelah tanggal sekarang';
         }
 
-        if($request->filled('end_date')){
+        if ($request->filled('end_date')) {
             $validate['end_date'] = 'required|date_format:Y-m-d';
 
             $validate_msg['end_date.required'] = 'Tanggal selesai harus di isi';
@@ -307,7 +307,7 @@ class AsessmentController extends Controller
             // $validate_msg['end_date.after'] = 'Tanggal selesai assesment harus setelah tanggal mulai assesment';
         }
 
-        if($request->filled('start_date_quisioner')){
+        if ($request->filled('start_date_quisioner')) {
             $validate['start_date_quisioner'] = 'required|date_format:Y-m-d';
             $validate_msg['start_date_quisioner.required'] = 'Tanggal mulai harus di isi';
             $validate_msg['start_date_quisioner.date_format'] = 'Tanggal format (Y-m-d)';
@@ -323,21 +323,21 @@ class AsessmentController extends Controller
 
         $request->validate($validate, $validate_msg);
 
-        $data = Assesment::with(['organisasi','pic'])->find($id);
+        $data = Assesment::with(['organisasi', 'pic'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $data->nama=$request->nama;
+        $data->nama = $request->nama;
         $data->deskripsi = $request->deskripsi;
-        if($request->filled('start_date')){
+        if ($request->filled('start_date')) {
             $data->start_date = $request->start_date;
         }
-        if($request->filled('end_date')){
+        if ($request->filled('end_date')) {
             $data->end_date = $request->end_date;
         }
 
-        if($request->filled('start_date_quisioner')){
+        if ($request->filled('start_date_quisioner')) {
             $data->start_date_quisioner = $request->start_date_quisioner;
         }
         if ($request->filled('end_date_quisioner')) {
@@ -353,20 +353,20 @@ class AsessmentController extends Controller
 
         return $this->successResponse();
     }
-    public function setStatus(Request $request,$id)
+    public function setStatus(Request $request, $id)
     {
         $request->validate(
             [
-                'status'=>'required|in:ongoing,completed',
+                'status' => 'required|in:ongoing,completed',
             ],
             [
-                'status.required'=>'Status harus di isi',
+                'status.required' => 'Status harus di isi',
                 'status.in' => 'Status tidak valid (ongoing|completed)',
             ]
         );
 
-        $data=Assesment::find($id);
-        $data->status=$request->status;
+        $data = Assesment::find($id);
+        $data->status = $request->status;
         $data->save();
 
         return $this->successResponse();
@@ -375,15 +375,13 @@ class AsessmentController extends Controller
     public function remove($id)
     {
         $data = Assesment::find($id);
-        if (!$data)
-        {
+        if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $_canvas_check=AssesmentCanvas::where('assesment_id',$id)->exists();
-        if($_canvas_check)
-        {
-            return $this->errorResponse('Assesment tidak bisa dihapus',400);
+        $_canvas_check = AssesmentCanvas::where('assesment_id', $id)->exists();
+        if ($_canvas_check) {
+            return $this->errorResponse('Assesment tidak bisa dihapus', 400);
         }
         $data->delete();
 
@@ -403,19 +401,18 @@ class AsessmentController extends Controller
             $validate['email'] = [
                 'required',
                 'array',
-                function($attribute,$value,$fail) use($request){
+                function ($attribute, $value, $fail) use ($request) {
                     $_chekc_exists_mail = AssessmentUsers::select('email')
                         ->where('assesment_id', $request->id)
                         ->whereIn('email', $value)
                         ->get();
 
-                    if (!$_chekc_exists_mail->isEmpty())
-                    {
-                        $mail=[];
+                    if (!$_chekc_exists_mail->isEmpty()) {
+                        $mail = [];
                         foreach ($_chekc_exists_mail as $_item_mail) {
-                            $mail[]=$_item_mail->email;
+                            $mail[] = $_item_mail->email;
                         }
-                        $fail('Terdapat email yang sudah terdaftar pada assesment yang sama ('. implode(',', $mail).')');
+                        $fail('Terdapat email yang sudah terdaftar pada assesment yang sama (' . implode(',', $mail) . ')');
                     }
                 }
             ];
@@ -440,9 +437,8 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
 
-            if($assesment->status == 'completed')
-            {
-                return $this->errorResponse('Assesment sudah dilaksanakan/Completed',400);
+            if ($assesment->status == 'completed') {
+                return $this->errorResponse('Assesment sudah dilaksanakan/Completed', 400);
             }
 
             // $_exp_date=Carbon::parse($assesment->tahun);
@@ -450,7 +446,7 @@ class AsessmentController extends Controller
             // {
             //     return $this->errorResponse('Assesment sudah lewat batas tahun ('.$_exp_date.')');
             // }
-            $organisasi=$assesment->organisasi;
+            $organisasi = $assesment->organisasi;
             // $quisioner=Quisioner::where('aktif',true)->first();
             // foreach ($request->responden as $_item_responden)
             // {
@@ -477,8 +473,7 @@ class AsessmentController extends Controller
             // }
 
 
-            foreach ($request->email as $_item_email)
-            {
+            foreach ($request->email as $_item_email) {
                 $responden = new AssessmentUsers();
                 $responden->email = $_item_email;
                 $responden->assesment_id = $assesment->id;
@@ -499,16 +494,16 @@ class AsessmentController extends Controller
 
         $request->validate(
             [
-                'id'=>'required|uuid|exists:assesment,id',
-                'file'=> 'required|mimes:'.config('filesystems.validation.docs.excel.mimes').'|max:'. config('filesystems.validation.docs.excel.size')
+                'id' => 'required|uuid|exists:assesment,id',
+                'file' => 'required|mimes:' . config('filesystems.validation.docs.excel.mimes') . '|max:' . config('filesystems.validation.docs.excel.size')
             ],
             [
                 'id.required' => 'Assesment ID harus di isi',
                 'id.uuid' => 'Assesment ID tidak valid',
                 'id.exists' => 'Assesment ID tidak terdaftar',
-                'file.required'=>'File harus di isi',
-                'file.mimes' => 'File tidak valid ('. config('filesystems.validation.docs.excel.mimes').')',
-                'file.max'=>'Maksimal file (' . config('filesystems.validation.docs.excel.size') . ')',
+                'file.required' => 'File harus di isi',
+                'file.mimes' => 'File tidak valid (' . config('filesystems.validation.docs.excel.mimes') . ')',
+                'file.max' => 'Maksimal file (' . config('filesystems.validation.docs.excel.size') . ')',
             ]
         );
 
@@ -536,14 +531,12 @@ class AsessmentController extends Controller
 
     public function reinviteResponden($id)
     {
-        $responden=AssessmentUsers::with(['assesment.organisasi'])->find($id);
-        if(!$responden)
-        {
-            return $this->errorResponse('Responden tidak ditemukan',404);
+        $responden = AssessmentUsers::with(['assesment.organisasi'])->find($id);
+        if (!$responden) {
+            return $this->errorResponse('Responden tidak ditemukan', 404);
         }
-        if($responden->is_proses == 'done')
-        {
-            return $this->errorResponse('Responden sudah melakukan Kuisioner',400);
+        if ($responden->is_proses == 'done') {
+            return $this->errorResponse('Responden sudah melakukan Kuisioner', 400);
         }
 
         $organisasi = $responden->assesment->organisasi;
@@ -589,8 +582,8 @@ class AsessmentController extends Controller
                 if (isset($_item_user['email'])) {
 
                     $email = $_item_user['email'];
-                    $user = User::where('email',$email)->first();
-                    if(!$user){
+                    $user = User::where('email', $email)->first();
+                    if (!$user) {
 
                         $_token = Str::random(50);
                         $user = new User();
@@ -617,8 +610,8 @@ class AsessmentController extends Controller
                     Notification::send($user, new InviteUserNotif($user));
                 }
 
-                $pic_exists = UserAssesment::where('users_id',$user_id)->where('assesment_id',$assesment_id)->first();
-                if(!$pic_exists){
+                $pic_exists = UserAssesment::where('users_id', $user_id)->where('assesment_id', $assesment_id)->first();
+                if (!$pic_exists) {
                     $user_ass = new UserAssesment();
                     $user_ass->users_id = $user_id;
                     $user_ass->assesment_id = $assesment_id;
@@ -639,12 +632,11 @@ class AsessmentController extends Controller
         }
     }
 
-    public function editPIC(Request $request,$id)
+    public function editPIC(Request $request, $id)
     {
-        $user=User::find($id);
-        if(!$user)
-        {
-            return $this->errorResponse('User tidak ditemukan',404);
+        $user = User::find($id);
+        if (!$user) {
+            return $this->errorResponse('User tidak ditemukan', 404);
         }
 
         // if($user->status !='pending')
@@ -661,14 +653,13 @@ class AsessmentController extends Controller
         $user->nama = $request->pic_nama;
         $user->jabatan_id = $request->pic_jabatan_id;
         $user->divisi_id = $request->pic_divisi_id;
-        if($request->filled('pic_email')){
-            $_mail_check=User::where('email',$request->pic_email)->where('id','!=',$user->id)->exists();
-            if($_mail_check)
-            {
-                return $this->errorResponse('Email .'.$request->pic_email.' sudah digunakan',400);
+        if ($request->filled('pic_email')) {
+            $_mail_check = User::where('email', $request->pic_email)->where('id', '!=', $user->id)->exists();
+            if ($_mail_check) {
+                return $this->errorResponse('Email .' . $request->pic_email . ' sudah digunakan', 400);
             }
             // Notification::send($user, new ChangeMailNotif($user));
-            if($user->email != $request->pic_email){
+            if ($user->email != $request->pic_email) {
                 $user->email = $request->pic_email;
                 Notification::send($user, new ChangeMailNotif($user));
             }
@@ -681,7 +672,7 @@ class AsessmentController extends Controller
         return $this->successResponse();
     }
 
-    public function reAktifasi(Request $request,$id)
+    public function reAktifasi(Request $request, $id)
     {
         $user = User::find($id);
         if (!$user) {
@@ -730,20 +721,20 @@ class AsessmentController extends Controller
             if ($request->hasFile('docs')) {
                 if ($request->filled('parent_id')) {
 
-                    $parent=AssesmentDocs::find($request->parent_id);
+                    $parent = AssesmentDocs::find($request->parent_id);
 
-                    if($parent){
+                    if ($parent) {
 
-                        if($parent->current){
+                        if ($parent->current) {
                             $parent->current = false;
                             $parent->save();
                         }
 
-                        $latest_version = AssesmentDocs::where('parent_id',$request->parent_id)->latest()->first();
-                        $current_version=null;
-                        if($latest_version){
-                            $current_version=$latest_version->version;
-                        }else{
+                        $latest_version = AssesmentDocs::where('parent_id', $request->parent_id)->latest()->first();
+                        $current_version = null;
+                        if ($latest_version) {
+                            $current_version = $latest_version->version;
+                        } else {
                             $current_version = $parent->version;
                         }
 
@@ -773,9 +764,9 @@ class AsessmentController extends Controller
                 $ass_docs->save();
             }
 
-            if($request->filled('docs_id')){
+            if ($request->filled('docs_id')) {
                 AssesmentDocs::find($request->docs_id)->update([
-                    'name'=>$request->filename,
+                    'name' => $request->filename,
                     'version' => $request->version,
                 ]);
             }
@@ -812,27 +803,23 @@ class AsessmentController extends Controller
             ->whereNull('domain.deleted_at')
             ->whereNull('capability_target.deleted_at')
             ->whereNull('domain.deleted_at')
-                ->select(
-                    'assesment_canvas.*',
-                    'domain.kode',
-                    'domain.ket',
-                    'domain.translate',
-                    'capability_target.nama as nama_target',
-                    'capability_target.id as capability_target_id',
-                    )
+            ->select(
+                'assesment_canvas.*',
+                'domain.kode',
+                'domain.ket',
+                'domain.translate',
+                'capability_target.nama as nama_target',
+                'capability_target.id as capability_target_id',
+            )
             ->orderBy($sortBy, $sortType);
 
 
-        if($request->filled('domain_id'))
-        {
-            $list_domain->where('assesment_canvas.domain_id',$domain_id);
+        if ($request->filled('domain_id')) {
+            $list_domain->where('assesment_canvas.domain_id', $domain_id);
         }
-        if($request->filled('target_id'))
-        {
-            $list_domain->where('capability_target.id',$target_id);
-        }
-        else
-        {
+        if ($request->filled('target_id')) {
+            $list_domain->where('capability_target.id', $target_id);
+        } else {
             $list_domain->where('capability_target.default', true);
         }
         $total = $list_domain->count();
@@ -846,20 +833,19 @@ class AsessmentController extends Controller
         $meta['total_page'] = ceil($total / $limit);
         $meta['current_page'] = (int) $page;
 
-        $list_domains=$list_domain->get();
-        $result=[];
-        if(!$list_domains->isEmpty())
-        {
+        $list_domains = $list_domain->get();
+        $result = [];
+        if (!$list_domains->isEmpty()) {
             foreach ($list_domains as $_item_domain) {
-                $_result=$_item_domain;
+                $_result = $_item_domain;
 
-                $target_org=CapabilityTargetLevel::with('target')
-                    ->where('domain_id',$_item_domain->domain_id)
-                    ->where('capability_target_id',$_item_domain->capability_target_id)
+                $target_org = CapabilityTargetLevel::with('target')
+                    ->where('domain_id', $_item_domain->domain_id)
+                    ->where('capability_target_id', $_item_domain->capability_target_id)
                     ->first();
 
-                $_result->target_organisasi=$target_org;
-                $_result->target_level = $target_org && $target_org->target != null? (int)$target_org->target:0;
+                $_result->target_organisasi = $target_org;
+                $_result->target_level = $target_org && $target_org->target != null ? (int) $target_org->target : 0;
 
                 $_level = DB::table('capability_assesment')
                     ->join('capability_level', 'capability_assesment.capability_level_id', '=', 'capability_level.id')
@@ -884,25 +870,23 @@ class AsessmentController extends Controller
                     $_total_compilance = round($_total_sum_compilance / $_bobot_level, 2);
                 }
 
-                $target_name='-';
-                if($target_org->target != null)
-                {
-                    $target=CapabilityTarget::find($target_id);
-                    if($target){
-                        $target_name=$target->nama;
+                $target_name = '-';
+                if ($target_org->target != null) {
+                    $target = CapabilityTarget::find($target_id);
+                    if ($target) {
+                        $target_name = $target->nama;
                     }
                 }
 
                 $_result->hasil_assesment = $_total_compilance;
-                $_result->gap_deskripsi='Terdapat kesenjangan antara nilai saat ini dengan target '.$target_name;
-                $_result->potensi = 'Improvement pada area '.$_item_domain->translate.' dengan melakukan beberapa aktivitas tertentu sesuai rekomendasi.';
+                $_result->gap_deskripsi = 'Terdapat kesenjangan antara nilai saat ini dengan target ' . $target_name;
+                $_result->potensi = 'Improvement pada area ' . $_item_domain->translate . ' dengan melakukan beberapa aktivitas tertentu sesuai rekomendasi.';
 
-                $_result->gap_minus=round((float) $_result->target_level - $_total_compilance, 2);
-                if($_total_compilance > $_result->target_level)
-                {
-                    $_result->gap_minus=null;
+                $_result->gap_minus = round((float) $_result->target_level - $_total_compilance, 2);
+                if ($_total_compilance > $_result->target_level) {
+                    $_result->gap_minus = null;
                     $_result->gap_deskripsi = 'Sudah memenuhi target ' . $target_name;
-                    $_result->potensi = 'Sudah memenuhi kebutuhan '. $_item_domain->translate.', tidak ada potensi inisiatif yang perlu dilakukan pada area ini.';
+                    $_result->potensi = 'Sudah memenuhi kebutuhan ' . $_item_domain->translate . ', tidak ada potensi inisiatif yang perlu dilakukan pada area ini.';
                 }
 
                 // $_result->gap_minus = (float) $_item_domain->aggreed_capability_level - $_total_compilance;
@@ -912,11 +896,11 @@ class AsessmentController extends Controller
                 //     $_result->potensi = 'Sudah memenuhi kebutuhan , tidak ada potensi inisiatif yang perlu dilakukan pada area ini';
                 // }
 
-                $result[]=$_result;
+                $result[] = $_result;
             }
         }
 
-        $data['list']=$result;
+        $data['list'] = $result;
         $meta['total'] = $total;
         $data['meta'] = $meta;
         return $this->successResponse($data);
@@ -965,7 +949,7 @@ class AsessmentController extends Controller
 
         $list_domains = $list_domain->get();
         $result = [];
-        if (!$list_domains->isEmpty()){
+        if (!$list_domains->isEmpty()) {
             foreach ($list_domains as $_item_domain) {
                 $_result = $_item_domain;
                 $target_org = CapabilityTargetLevel::with('target')
@@ -1001,9 +985,9 @@ class AsessmentController extends Controller
 
                 // $_total_compilance = DB::select
                 $get_compliance_value = DB::selectOne('select get_compliance_value  from get_compliance_value(?,?)', [$id, $_item_domain->domain_id]);
-                $_total_compilance = round(floatval($get_compliance_value->get_compliance_value),2);
+                $_total_compilance = round(floatval($get_compliance_value->get_compliance_value), 2);
                 $target_name = '-';
-                if($target_org && $target_org->target != null) {
+                if ($target_org && $target_org->target != null) {
                     $target = CapabilityTarget::find($target_id);
                     if ($target) {
                         $target_name = $target->nama;
@@ -1068,7 +1052,7 @@ class AsessmentController extends Controller
         //     $list_domain->where('assesment_canvas.domain_id', $domain_id);
         // }
 
-        if ($request->filled('target_id')){
+        if ($request->filled('target_id')) {
             $list_domain->where('capability_target.id', $target_id);
         }
 
@@ -1079,18 +1063,18 @@ class AsessmentController extends Controller
         // }
 
         $target = CapabilityTarget::find($target_id);
-        $target_name='';
-        if($target){
-            $target_name=$target->nama;
+        $target_name = '';
+        if ($target) {
+            $target_name = $target->nama;
         }
         // $list_domain->where('capability_target.id', $target_id);
 
         $list_domain = $list_domain->get();
         $list_domains = [];
 
-        $hasil_assesment=[];
-        $gap_minus=[];
-        $target_level=[];
+        $hasil_assesment = [];
+        $gap_minus = [];
+        $target_level = [];
 
         if (!$list_domain->isEmpty()) {
             foreach ($list_domain as $_item_domain) {
@@ -1131,14 +1115,14 @@ class AsessmentController extends Controller
                 $_result->hasil_assesment = $_total_compilance;
                 $_result->gap_minus = round((float) $_result->target_level - $_total_compilance, 2);
 
-                $gap_minus[]=$_result->gap_minus;
-                $hasil_assesment[]=$_total_compilance;
-                $target_level[]=$_result->target_level;
+                $gap_minus[] = $_result->gap_minus;
+                $hasil_assesment[] = $_total_compilance;
+                $target_level[] = $_result->target_level;
             }
         }
 
         $categories = $list_domains;
-        $series= [
+        $series = [
             array(
                 'name' => 'Hasil Assesment & Klarifikasi',
                 'data' => $hasil_assesment
@@ -1191,7 +1175,7 @@ class AsessmentController extends Controller
         if (!$assesment) {
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
-        $target_default=CapabilityTarget::where('assesment_id',$assesment_id)->where('default',true)->first();
+        $target_default = CapabilityTarget::where('assesment_id', $assesment_id)->where('default', true)->first();
         $list_domain = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->join('capability_target', 'assesment_canvas.assesment_id', '=', 'capability_target.assesment_id')
@@ -1323,19 +1307,19 @@ class AsessmentController extends Controller
             // ->join('capability_target_level', 'capability_target.id', '=', 'capability_target_level.capability_target_id')
             // ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
             // ->select('capability_target.nama as nama_target', 'capability_target_level.target')
-            ->orderBy('default','desc')
+            ->orderBy('default', 'desc')
             ->get();
 
-        if(!$_target->isEmpty()){
+        if (!$_target->isEmpty()) {
             foreach ($_target as $item_target) {
-                $_target_level = CapabilityTargetLevel::where('capability_target_id',$item_target->id)->get();
+                $_target_level = CapabilityTargetLevel::where('capability_target_id', $item_target->id)->get();
                 $list_levels = [];
                 // if(!$_target_level->isEmpty()){
                 // }
                 foreach ($_target_level as $item_level) {
-                    $list_levels[]=$item_level->target ? $item_level->target : 0;
+                    $list_levels[] = $item_level->target ? $item_level->target : 0;
                 }
-                $series[]=array(
+                $series[] = array(
                     'name' => $item_target->nama,
                     'data' => $list_levels
                 );
@@ -1349,52 +1333,52 @@ class AsessmentController extends Controller
 
     public function chartReportHasilAllTarget(Request $request)
     {
-        $assesment_id=$request->assesment_id;
-        $categories=[];
-        $series=[];
+        $assesment_id = $request->assesment_id;
+        $categories = [];
+        $series = [];
 
         $assesment = Assesment::find($assesment_id);
         if (!$assesment) {
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
 
-        $get_ist_domain = CapabilityTargetLevel::whereIn('capability_target_id',function($q) use($assesment_id){
+        $get_ist_domain = CapabilityTargetLevel::whereIn('capability_target_id', function ($q) use ($assesment_id) {
             $q->select('id')
                 ->from('capability_target')
-                ->where('assesment_id',$assesment_id)
+                ->where('assesment_id', $assesment_id)
                 ->whereNull('deleted_at');
         })
-        ->join('domain','capability_target_level.domain_id','=','domain.id')
-        ->select('domain.id','domain.kode')
-        ->orderBy('domain.urutan','asc')
-        ->groupBy('domain.id', 'domain.kode')
-        ->get();
+            ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
+            ->select('domain.id', 'domain.kode')
+            ->orderBy('domain.urutan', 'asc')
+            ->groupBy('domain.id', 'domain.kode')
+            ->get();
 
-        $list_domain_id=[];
-        if(!$get_ist_domain->isEmpty()){
+        $list_domain_id = [];
+        if (!$get_ist_domain->isEmpty()) {
             foreach ($get_ist_domain as $item_domain) {
-                $list_domain_id[]=$item_domain->id;
-                $categories[]= $item_domain->kode;
+                $list_domain_id[] = $item_domain->id;
+                $categories[] = $item_domain->kode;
             }
         }
 
-        $assesment_canvas = AssesmentCanvas::where('assesment_id',$assesment_id)
-            ->whereIn('domain_id',$list_domain_id)
+        $assesment_canvas = AssesmentCanvas::where('assesment_id', $assesment_id)
+            ->whereIn('domain_id', $list_domain_id)
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->orderBy('domain.urutan','asc')
+            ->orderBy('domain.urutan', 'asc')
             ->whereNull('domain.deleted_at')
             ->select(
                 DB::raw('
                 assesment_canvas.domain_id,
                 assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level,
                 get_compliance_value(assesment_canvas.assesment_id,assesment_canvas.domain_id) as hasil_assesment'),
-                )
+            )
             ->get();
 
 
-        $hasil_assesment=[];
+        $hasil_assesment = [];
         $hasil_adjusment = [];
-        if(!$assesment_canvas->isEmpty()){
+        if (!$assesment_canvas->isEmpty()) {
 
             foreach ($assesment_canvas as $item_canvas) {
                 // $_bobot = DB::table('capability_level')
@@ -1428,7 +1412,7 @@ class AsessmentController extends Controller
         if (!$_target->isEmpty()) {
             foreach ($_target as $item_target) {
                 $_target_level = CapabilityTargetLevel::where('capability_target_id', $item_target->id)
-                    ->whereIn('domain_id',$list_domain_id)
+                    ->whereIn('domain_id', $list_domain_id)
                     ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
                     ->orderBy('domain.urutan', 'asc')
                     ->get();
@@ -1437,7 +1421,7 @@ class AsessmentController extends Controller
                 // if(!$_target_level->isEmpty()){
                 // }
                 foreach ($_target_level as $item_level) {
-                    $list_levels[] = $item_level->target ? (int)$item_level->target : 0;
+                    $list_levels[] = $item_level->target ? (int) $item_level->target : 0;
                 }
                 $series[] = array(
                     'name' => $item_target->nama == 'Organisasi' ? 'Target BUMN' : $item_target->nama,
@@ -1483,7 +1467,7 @@ class AsessmentController extends Controller
     public function ReportDetailOfi(Request $request)
     {
 
-        $list_ofi=CapabilityAssesmentOfi::where('capability_target_id',$request->capability_target_id);
+        $list_ofi = CapabilityAssesmentOfi::where('capability_target_id', $request->capability_target_id);
 
         /*
         if($request->filled('capability_assesment_id')){
@@ -1491,15 +1475,15 @@ class AsessmentController extends Controller
         }
         */
 
-        if($request->filled('domain_id')){
-            $list_ofi->where('domain_id',$request->domain_id);
+        if ($request->filled('domain_id')) {
+            $list_ofi->where('domain_id', $request->domain_id);
         }
-        $list_ofi=$list_ofi->get();
+        $list_ofi = $list_ofi->get();
         $domain = Domain::find($request->domain_id);
         $data['ofi'] = $list_ofi;
-        $data['domain']=$domain;
+        $data['domain'] = $domain;
 
-        if($request->filled('download')){
+        if ($request->filled('download')) {
             return Excel::download(new AssesmentOfiByDomainExport($data), 'report-OFI-detail.xlsx');
         }
         return $this->successResponse($data);
@@ -1546,15 +1530,14 @@ class AsessmentController extends Controller
             $list_domains->where('capability_target.default', true);
         }
 
-        if($request->filled('limit') && $request->filled('page'))
-        {
+        if ($request->filled('limit') && $request->filled('page')) {
             $offset = ($page * $limit) - $limit;
             $list_domains->limit($limit);
             $list_domains->skip($offset);
         }
 
         $data = [];
-        $data_list_domain=$list_domains->get();
+        $data_list_domain = $list_domains->get();
         if (!$data_list_domain->isEmpty()) {
             foreach ($data_list_domain as $_item_domain) {
                 $_result = $_item_domain;
@@ -1618,7 +1601,7 @@ class AsessmentController extends Controller
             }
         }
 
-        return Excel::download(new AnalisaGapExport($data, $target_name),'report-capability-assesment.xlsx');
+        return Excel::download(new AnalisaGapExport($data, $target_name), 'report-capability-assesment.xlsx');
         // return $this->successResponse($data);
     }
 
@@ -1627,7 +1610,7 @@ class AsessmentController extends Controller
         $assesment_id = $request->assesment_id;
         $design_faktor_id = $request->design_faktor_id;
 
-        $list_dfk=DB::table('quisioner_hasil_avg')
+        $list_dfk = DB::table('quisioner_hasil_avg')
             ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
             ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
             ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
@@ -1647,18 +1630,18 @@ class AsessmentController extends Controller
             ->get();
 
 
-        $dfks=[];
+        $dfks = [];
         $headercol_id = [];
-        $headercol=[];
-        if(!$list_dfk->isEmpty()){
+        $headercol = [];
+        if (!$list_dfk->isEmpty()) {
             foreach ($list_dfk as $_item_dfk) {
-                $item_dfk=$_item_dfk;
-                $values=DB::table('quisioner_hasil_avg')
+                $item_dfk = $_item_dfk;
+                $values = DB::table('quisioner_hasil_avg')
                     // ->join('design_faktor_komponen', 'quisioner_hasil_avg.design_faktor_komponen_id', 'design_faktor_komponen.id')
                     // ->join('design_faktor', 'design_faktor_komponen.design_faktor_id', 'design_faktor.id')
-                    ->join('quisioner_pertanyaan','quisioner_hasil_avg.quisioner_pertanyaan_id','quisioner_pertanyaan.id')
+                    ->join('quisioner_pertanyaan', 'quisioner_hasil_avg.quisioner_pertanyaan_id', 'quisioner_pertanyaan.id')
                     ->where('quisioner_hasil_avg.assesment_id', $assesment_id)
-                    ->where('quisioner_hasil_avg.design_faktor_komponen_id',$_item_dfk->dfk_id)
+                    ->where('quisioner_hasil_avg.design_faktor_komponen_id', $_item_dfk->dfk_id)
                     // ->where('design_faktor.id',$design_faktor_id)
                     // ->whereNull('design_faktor_komponen.deleted_at')
                     // ->whereNull('design_faktor.deleted_at')
@@ -1678,20 +1661,18 @@ class AsessmentController extends Controller
                     ->get();
 
 
-                $item_dfk->values=$values;
-                $dfks[]=$item_dfk;
+                $item_dfk->values = $values;
+                $dfks[] = $item_dfk;
 
-                if(!$values->isEmpty())
-                {
+                if (!$values->isEmpty()) {
                     // $_head_col=[];
                     foreach ($values as $_item_value) {
-                        if(!in_array($_item_value->pertanyaan_id,$headercol_id))
-                        {
+                        if (!in_array($_item_value->pertanyaan_id, $headercol_id)) {
                             $headercol_id[] = $_item_value->pertanyaan_id;
 
-                            if($item_dfk->df_kode == 'DF3'){
-                                $headercol[]=$_item_value->pertanyaan;
-                            }else{
+                            if ($item_dfk->df_kode == 'DF3') {
+                                $headercol[] = $_item_value->pertanyaan;
+                            } else {
                                 $headercol[] = 'Importance';
                             }
                         }
@@ -1700,7 +1681,7 @@ class AsessmentController extends Controller
             }
         }
         // $data = $this->paging($list,null,null, AssesmentDFInputSectionResource::class);
-        $data['list']=$dfks;
+        $data['list'] = $dfks;
         $data['headercol'] = $headercol;
         return $this->successResponse($data);
     }
@@ -1748,7 +1729,7 @@ class AsessmentController extends Controller
                 'domain.urutan',
             );
 
-        if($request->filled('search')){
+        if ($request->filled('search')) {
             $list->where('domain.kode', 'ilike', '%' . $search . '%');
         }
         $data = $this->paging($list, $limit, $page);
@@ -1764,13 +1745,11 @@ class AsessmentController extends Controller
         $series = [];
         $categories = [];
 
-        $score=[];
+        $score = [];
         $baseline_score = [];
         $relative_importance = [];
-        if(!$_list_domain->isEmpty())
-        {
-            foreach ($_list_domain as $_item_domain)
-            {
+        if (!$_list_domain->isEmpty()) {
+            foreach ($_list_domain as $_item_domain) {
                 $categories[] = $_item_domain->kode;
 
                 $nilai = DB::table('assesment_hasil')
@@ -1789,12 +1768,12 @@ class AsessmentController extends Controller
                         'domain.urutan as domain_urutan',
                     )->first();
 
-                    $score[]= $nilai ? CobitHelper::convertToNumber($nilai->score) : 0;
-                    $baseline_score[] = $nilai ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
-                    $relative_importance[] = $nilai ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
+                $score[] = $nilai ? CobitHelper::convertToNumber($nilai->score) : 0;
+                $baseline_score[] = $nilai ? CobitHelper::convertToNumber($nilai->baseline_score) : 0;
+                $relative_importance[] = $nilai ? CobitHelper::convertToNumber($nilai->relative_importance) : 0;
             }
 
-            $series= array(
+            $series = array(
                 // [
                 //     'name' => 'Score',
                 //     'data' => $score
@@ -1816,12 +1795,13 @@ class AsessmentController extends Controller
         return $this->successResponse($data);
     }
 
-    public function editPicExpire(Request $request,$id){
-        $row=UserAssesment::find($id);
-        if(!$row){
-            return $this->errorResponse('Data tidak ditemukan',404);
+    public function editPicExpire(Request $request, $id)
+    {
+        $row = UserAssesment::find($id);
+        if (!$row) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
         }
-        $row->expire_at=$request->expire_at;
+        $row->expire_at = $request->expire_at;
         $row->save();
 
         $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($row->assesment_id);
@@ -1831,10 +1811,10 @@ class AsessmentController extends Controller
     public function listCurrentDocs(Request $request)
     {
         $list = AssesmentDocs::where('assesment_id', $request->assesment_id);
-        if($request->filled('parent_id')){
+        if ($request->filled('parent_id')) {
             $list->where('id', $request->parent_id);
-            $list->orWhere('parent_id',$request->parent_id);
-        }else{
+            $list->orWhere('parent_id', $request->parent_id);
+        } else {
             $list->where('current', true);
         }
 
@@ -1861,9 +1841,9 @@ class AsessmentController extends Controller
                 return $this->errorResponse('Data tidak ditemukan', 404);
             }
 
-            if($data->parent_id){
+            if ($data->parent_id) {
                 $list_deleted = AssesmentDocs::where('id', $data->parent_id)->orWhere('parent_id', $data->parent_id)->get();
-                if(!$list_deleted->isEmpty()){
+                if (!$list_deleted->isEmpty()) {
                     foreach ($list_deleted as $item_doc) {
                         if (Storage::exists($item_doc->file->path)) {
                             Storage::delete($item_doc->file->path);
@@ -1874,7 +1854,7 @@ class AsessmentController extends Controller
                 // AssesmentDocs::where('id',$data->parent_id)->orWhere('parent_id', $data->parent_id)->delete();
             }
 
-            if(Storage::exists($data->file->path)){
+            if (Storage::exists($data->file->path)) {
                 Storage::delete($data->file->path);
             }
 
@@ -1887,29 +1867,29 @@ class AsessmentController extends Controller
         }
     }
 
-    public function updateDocs(Request $request,$id)
+    public function updateDocs(Request $request, $id)
     {
         $data = AssesmentDocs::find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $data->name=$request->filename;
+        $data->name = $request->filename;
         $data->save();
 
         return $this->successResponse();
     }
 
-    public function changeOrg(Request $request,$id)
+    public function changeOrg(Request $request, $id)
     {
-        $validate=[];
+        $validate = [];
         $validate_msg = [];
-        if($request->filled('organisasi_id')){
+        if ($request->filled('organisasi_id')) {
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
             $validate_msg['organisasi_id.uuid'] = 'Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
 
-        }else{
+        } else {
             $validate['organisasi_nama'] = 'required|unique:organisasi,nama';
             $validate_msg['organisasi_nama.required'] = 'Nama organisasi harus di isi';
             $validate_msg['organisasi_nama.unique'] = 'Nama organisasi sudah digunakan';
@@ -1919,26 +1899,26 @@ class AsessmentController extends Controller
         DB::beginTransaction();
         try {
 
-            $org_id=null;
+            $org_id = null;
             $data = null;
             $assesment = Assesment::find($id);
             if (!$assesment) {
                 return $this->errorResponse('Project tidak ditemukan', 404);
             }
-            if($request->filled('organisasi_id')){
-                $org_id=$request->organisasi_id;
-                $data=Organisasi::find($request->organisasi_id);
-            }else{
+            if ($request->filled('organisasi_id')) {
+                $org_id = $request->organisasi_id;
+                $data = Organisasi::find($request->organisasi_id);
+            } else {
                 $organisasi = new Organisasi();
                 $organisasi->nama = $request->organisasi_nama;
                 $organisasi->deskripsi = $request->organisasi_deskripsi;
                 $organisasi->save();
 
-                $org_id=$organisasi->id;
-                $data=$organisasi;
+                $org_id = $organisasi->id;
+                $data = $organisasi;
             }
 
-            $assesment->organisasi_id= $org_id;
+            $assesment->organisasi_id = $org_id;
             $assesment->save();
 
             DB::commit();
@@ -2007,6 +1987,77 @@ class AsessmentController extends Controller
             $user_ass->save();
             DB::commit();
             //
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public function reKalkulasi($id)
+    {
+        $data = Assesment::find($id);
+        if (!$data) {
+            return $this->errorResponse('Data tidak ditemukan', 404);
+        }
+
+        try {
+            // $responden=[];
+            $user_assessment = AssessmentUsers::where('assesment_id', $id)
+                ->where('status', 'done')
+                ->where('quesioner_processed', true)
+                ->get();
+            if (!$user_assessment->isEmpty()) {
+                foreach ($user_assessment as $item_user) {
+                    QuisionerHasil::where('assesment_users_id', $item_user->id)->delete();
+                    $quisionerId = Quisioner::where('aktif', true)->first();
+                    $dfList = DB::select("SELECT * FROM design_faktor where id not in (
+                    select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id AND qh.deleted_at is null GROUP BY design_faktor_id)", ['assesment_users_id' => $item_user->id]);
+                    foreach ($dfList as $df) {
+                        $dfKomponen = DesignFaktorKomponen::where('design_faktor_id', $df->id)->get();
+                        $pertanyaanId = QuisionerPertanyaan::where('design_faktor_id', $df->id)->first();
+                        if ($df->kode == 'DF3') {
+                            for ($a = 1; $a <= 2; $a++) {
+                                foreach ($dfKomponen as $dfk) {
+                                    $find = QuisionerHasil::where('assesment_users_id', $item_user->id)->where('design_faktor_komponen_id', $dfk->id)->get()->count();
+                                    if ($find <= 2) {
+                                        $ins = new QuisionerHasil();
+                                        $ins->quisioner_id = $quisionerId->id;
+                                        $ins->quisioner_pertanyaan_id = $pertanyaanId->id;
+                                        $ins->jawaban_id = null;
+                                        $ins->assesment_users_id = $item_user->id;
+                                        $ins->bobot = null;
+                                        //$ins->is_proses
+                                        $ins->design_faktor_komponen_id = $dfk->id;
+                                        $ins->save();
+                                    }
+
+                                }
+                            }
+                        } else {
+                            foreach ($dfKomponen as $dfk) {
+                                $find = QuisionerHasil::where('assesment_users_id', $item_user->id)->where('design_faktor_komponen_id', $dfk->id)->first();
+                                if (!$find) {
+                                    $ins = new QuisionerHasil();
+                                    $ins->quisioner_id = $quisionerId->id;
+                                    $ins->quisioner_pertanyaan_id = $pertanyaanId->id;
+                                    $ins->jawaban_id = null;
+                                    $ins->assesment_users_id = $item_user->id;
+                                    $ins->bobot = null;
+                                    //$ins->is_proses
+                                    $ins->design_faktor_komponen_id = $dfk->id;
+                                    $ins->save();
+                                }
+                            }
+                        }
+                    }
+
+                    SetProsesQuisionerHasilQueue::dispatch($item_user->id);
+                }
+            }
+
+            SetCanvasHasilDataJob::dispatch($id);
+            DB::commit();
+            return $this->successResponse();
         } catch (\Throwable $th) {
             DB::rollback();
             return $this->errorResponse($th->getMessage());

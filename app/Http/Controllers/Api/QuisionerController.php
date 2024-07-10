@@ -532,7 +532,12 @@ class QuisionerController extends Controller
         $list = OrganisasiDivisi::where('organisasi_id', $organisasi_id);
 
         if ($request->filled('search')) {
-            $list->where('nama', 'ilike', '%' . $search . '%');
+            if($search == 'direktorat'){
+                $list->where('nama', 'ilike', '%direktorat%');
+                $list->orWhere('nama', 'ilike', '%office%');
+            }else{
+                $list->where('nama', 'ilike', '%' . $search . '%');
+            }
         }
 
         $list->orderBy($sortBy, $sortType);
@@ -684,6 +689,33 @@ class QuisionerController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
+        }
+    }
+
+    public function tesReset(Request $request)
+    {
+        $assesment_id=$request->assesment_id;
+        $organisasi_id=$request->organisasi_id;
+        $organisasi_divisi_id = $request->organisasi_divisi_id;
+        try {
+            // $responden = AssessmentUsers::where('assesment_id',$request->assesment_id)->get();
+            $list_quisioner_hasil=QuisionerHasil::whereIn('assesment_users_id',function($q) use($assesment_id){
+                $q->select('id')
+                    ->from('assesment_users')
+                    ->where('assesment_id',$assesment_id)
+                    ->whereNull('deleted_at');
+            })->get();
+
+            // $list_org_divisi = OrganisasiDivisi::with(['mapsdf'])->where('organisasi_id',$organisasi_id)->get();
+            $list_org_divisi = OrganisasiDivisi::with(['mapsdf'])->find($organisasi_divisi_id);
+            // if(!$list_org_divisi->isEmpty()){
+            //     foreach ($list_org_divisi as $item) {
+
+            //     }
+            // }
+            return $this->successResponse($list_org_divisi);
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
         }
     }
 }

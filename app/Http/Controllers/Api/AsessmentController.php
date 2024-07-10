@@ -28,6 +28,7 @@ use App\Models\Domain;
 use App\Models\Organisasi;
 use App\Models\OrganisasiDivisi;
 use App\Models\OrganisasiDivisiJabatan;
+use App\Models\OrganisasiDivisiMapDF;
 use App\Models\Quisioner;
 use App\Models\QuisionerHasil;
 use App\Models\QuisionerPertanyaan;
@@ -2002,14 +2003,32 @@ class AsessmentController extends Controller
 
         try {
             // $responden=[];
+            $quisionerId = Quisioner::where('aktif', true)->first();
             $user_assessment = AssessmentUsers::where('assesment_id', $id)
                 ->where('status', 'done')
                 ->where('quesioner_processed', true)
                 ->get();
             if (!$user_assessment->isEmpty()) {
                 foreach ($user_assessment as $item_user) {
-                    QuisionerHasil::where('assesment_users_id', $item_user->id)->delete();
-                    $quisionerId = Quisioner::where('aktif', true)->first();
+
+                    $list_df_map=OrganisasiDivisiMapDF::where('organisasi_divisi_id',$item_user->divisi_id)->get();
+                    if(!$list_df_map->isEmpty()){
+                        foreach ($list_df_map as $item_map_df) {
+                            $list_df_komponen = DesignFaktorKomponen::where('design_faktor_id', $item_map_df->design_faktor_id)->get();
+                            if(!$list_df_komponen->isEmpty()){
+                                $list_not_in_df_komp=[];
+                                foreach ($list_df_komponen as $item_df_komponen) {
+                                    $list_not_in_df_komp[]=$item_df_komponen->id;
+                                }
+
+                                QuisionerHasil::where('assesment_users_id', $item_user->id)
+                                    ->where('quisioner_id',$quisionerId->id)
+                                    ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
+                                    ->delete();
+                            }
+                        }
+                    }
+
                     $dfList = DB::select("SELECT * FROM design_faktor where id not in (
                     select design_faktor_id from quisioner_hasil qh JOIN design_faktor_komponen dfk ON dfk.id=qh.design_faktor_komponen_id JOIN design_faktor df ON df.id=dfk.design_faktor_id where qh.assesment_users_id=:assesment_users_id AND qh.deleted_at is null GROUP BY design_faktor_id)", ['assesment_users_id' => $item_user->id]);
                     foreach ($dfList as $df) {

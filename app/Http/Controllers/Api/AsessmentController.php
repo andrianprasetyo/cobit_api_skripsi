@@ -557,7 +557,7 @@ class AsessmentController extends Controller
 
         $request->validated();
 
-        $users = $request->user_id;
+        $users = $request->users;
         $assesment_id = $request->assesment_id;
         $organisasi_id = $request->organisasi_id;
         $account = auth()->user();
@@ -587,34 +587,44 @@ class AsessmentController extends Controller
                 $user_id = isset($_item_user['id']) ? $_item_user['id'] : null;
 
                 if (isset($_item_user['email'])) {
+
                     $email = $_item_user['email'];
-                    $_token = Str::random(50);
-                    $user = new User();
-                    $user->email = $email;
-                    $user->status = 'pending';
-                    $user->internal = false;
-                    $user->organisasi_id = $organisasi_id;
-                    $user->token = $_token;
-                    $user->password = $_token;
-                    $user->username = null;
-                    $user->save();
+                    $user = User::where('email',$email)->first();
+                    if(!$user){
 
+                        $_token = Str::random(50);
+                        $user = new User();
+                        $user->email = $email;
+                        $user->status = 'pending';
+                        $user->internal = false;
+                        $user->organisasi_id = $organisasi_id;
+                        $user->token = $_token;
+                        $user->password = $_token;
+                        $user->username = $email;
+                        $user->nama = $email;
+                        $user->save();
+
+                        // $user_id = $user->id;
+
+                        $role_user = new RoleUsers();
+                        $role_user->users_id = $user_id;
+                        $role_user->roles_id = $role->id;
+                        $role_user->default = true;
+                        $role_user->save();
+                    }
                     $user_id = $user->id;
-
-                    $role_user = new RoleUsers();
-                    $role_user->users_id = $user_id;
-                    $role_user->roles_id = $role->id;
-                    $role_user->default = true;
-                    $role_user->save();
 
                     Notification::send($user, new InviteUserNotif($user));
                 }
 
-                $user_ass = new UserAssesment();
-                $user_ass->users_id = $user_id;
-                $user_ass->assesment_id = $assesment_id;
-                $user_ass->default = false;
-                $user_ass->save();
+                $pic_exists = UserAssesment::where('users_id',$user_id)->where('assesment_id',$assesment_id)->first();
+                if(!$pic_exists){
+                    $user_ass = new UserAssesment();
+                    $user_ass->users_id = $user_id;
+                    $user_ass->assesment_id = $assesment_id;
+                    $user_ass->default = false;
+                    $user_ass->save();
+                }
 
                 // if (isset($_item_user['id'])) {
                 //     // notif invite assesment users exists
@@ -622,7 +632,7 @@ class AsessmentController extends Controller
             }
 
             DB::commit();
-            $this->successResponse();
+            return $this->successResponse();
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e->getMessage());

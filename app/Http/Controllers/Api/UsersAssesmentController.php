@@ -35,7 +35,7 @@ class UsersAssesmentController extends Controller
         $list = AssessmentUsers::select('assesment_users.*')
             ->join('assesment', 'assesment_users.assesment_id', '=', 'assesment.id')
             ->join('organisasi', 'assesment.organisasi_id', '=', 'organisasi.id')
-            ->join('organisasi_divisi', 'assesment_users.divisi_id', '=', 'organisasi_divisi.id')
+            ->leftJoin('organisasi_divisi', 'assesment_users.divisi_id', '=', 'organisasi_divisi.id')
             ->leftJoin('organisasi_divisi_jabatan', 'assesment_users.jabatan_id', '=', 'organisasi_divisi_jabatan.id');
 
         if ($request->filled('assesment_id')) {

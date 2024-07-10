@@ -70,4 +70,10 @@ class Assesment extends Model
         // return $this->hasMany(AssesmentDocs::class, 'assesment_id', 'id')->orderBy('created_at','desc');
         return $this->belongsTo(AssesmentDocs::class, 'assesment_id', 'id')->latest();
     }
+
+    // jangan digunakan dulu
+    public function allpic()
+    {
+        return $this->hasMany(User::class, 'pic_assesment_id', 'id');
+    }
 }

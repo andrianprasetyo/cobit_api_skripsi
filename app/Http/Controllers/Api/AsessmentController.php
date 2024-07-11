@@ -2059,14 +2059,14 @@ class AsessmentController extends Controller
                                 foreach ($list_df_komponen as $item_df_komponen) {
                                     $list_not_in_df_komp[] = $item_df_komponen->id;
 
-                                    $data_backup = QuisionerHasil::where('assesment_users_id', $item_user->id)
-                                        ->where('quisioner_id', $quisionerId->id)
-                                        ->where('design_faktor_komponen_id', $item_df_komponen->id)
-                                        ->first();
+                                    // $data_backup = QuisionerHasil::where('assesment_users_id', $item_user->id)
+                                    //     ->where('quisioner_id', $quisionerId->id)
+                                    //     ->where('design_faktor_komponen_id', $item_df_komponen->id)
+                                    //     ->first();
                                         
-                                    if ($data_backup) {
-                                        $list_backup_hasil_quisioner[] = $data_backup;
-                                    }
+                                    // if ($data_backup) {
+                                    //     $list_backup_hasil_quisioner[] = $data_backup;
+                                    // }
                                 }
                             }
                         }

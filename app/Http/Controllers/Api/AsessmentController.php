@@ -2002,7 +2002,6 @@ class AsessmentController extends Controller
         }
 
         try {
-            // $tes=[];
             $quisionerId = Quisioner::where('aktif', true)->first();
             $user_assessment = AssessmentUsers::where('assesment_id', $id)
                 ->where('status', 'done')
@@ -2062,17 +2061,21 @@ class AsessmentController extends Controller
                                 foreach ($list_df_komponen as $item_df_komponen) {
                                     $list_not_in_df_komp[] = $item_df_komponen->id;
                                 }
-                                // $tes[] = $list_not_in_df_komp;
-
                             }
                         }
 
-                        // $mergedArray = call_user_func_array('array_merge', $list_not_in_df_komp);
                         QuisionerHasil::where('assesment_users_id', $item_user->id)
                             ->where('quisioner_id', $quisionerId->id)
                             ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
-                            ->delete();
-                        // $tes[]=$list_not_in_df_komp;
+                            ->update([
+                                'jawaban_id' => null,
+                                'bobot' => null
+                            ]);
+
+                        // QuisionerHasil::where('assesment_users_id', $item_user->id)
+                        //     ->where('quisioner_id', $quisionerId->id)
+                        //     ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
+                        //     ->delete();
                     }
 
                     SetProsesQuisionerHasilQueue::dispatch($item_user->id);

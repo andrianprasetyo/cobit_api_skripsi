@@ -1269,7 +1269,6 @@ class AsessmentController extends Controller
                 $gap_minus[] = $_result->gap_minus;
                 $hasil_assesment[] = $_total_compilance;
                 $target_level[] = $_result->target_level;
-
             }
         }
 
@@ -1889,7 +1888,6 @@ class AsessmentController extends Controller
             $validate['organisasi_id'] = 'uuid|exists:organisasi,id';
             $validate_msg['organisasi_id.uuid'] = 'Organisasi ID tidak valid';
             $validate_msg['organisasi_id.exists'] = 'Organisasi tidak terdaftar';
-
         } else {
             $validate['organisasi_nama'] = 'required|unique:organisasi,nama';
             $validate_msg['organisasi_nama.required'] = 'Nama organisasi harus di isi';
@@ -2002,7 +2000,7 @@ class AsessmentController extends Controller
         }
 
         try {
-            // $tes=[];
+            $list_backup_hasil_quisioner = [];
             $quisionerId = Quisioner::where('aktif', true)->first();
             $user_assessment = AssessmentUsers::where('assesment_id', $id)
                 ->where('status', 'done')
@@ -2031,7 +2029,6 @@ class AsessmentController extends Controller
                                         $ins->design_faktor_komponen_id = $dfk->id;
                                         $ins->save();
                                     }
-
                                 }
                             }
                         } else {
@@ -2061,21 +2058,42 @@ class AsessmentController extends Controller
 
                                 foreach ($list_df_komponen as $item_df_komponen) {
                                     $list_not_in_df_komp[] = $item_df_komponen->id;
-                                }
-                                // $tes[] = $list_not_in_df_komp;
 
+                                    // $data_backup = QuisionerHasil::where('assesment_users_id', $item_user->id)
+                                    //     ->where('quisioner_id', $quisionerId->id)
+                                    //     ->where('design_faktor_komponen_id', $item_df_komponen->id)
+                                    //     ->first();
+                                        
+                                    // if ($data_backup) {
+                                    //     $list_backup_hasil_quisioner[] = $data_backup;
+                                    // }
+                                }
                             }
                         }
 
-                        // $mergedArray = call_user_func_array('array_merge', $list_not_in_df_komp);
                         QuisionerHasil::where('assesment_users_id', $item_user->id)
                             ->where('quisioner_id', $quisionerId->id)
                             ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
-                            ->delete();
-                        // $tes[]=$list_not_in_df_komp;
+                            ->update([
+                                'jawaban_id' => null,
+                                'bobot' => null
+                            ]);
+
+
+                        // QuisionerHasil::where('assesment_users_id', $item_user->id)
+                        //     ->where('quisioner_id', $quisionerId->id)
+                        //     ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
+                        //     ->delete();
                     }
 
                     SetProsesQuisionerHasilQueue::dispatch($item_user->id);
+                }
+            }
+
+            if (!empty($list_backup_hasil_quisioner)) {
+                $QuisionerHasilBackupExists = DB::select("SELECT to_regclass('public.quisioner_hasil_backup')");
+                if (!empty($QuisionerHasilBackupExists) && $QuisionerHasilBackupExists[0]->to_regclass !== null) {
+                    DB::table('quisioner_hasil_backup')->insert($list_backup_hasil_quisioner);
                 }
             }
 

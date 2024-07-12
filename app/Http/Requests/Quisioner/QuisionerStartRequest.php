@@ -32,31 +32,34 @@ class QuisionerStartRequest extends FormRequest
                 'required',
                 'uuid',
                 'exists:assesment,id',
-                function($attr,$value,$fail){
-                    $_assesment=Assesment::find($value);
+                function ($attr, $value, $fail) {
+                    $_assesment = Assesment::find($value);
+                    if (!$_assesment) {
+                        return;
+                    }
                     $currentDate = Carbon::now();
 
-                    if($_assesment->start_date_quisioner == null)
-                    {
-                        $fail('Assesment quisioner tanggal mulai belum di atur',400);
+                    if ($_assesment->start_date_quisioner == null) {
+                        $fail('Assesment quisioner tanggal mulai belum di atur');
                     }
                     if ($_assesment->end_date_quisioner == null) {
-                        $fail('Assesment quisioner tanggal selesai belum di atur', 400);
+                        $fail('Assesment quisioner tanggal selesai belum di atur');
                     }
 
                     $start_date = Carbon::parse($_assesment->start_date_quisioner)->format('Y-m-d');
-                    $end_date=Carbon::parse($_assesment->end_date_quisioner)->format('Y-m-d');
+                    // $end_date=Carbon::parse($_assesment->end_date_quisioner)->format('Y-m-d');
+                    $end_date = Carbon::parse($_assesment->end_date_quisioner)->endOfDay();
 
                     if (!$currentDate->startOfDay()->gte($start_date)) {
-                        $fail('Assesment quisoner dimulai pada ' . $start_date, 400);
+                        $fail('Assesment quisoner dimulai pada ' . $start_date);
                     }
 
                     if (Carbon::now()->gte($end_date)) {
-                        $fail('Assesment quisoner telah selesai pada ' . $end_date, 400);
+                        $fail('Assesment quisoner telah selesai pada ' . $end_date);
                     }
                 }
             ],
-            'nama'=>'required',
+            'nama' => 'required',
             // 'quisioner_id' => [
             //     'required',
             //     'uuid',

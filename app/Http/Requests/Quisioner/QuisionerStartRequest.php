@@ -45,15 +45,16 @@ class QuisionerStartRequest extends FormRequest
                     }
 
                     $start_date = Carbon::parse($_assesment->start_date_quisioner)->format('Y-m-d');
-                    $end_date=Carbon::parse($_assesment->end_date_quisioner)->format('Y-m-d');
+                    // $end_date=Carbon::parse($_assesment->end_date_quisioner)->format('Y-m-d');
+                    // $end_date = Carbon::parse($_assesment->end_date_quisioner)->endOfDay();
 
                     if (!$currentDate->startOfDay()->gte($start_date)) {
                         $fail('Assesment quisoner dimulai pada ' . $start_date, 400);
                     }
 
-                    if (Carbon::now()->gte($end_date)) {
-                        $fail('Assesment quisoner telah selesai pada ' . $end_date, 400);
-                    }
+                    // if (Carbon::now()->gte($end_date)) {
+                    //     $fail('Assesment quisoner telah selesai pada ' . $end_date, 400);
+                    // }
                 }
             ],
             'nama'=>'required',

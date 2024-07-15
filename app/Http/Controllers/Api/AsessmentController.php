@@ -2118,4 +2118,21 @@ class AsessmentController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
+
+    public function runCobitHelperManual(Request $request)
+    {
+        $id = $request->assesment_id;
+        $method = $request->method;
+        try {
+            if($method == 'generateTargetLevelDomain'){
+                $data = CobitHelper::generateTargetLevelDomain($id,'Organisasi', true);
+            }else{
+                $data= CobitHelper::{$method}($id);
+            }
+            // SetCanvasHasilDataJob::dispatch($id);
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
 }

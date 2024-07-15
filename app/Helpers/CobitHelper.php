@@ -347,6 +347,7 @@ class CobitHelper
         ",[
             'assesment_id'=>$assesmentId
         ]);*/
+        return $assesmentId;
     }
     public static function prosesHasilDF2($assesment_id,$designFaktorId){
         $dataQuesioner=DB::select("

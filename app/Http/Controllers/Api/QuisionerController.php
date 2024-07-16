@@ -666,12 +666,15 @@ class QuisionerController extends Controller
                 }
             }
 
+            $responden_done=null;
             foreach ($list_selected as $item_user) {
                 $responden = AssessmentUsers::find($item_user['id']);
                 if ($responden) {
                     $responden->quesioner_processed = $item_user['quesioner_processed'];
                     $responden->save();
-
+                    if($responden->status =='done' && $responden->quesioner_processed){
+                        $responden_done=$responden->id;
+                    }
                     // QusisionerHasilAvg::where('assesment_id', $responden->assesment_id)->forceDelete();
                     // DB::table('quisioner_hasil_avg')->where('assesment_id', $responden->assesment_id)->delete();
                     // CobitHelper::getQuisionerHasil($responden->id);
@@ -681,9 +684,10 @@ class QuisionerController extends Controller
                     // }
                     // SetProsesQuisionerHasilQueue::dispatch($responden->id);
                     // SetCanvasHasilDataJob::dispatch($responden->assesment_id);
-                    CobitHelper::ResetHasilCanvas($responden->assesment_id, $responden->id);
+                    // CobitHelper::ResetHasilCanvas($responden->assesment_id, $responden->id);
                 }
             }
+            CobitHelper::ResetHasilCanvas($request->assesment_id, $responden_done);
 
             DB::commit();
             return $this->successResponse();

@@ -31,6 +31,8 @@ Route::group(['middleware' => ['jwt.auth']], function ($router) {
     Route::get('/assesment/docs/detail/{id}', 'AsessmentController@detailDocs');
     Route::put('/assesment/docs/edit/{id}', 'AsessmentController@updateDocs');
     Route::delete('/assesment/docs/remove/{id}', 'AsessmentController@removeDocs');
+
+    Route::post('/assesment/manual-kalkulasi', 'AsessmentController@runCobitHelperManual');
 });
 Route::post('/assesment/responden/invite-by-excel', 'AsessmentController@inviteRespondentByExcel');
 Route::get('/assesment/report/capability/download', 'AsessmentController@downloadReportCapabilityAssesment');

@@ -29,11 +29,19 @@ class SetCanvasHasilDataJob implements ShouldQueue
      */
     public function handle(): void
     {
-        CobitHelper::setAssesmentHasilAvg($this->id);
-        CobitHelper::assesmentDfWeight($this->id);
-        CobitHelper::setCanvasStep2Value($this->id);
-        CobitHelper::setCanvasStep3Value($this->id);
-        CobitHelper::updateCanvasAdjust($this->id);
-        CobitHelper::generateTargetLevelDomain($this->id, 'Organisasi', true);
+        SetCanvasHasilDataJob::withChain([
+            // new setAssesmentHasilAvgJob1($this->id),
+            new assesmentDfWeightJob2($this->id),
+            new setCanvasStep2ValueJob3($this->id),
+            new setCanvasStep3ValueJob4($this->id),
+            new updateCanvasAdjustJob5($this->id),
+            new generateTargetLevelDomainJob6($this->id),
+        ])->dispatch($this->id);
+        // CobitHelper::setAssesmentHasilAvg($this->id);
+        // CobitHelper::assesmentDfWeight($this->id);
+        // CobitHelper::setCanvasStep2Value($this->id);
+        // CobitHelper::setCanvasStep3Value($this->id);
+        // CobitHelper::updateCanvasAdjust($this->id);
+        // CobitHelper::generateTargetLevelDomain($this->id, 'Organisasi', true);
     }
 }

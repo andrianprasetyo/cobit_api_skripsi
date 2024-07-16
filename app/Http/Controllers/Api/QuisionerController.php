@@ -679,8 +679,9 @@ class QuisionerController extends Controller
 
                     // if ($item_user['quesioner_processed']) {
                     // }
-                    SetProsesQuisionerHasilQueue::dispatch($responden->id);
-                    SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                    // SetProsesQuisionerHasilQueue::dispatch($responden->id);
+                    // SetCanvasHasilDataJob::dispatch($responden->assesment_id);
+                    CobitHelper::ResetHasilCanvas($responden->assesment_id, $responden->id);
                 }
             }
 

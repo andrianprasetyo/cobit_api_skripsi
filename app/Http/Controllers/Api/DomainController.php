@@ -143,19 +143,37 @@ class DomainController extends Controller
         //     $list = Domain::query();
         // }
 
-        $list = DB::table('assesment_canvas')
-            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
-            // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
-            ->where('assesment_canvas.assesment_id', $assesment_id)
-            // ->where('capability_target_level.capability_target_id', $capability_target_default->id)
-            // ->where('capability_target.default', true)
-            ->whereNull('domain.deleted_at')
-            // ->whereNull('capability_target_level.deleted_at')
-            // ->whereNull('capability_target.deleted_at')
-            ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan');
+        // $list = DB::table('assesment_canvas')
+        //     ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+        //     // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+        //     // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
+        //     ->where('assesment_canvas.assesment_id', $assesment_id)
+        //     // ->where('capability_target_level.capability_target_id', $capability_target_default->id)
+        //     // ->where('capability_target.default', true)
+        //     ->whereNull('domain.deleted_at')
+        //     // ->whereNull('capability_target_level.deleted_at')
+        //     // ->whereNull('capability_target.deleted_at')
+        //     ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan');
 
-        $list->orderBy($sortBy, $sortType);
+        // $list->orderBy($sortBy, $sortType);
+
+        $exists_assesment = AssesmentCanvas::where('assesment_id', $assesment_id)->exists();
+        if ($exists_assesment) {
+
+            $list = DB::table('assesment_canvas')
+                ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+                // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
+                // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
+                ->where('assesment_canvas.assesment_id', $assesment_id)
+                // ->where('capability_target_level.capability_target_id', $capability_target_default->id)
+                // ->where('capability_target.default', true)
+                ->whereNull('domain.deleted_at')
+                // ->whereNull('capability_target_level.deleted_at')
+                // ->whereNull('capability_target.deleted_at')
+                ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan');
+        } else {
+            $list = Domain::query();
+        }
 
         $data = $this->paging($list, $limit, $page, DomainByAssesmentResource::class);
         return $this->successResponse($data);

@@ -279,6 +279,12 @@ class AsessmentController extends Controller
             $user_ass->expire_at = $request->pic_expire_at;
             $user_ass->save();
 
+            $target_default = new CapabilityTarget();
+            $target_default->assesment_id = $assesment->id;
+            $target_default->nama = 'Organisasi';
+            $target_default->default = true;
+            $target_default->save();
+
             $list_domain = Domain::all();
             if (!$list_domain->isEmpty()) {
                 $payload_domain = [];
@@ -311,6 +317,8 @@ class AsessmentController extends Controller
                     $add->save();
                 }
             }
+
+            CobitHelper::generateTargetLevelDomain($assesment->id,default:true);
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());

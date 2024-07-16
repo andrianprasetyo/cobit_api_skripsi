@@ -18,6 +18,10 @@ class DomainByAssesmentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $ass=Assesment::find($this->assesment_id);
+        $is_assessment = null;
+        if($ass){
+            $is_assessment = $this->aggreed_capability_level >= $ass->minimum_target?'Ya':'Tidak';
+        }
         $capability_target_default = CapabilityTarget::where('assesment_id', $this->assesment_id)->where('default', true)->first();
         $target=null;
         if($capability_target_default){
@@ -46,7 +50,7 @@ class DomainByAssesmentResource extends JsonResource
             'suggest_capability_level' => $this->suggest_capability_level,
             'urutan' => $this->urutan,
             'target' => $target,
-            'is_assessment'=>$this->aggreed_capability_level >= $ass->minimum_target?'Ya':'Tidak'
+            'is_assessment'=> $is_assessment
         ];
     }
 }

@@ -15,6 +15,7 @@ use App\Jobs\SetCanvasHasilDataJob;
 use App\Jobs\SetProsesQuisionerHasilQueue;
 use App\Models\Assesment;
 use App\Models\AssesmentCanvas;
+use App\Models\AssesmentDesignFaktorWeight;
 use App\Models\AssesmentDocs;
 use App\Models\AssesmentHasil;
 use App\Models\AssessmentQuisioner;
@@ -23,6 +24,7 @@ use App\Models\CapabilityAssesment;
 use App\Models\CapabilityAssesmentOfi;
 use App\Models\CapabilityTarget;
 use App\Models\CapabilityTargetLevel;
+use App\Models\DesignFaktor;
 use App\Models\DesignFaktorKomponen;
 use App\Models\Domain;
 use App\Models\Organisasi;
@@ -277,14 +279,13 @@ class AsessmentController extends Controller
             $user_ass->expire_at = $request->pic_expire_at;
             $user_ass->save();
 
-            $list_domain=Domain::all();
-            if(!$list_domain->isEmpty()){
-                $payload_domain=[];
-                foreach($list_domain as $item_domain)
-                {
-                    $payload_domain[]=array(
-                        'assesment_id'=>$assesment->id,
-                        'domain_id'=>$item_domain->id,
+            $list_domain = Domain::all();
+            if (!$list_domain->isEmpty()) {
+                $payload_domain = [];
+                foreach ($list_domain as $item_domain) {
+                    $payload_domain[] = array(
+                        'assesment_id' => $assesment->id,
+                        'domain_id' => $item_domain->id,
                         'step2_init_value' => 0,
                         'step2_value' => 0,
                         'step3_init_value' => 0,
@@ -297,6 +298,18 @@ class AsessmentController extends Controller
                     );
                 }
                 AssesmentCanvas::insert($payload_domain);
+            }
+
+            $df = DesignFaktor::get();
+            foreach ($df as $item_df) {
+                $checkExist = AssesmentDesignFaktorWeight::where('assesment_id', $assesment->id)->where('design_faktor_id', $item_df->id)->first();
+                if (!$checkExist) {
+                    $add = new AssesmentDesignFaktorWeight();
+                    $add->assesment_id = $assesment->id;
+                    $add->design_faktor_id = $item_df->id;
+                    $add->weight = $item_df->weight;
+                    $add->save();
+                }
             }
 
             // $user->assesment=$user_ass;
@@ -2024,7 +2037,7 @@ class AsessmentController extends Controller
         }
 
         try {
-            $list_backup_hasil_quisioner=[];
+            $list_backup_hasil_quisioner = [];
             $quisionerId = Quisioner::where('aktif', true)->first();
             $user_assessment = AssessmentUsers::where('assesment_id', $id)
                 ->where('status', 'done')
@@ -2110,9 +2123,9 @@ class AsessmentController extends Controller
                             ->where('quisioner_id', $quisionerId->id)
                             ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
                             ->update([
-                                'jawaban_id' => null,
-                                'bobot' => null
-                            ]);
+                                    'jawaban_id' => null,
+                                    'bobot' => null
+                                ]);
 
 
                         // QuisionerHasil::where('assesment_users_id', $item_user->id)
@@ -2125,7 +2138,7 @@ class AsessmentController extends Controller
                 }
             }
 
-            if(!empty($list_backup_hasil_quisioner)){
+            if (!empty($list_backup_hasil_quisioner)) {
                 $QuisionerHasilBackupExists = DB::select("SELECT to_regclass('public.quisioner_hasil_backup')");
                 if (!empty($QuisionerHasilBackupExists) && $QuisionerHasilBackupExists[0]->to_regclass !== null) {
                     DB::table('quisioner_hasil_backup')->insert($list_backup_hasil_quisioner);
@@ -2151,11 +2164,11 @@ class AsessmentController extends Controller
             // }else{
             //     $data= CobitHelper::{$method}($id);
             // }
-            if(!empty($method)){
-                foreach($method as $item){
-                    if($item == 'generateTargetLevelDomain'){
+            if (!empty($method)) {
+                foreach ($method as $item) {
+                    if ($item == 'generateTargetLevelDomain') {
                         CobitHelper::generateTargetLevelDomain($id, default: true);
-                    }else{
+                    } else {
                         CobitHelper::{$item}($id);
                     }
                 }

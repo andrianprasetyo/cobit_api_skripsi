@@ -820,4 +820,21 @@ class CobitHelper
         }
         return 0;
     }
+
+    public static function ResetHasilCanvas($assement_id=null,$responden_id=null)
+    {
+        if($responden_id !=null){
+
+            CobitHelper::getQuisionerHasil($responden_id);
+        }
+        if($assement_id != null){
+
+            CobitHelper::setAssesmentHasilAvg($assement_id);
+            CobitHelper::assesmentDfWeight($assement_id);
+            CobitHelper::setCanvasStep2Value($assement_id);
+            CobitHelper::setCanvasStep3Value($assement_id);
+            CobitHelper::updateCanvasAdjust($assement_id);
+            CobitHelper::generateTargetLevelDomain($assement_id, 'Organisasi', true);
+        }
+    }
 }

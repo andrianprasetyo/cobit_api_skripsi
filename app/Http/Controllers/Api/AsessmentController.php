@@ -2124,10 +2124,19 @@ class AsessmentController extends Controller
         $id = $request->assesment_id;
         $method = $request->method;
         try {
-            if($method == 'generateTargetLevelDomain'){
-                $data = CobitHelper::generateTargetLevelDomain($id,'Organisasi', true);
-            }else{
-                $data= CobitHelper::{$method}($id);
+            // if($method == 'generateTargetLevelDomain'){
+            //     $data = CobitHelper::generateTargetLevelDomain($id,default:true);
+            // }else{
+            //     $data= CobitHelper::{$method}($id);
+            // }
+            if(!empty($method)){
+                foreach($method as $item){
+                    if($item == 'generateTargetLevelDomain'){
+                        CobitHelper::generateTargetLevelDomain($id, default: true);
+                    }else{
+                        CobitHelper::{$item}($id);
+                    }
+                }
             }
             // SetCanvasHasilDataJob::dispatch($id);
             return $this->successResponse();

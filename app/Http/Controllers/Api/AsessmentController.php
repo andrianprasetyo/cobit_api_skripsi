@@ -402,10 +402,10 @@ class AsessmentController extends Controller
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
 
-        $_canvas_check = AssesmentCanvas::where('assesment_id', $id)->exists();
-        if ($_canvas_check) {
-            return $this->errorResponse('Assesment tidak bisa dihapus', 400);
-        }
+        // $_canvas_check = AssesmentCanvas::where('assesment_id', $id)->exists();
+        // if ($_canvas_check) {
+        //     return $this->errorResponse('Assesment tidak bisa dihapus', 400);
+        // }
         $data->delete();
 
         return $this->successResponse();

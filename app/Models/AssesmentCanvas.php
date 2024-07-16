@@ -13,6 +13,20 @@ class AssesmentCanvas extends Model
     protected $table = 'assesment_canvas';
     protected $keyType = 'string';
 
+    protected $fillable=[
+        'assesment_id',
+        'domain_id',
+        'step2_init_value',
+        'step2_value',
+        'step3_init_value',
+        'step3_value',
+        'adjustment',
+        'reason',
+        'origin_capability_level',
+        'suggest_capability_level',
+        'aggreed_capability_level',
+    ];
+
     public function assesment()
     {
         return $this->belongsTo(Assesment::class, 'assesment_id');

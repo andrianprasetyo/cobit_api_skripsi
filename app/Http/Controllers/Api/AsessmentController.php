@@ -277,6 +277,28 @@ class AsessmentController extends Controller
             $user_ass->expire_at = $request->pic_expire_at;
             $user_ass->save();
 
+            $list_domain=Domain::all();
+            if(!$list_domain->isEmpty()){
+                $payload_domain=[];
+                foreach($list_domain as $item_domain)
+                {
+                    $payload_domain[]=array(
+                        'assesment_id'=>$assesment->id,
+                        'domain_id'=>$item_domain->id,
+                        'step2_init_value' => 0,
+                        'step2_value' => 0,
+                        'step3_init_value' => 0,
+                        'step3_value' => 0,
+                        'adjustment' => 0,
+                        'reason' => 0,
+                        'origin_capability_level' => 0,
+                        'suggest_capability_level' => 0,
+                        'aggreed_capability_level' => 0,
+                    );
+                }
+                AssesmentCanvas::insert($payload_domain);
+            }
+
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
             if (!$_check_mail_exists) {

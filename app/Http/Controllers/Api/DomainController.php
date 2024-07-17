@@ -178,7 +178,19 @@ class DomainController extends Controller
         $series = [];
         $categories = [];
         $assesment_id = $request->assesment_id;
-        $list_domain=Domain::orderBy('urutan','asc')->get();
+        // $list_domain=Domain::orderBy('urutan','asc')->get();
+
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+        $list_domain = DB::table('assesment_canvas')
+            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+            ->select('domain.id', 'domain.kode')
+            ->where('assesment_canvas.assesment_id', $assesment_id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
+            ->get();
 
         $suggest_capability_level=[];
         $aggreed_capability_level = [];

@@ -1419,14 +1419,14 @@ class AsessmentController extends Controller
         if (!$get_ist_domain->isEmpty()) {
             foreach ($get_ist_domain as $item_domain) {
                 $list_domain_id[] = $item_domain->id;
-                // $categories[] = $item_domain->kode;
+                $categories[] = $item_domain->kode;
             }
         }
 
         $assesment_canvas = AssesmentCanvas::where('assesment_id', $assesment_id)
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->whereIn('domain_id', $list_domain_id)
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at')
             ->select(
                 DB::raw('
@@ -1454,7 +1454,7 @@ class AsessmentController extends Controller
                 $hasil_assesment[] = $hasil;
                 // $hasil_assesment[]= $hasil;
                 $hasil_adjusment[] = $item_canvas->aggreed_capability_level;
-                $categories[] = $item_canvas->kode;
+                // $categories[] = $item_canvas->kode;
             }
         }
 

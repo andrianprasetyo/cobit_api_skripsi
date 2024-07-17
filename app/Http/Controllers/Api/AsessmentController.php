@@ -279,6 +279,10 @@ class AsessmentController extends Controller
             $assesment->minimum_target = $request->filled('minimum_target') ? $request->minimum_target : 3;
             $assesment->save();
 
+            User::where('id',$user)->update([
+                'pic_assesment_id'=>$assesment->id
+            ]);
+
             $user_ass = new UserAssesment();
             $user_ass->users_id = $user_id;
             $user_ass->assesment_id = $assesment->id;

@@ -2165,6 +2165,17 @@ class AsessmentController extends Controller
         }
     }
 
+    public function removePIC(Request $request,$id)
+    {
+        $user=User::find($id);
+        if(!$user){
+            return $this->errorResponse('User tidak ditemukan',404);
+        }
+
+        $user->pic_assesment_id=null;
+        $user->save();
+        return $this->successResponse();
+    }
     public function runCobitHelperManual(Request $request)
     {
         $id = $request->assesment_id;

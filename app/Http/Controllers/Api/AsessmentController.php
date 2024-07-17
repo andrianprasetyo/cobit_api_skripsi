@@ -1467,7 +1467,7 @@ class AsessmentController extends Controller
                     'data' => $hasil_assesment
                 ),
                 array(
-                    'name' => 'Target Capability Adjustment',
+                    'name' => 'Target Capability',
                     'data' => $hasil_adjusment
                 ),
             ];

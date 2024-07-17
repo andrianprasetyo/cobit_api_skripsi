@@ -92,7 +92,7 @@ class AsessmentController extends Controller
             'allpic.divisi',
             'allpic.jabatan',
             'allpic.assesment:id,expire_at,users_id,assesment_id'
-            ])->find($id);
+        ])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
@@ -279,8 +279,8 @@ class AsessmentController extends Controller
             $assesment->minimum_target = $request->filled('minimum_target') ? $request->minimum_target : 3;
             $assesment->save();
 
-            User::where('id',$user->id)->update([
-                'pic_assesment_id'=>$assesment->id
+            User::where('id', $user->id)->update([
+                'pic_assesment_id' => $assesment->id
             ]);
 
             $user_ass = new UserAssesment();
@@ -329,7 +329,7 @@ class AsessmentController extends Controller
                 }
             }
 
-            CobitHelper::generateTargetLevelDomain($assesment->id,default:true);
+            CobitHelper::generateTargetLevelDomain($assesment->id, default: true);
 
             // $user->assesment=$user_ass;
             // $user->notify(new InviteUserNotif());
@@ -650,7 +650,7 @@ class AsessmentController extends Controller
                         $user->password = $_token;
                         $user->username = $email;
                         $user->nama = $email;
-                        $user->pic_assesment_id=$assesment_id;
+                        $user->pic_assesment_id = $assesment_id;
                         $user->save();
 
                         // $user_id = $user->id;
@@ -668,7 +668,7 @@ class AsessmentController extends Controller
 
                 $pic_exists = UserAssesment::where('users_id', $user_id)->where('assesment_id', $assesment_id)->first();
                 if (!$pic_exists) {
-                    $user_pic_exists = UserAssesment::where('assesment_id',$assesment_id)->first();
+                    $user_pic_exists = UserAssesment::where('assesment_id', $assesment_id)->first();
                     $user_ass = new UserAssesment();
                     $user_ass->users_id = $user_id;
                     $user_ass->assesment_id = $assesment_id;
@@ -1401,7 +1401,7 @@ class AsessmentController extends Controller
             return $this->errorResponse('Assesment tidak terdafter', 404);
         }
 
-        if($target == 'all'){
+        if ($target == 'all') {
             $get_ist_domain = CapabilityTargetLevel::whereIn('capability_target_id', function ($q) use ($assesment_id) {
                 $q->select('id')
                     ->from('capability_target')
@@ -1523,13 +1523,13 @@ class AsessmentController extends Controller
             //         );
             //     }
             // }
-        }else{
+        } else {
             $get_ist_domain = CapabilityTargetLevel::select('domain.id', 'domain.kode')
                 ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
                 ->join('assesment_canvas', 'assesment_canvas.domain_id', '=', 'capability_target_level.domain_id')
                 ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
                 ->where('capability_target_level.capability_target_id', $target)
-                ->where('assesment_canvas.assesment_id',$assesment_id)
+                ->where('assesment_canvas.assesment_id', $assesment_id)
                 ->whereNull('domain.deleted_at')
                 ->orderBy('domain.urutan', 'asc')
                 ->groupBy('domain.id', 'domain.kode')
@@ -1571,8 +1571,19 @@ class AsessmentController extends Controller
                 }
             }
 
+            $series = [
+                array(
+                    'name' => 'Hasil Assesment & Klarifikasi',
+                    'data' => $hasil_assesment
+                ),
+                array(
+                    'name' => 'Target Capability Adjustment',
+                    'data' => $hasil_adjusment
+                ),
+            ];
+
             $_target = CapabilityTarget::where('assesment_id', $assesment_id)
-                ->where('id',$target)
+                ->where('id', $target)
                 ->orderBy('default', 'desc')
                 ->get();
 
@@ -2224,9 +2235,9 @@ class AsessmentController extends Controller
                             ->where('quisioner_id', $quisionerId->id)
                             ->whereNotIn('design_faktor_komponen_id', $list_not_in_df_komp)
                             ->update([
-                                    'jawaban_id' => null,
-                                    'bobot' => null
-                                ]);
+                                'jawaban_id' => null,
+                                'bobot' => null
+                            ]);
 
 
                         // QuisionerHasil::where('assesment_users_id', $item_user->id)
@@ -2255,14 +2266,14 @@ class AsessmentController extends Controller
         }
     }
 
-    public function removePIC(Request $request,$id)
+    public function removePIC(Request $request, $id)
     {
-        $user=User::find($id);
-        if(!$user){
-            return $this->errorResponse('User tidak ditemukan',404);
+        $user = User::find($id);
+        if (!$user) {
+            return $this->errorResponse('User tidak ditemukan', 404);
         }
 
-        $user->pic_assesment_id=null;
+        $user->pic_assesment_id = null;
         $user->save();
         return $this->successResponse();
     }

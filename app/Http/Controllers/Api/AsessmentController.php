@@ -2168,22 +2168,56 @@ class AsessmentController extends Controller
     public function runCobitHelperManual(Request $request)
     {
         $id = $request->assesment_id;
-        $method = $request->method;
+        $step = $request->step;
         try {
+            switch ($step) {
+                case 1:
+                    CobitHelper::assesmentDfWeight($id);
+                    CobitHelper::setCanvasStep2Value($id);
+                    CobitHelper::setCanvasStep3Value($id);
+                    CobitHelper::updateCanvasAdjust($id);
+                    CobitHelper::generateTargetLevelDomain($id, 'Organisasi', true);
+                    break;
+
+                case 2:
+                    CobitHelper::setCanvasStep2Value($id);
+                    CobitHelper::setCanvasStep3Value($id);
+                    CobitHelper::updateCanvasAdjust($id);
+                    CobitHelper::generateTargetLevelDomain($id, 'Organisasi', true);
+                    break;
+
+                case 3:
+                    CobitHelper::setCanvasStep3Value($id);
+                    CobitHelper::updateCanvasAdjust($id);
+                    CobitHelper::generateTargetLevelDomain($id, 'Organisasi', true);
+                    break;
+
+                case 4:
+                    CobitHelper::updateCanvasAdjust($id);
+                    CobitHelper::generateTargetLevelDomain($id, 'Organisasi', true);
+                    break;
+
+                case 5:
+                    CobitHelper::generateTargetLevelDomain($id, 'Organisasi', true);
+                    break;
+                default:
+                    # code...
+                    break;
+            }
             // if($method == 'generateTargetLevelDomain'){
             //     $data = CobitHelper::generateTargetLevelDomain($id,default:true);
             // }else{
             //     $data= CobitHelper::{$method}($id);
             // }
-            if (!empty($method)) {
-                foreach ($method as $item) {
-                    if ($item == 'generateTargetLevelDomain') {
-                        CobitHelper::generateTargetLevelDomain($id, default: true);
-                    } else {
-                        CobitHelper::{$item}($id);
-                    }
-                }
-            }
+            // if (!empty($method)) {
+            //     foreach ($method as $item) {
+            //         if ($item == 'generateTargetLevelDomain') {
+            //             CobitHelper::generateTargetLevelDomain($id, default: true);
+            //         } else {
+            //             CobitHelper::{$item}($id);
+            //         }
+            //     }
+            // }
             // SetCanvasHasilDataJob::dispatch($id);
             return $this->successResponse();
         } catch (\Throwable $th) {

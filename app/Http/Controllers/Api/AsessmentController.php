@@ -85,7 +85,7 @@ class AsessmentController extends Controller
 
     public function detailByID($id)
     {
-        $data = Assesment::with('pic.divisi', 'pic.jabatan')->find($id);
+        $data = Assesment::with(['pic.divisi', 'pic.jabatan','allpic:id,nama,username,email,divisi,posisi,status,internal,avatar,jabatan_id,divisi_id,pic_assesment_id'])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }
@@ -639,12 +639,13 @@ class AsessmentController extends Controller
                         $user->password = $_token;
                         $user->username = $email;
                         $user->nama = $email;
+                        $user->pic_assesment_id=$assesment_id;
                         $user->save();
 
                         // $user_id = $user->id;
 
                         $role_user = new RoleUsers();
-                        $role_user->users_id = $user_id;
+                        $role_user->users_id = $user->id;
                         $role_user->roles_id = $role->id;
                         $role_user->default = true;
                         $role_user->save();

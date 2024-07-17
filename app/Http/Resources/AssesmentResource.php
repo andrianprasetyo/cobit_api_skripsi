@@ -45,6 +45,7 @@ class AssesmentResource extends JsonResource
             'minimum_target' => $this->minimum_target,
             'assesment_user'=>$assesment_pic,
             'users_count'=>$this->users_count,
+            'allpic' => $this->allpic,
             // 'docs' => $this->docs,
             // 'docs' => $docs,
         ];

@@ -22,6 +22,7 @@ class AddPICRequest extends FormRequest
     public function rules(): array
     {
         $validate['users']='required|array';
+        // $validate['users.*.email'] = 'email';
         $validate['assesment_id'] = 'required|exists:assesment,id';
         $validate['organisasi_id'] = 'required|exists:organisasi,id';
         return $validate;

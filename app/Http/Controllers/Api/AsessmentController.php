@@ -85,7 +85,14 @@ class AsessmentController extends Controller
 
     public function detailByID($id)
     {
-        $data = Assesment::with(['pic.divisi', 'pic.jabatan','allpic:id,nama,username,email,divisi,posisi,status,internal,avatar,jabatan_id,divisi_id,pic_assesment_id'])->find($id);
+        $data = Assesment::with([
+            'pic.divisi',
+            'pic.jabatan',
+            'allpic:id,nama,username,email,divisi,posisi,status,internal,avatar,jabatan_id,divisi_id,pic_assesment_id',
+            'allpic.divisi',
+            'allpic.jabatan',
+            'allpic.assesment:id,expire_at,users_id,assesment_id'
+            ])->find($id);
         if (!$data) {
             return $this->errorResponse('Data tidak ditemukan', 404);
         }

@@ -657,10 +657,12 @@ class AsessmentController extends Controller
 
                 $pic_exists = UserAssesment::where('users_id', $user_id)->where('assesment_id', $assesment_id)->first();
                 if (!$pic_exists) {
+                    $user_pic_exists = UserAssesment::where('assesment_id',$assesment_id)->first();
                     $user_ass = new UserAssesment();
                     $user_ass->users_id = $user_id;
                     $user_ass->assesment_id = $assesment_id;
                     $user_ass->default = false;
+                    $user_ass->expire_at = $user_pic_exists->expire_at;
                     $user_ass->save();
                 }
 

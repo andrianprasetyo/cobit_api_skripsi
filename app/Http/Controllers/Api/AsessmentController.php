@@ -1407,7 +1407,10 @@ class AsessmentController extends Controller
                 ->whereNull('deleted_at');
         })
             ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
+            ->join('assesment_canvas', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id', 'domain.kode')
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'asc')
             ->groupBy('domain.id', 'domain.kode')
             ->get();

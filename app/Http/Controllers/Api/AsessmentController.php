@@ -1407,9 +1407,9 @@ class AsessmentController extends Controller
                 ->whereNull('deleted_at');
         })
             ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
-            ->join('assesment_canvas', 'assesment_canvas.domain_id', '=', 'domain.id')
+            // ->join('assesment_canvas', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id', 'domain.kode')
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+            // ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at')
             ->orderBy('domain.urutan', 'asc')
             ->groupBy('domain.id', 'domain.kode')
@@ -1419,21 +1419,22 @@ class AsessmentController extends Controller
         if (!$get_ist_domain->isEmpty()) {
             foreach ($get_ist_domain as $item_domain) {
                 $list_domain_id[] = $item_domain->id;
-                $categories[] = $item_domain->kode;
+                // $categories[] = $item_domain->kode;
             }
         }
 
         $assesment_canvas = AssesmentCanvas::where('assesment_id', $assesment_id)
-            ->whereIn('domain_id', $list_domain_id)
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->orderBy('domain.urutan', 'asc')
+            ->whereIn('domain_id', $list_domain_id)
+            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
             ->whereNull('domain.deleted_at')
             ->select(
                 DB::raw('
-                assesment_canvas.domain_id,
+                assesment_canvas.domain_id,domain.kode,
                 assesment_canvas.origin_capability_level,assesment_canvas.aggreed_capability_level,
                 get_compliance_value(assesment_canvas.assesment_id,assesment_canvas.domain_id) as hasil_assesment'),
-            )
+                )
+            ->orderBy('domain.urutan', 'asc')
             ->get();
 
 
@@ -1453,6 +1454,7 @@ class AsessmentController extends Controller
                 $hasil_assesment[] = $hasil;
                 // $hasil_assesment[]= $hasil;
                 $hasil_adjusment[] = $item_canvas->aggreed_capability_level;
+                $categories[] = $item_canvas->kode;
             }
         }
 

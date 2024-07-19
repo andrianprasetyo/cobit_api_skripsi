@@ -172,7 +172,7 @@ class DomainController extends Controller
         if($request->filled('assesment') && $request->assesment == '1'){
             $ass=Assesment::find($assesment_id);
             if($ass){
-                $list->where('assesment_canvas.aggreed_capability_level','=>', $ass->minimum_target);
+                $list->where('assesment_canvas.aggreed_capability_level','>=', $ass->minimum_target);
             }
         }
         $data = $this->paging($list, $limit, $page, DomainByAssesmentResource::class);
@@ -305,7 +305,7 @@ class DomainController extends Controller
         if ($request->filled('assesment') && $request->assesment == '1') {
             $ass = Assesment::find($id);
             if ($ass) {
-                $list->where('assesment_canvas.aggreed_capability_level', '=>', $ass->minimum_target);
+                $list->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target);
             }
         }
         $data = $list->get();

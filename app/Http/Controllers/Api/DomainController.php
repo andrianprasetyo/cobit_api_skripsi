@@ -169,6 +169,12 @@ class DomainController extends Controller
             // ->whereNull('capability_target.deleted_at')
             ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan');
 
+        if($request->filled('assesment') && $request->assesment == '1'){
+            $ass=Assesment::find($assesment_id);
+            if($ass){
+                $list->where('assesment_canvas.aggreed_capability_level','=>', $ass->minimum_target);
+            }
+        }
         $data = $this->paging($list, $limit, $page, DomainByAssesmentResource::class);
         return $this->successResponse($data);
     }
@@ -282,7 +288,7 @@ class DomainController extends Controller
             return $this->errorResponse('Assesment ID tidak terdaftar', 404);
         }
 
-        $data = DB::table('assesment_canvas')
+        $list = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             // ->join('capability_target_level', 'capability_target_level.domain_id', '=', 'domain.id')
             // ->join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
@@ -293,10 +299,16 @@ class DomainController extends Controller
             // ->whereNull('capability_target_level.deleted_at')
             // ->whereNull('capability_target.deleted_at')
             ->select('assesment_canvas.*', 'domain.kode', 'domain.ket', 'domain.urutan')
-            ->orderBy('domain.urutan','asc')
-            ->get();
+            ->orderBy('domain.urutan','asc');
 
 
+        if ($request->filled('assesment') && $request->assesment == '1') {
+            $ass = Assesment::find($id);
+            if ($ass) {
+                $list->where('assesment_canvas.aggreed_capability_level', '=>', $ass->minimum_target);
+            }
+        }
+        $data = $list->get();
         return Excel::download(new AssesmentDomain2Export($data,$assesment), 'Domain-Assesment-' . $assesment->nama . '.xlsx');
     }
 

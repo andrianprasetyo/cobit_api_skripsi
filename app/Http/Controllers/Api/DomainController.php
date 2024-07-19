@@ -112,8 +112,8 @@ class DomainController extends Controller
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
-        $sortBy = $request->get('sortBy', 'domain.urutan');
-        $sortType = $request->get('sortType', 'asc');
+        $sortBy = $request->get('sortBy');
+        $sortType = $request->get('sortType');
         $search = $request->search;
         $assesment_id = $request->assesment_id;
 
@@ -174,6 +174,9 @@ class DomainController extends Controller
             if($ass){
                 $list->where('assesment_canvas.aggreed_capability_level','>=', $ass->minimum_target);
             }
+        }
+        if($request->filled('sortBy') && $request->filled('sortType')){
+            $list->orderBy('assesment_canvas.'.$sortBy, $sortType);
         }
         $data = $this->paging($list, $limit, $page, DomainByAssesmentResource::class);
         return $this->successResponse($data);
@@ -273,6 +276,8 @@ class DomainController extends Controller
     {
         $id = $request->id;
         $assesment = Assesment::find($id);
+        $sortBy = $request->get('sortBy');
+        $sortType = $request->get('sortType');
         // $data = AssesmentCanvas::with(['assesment', 'domain'])->where('assesment_id', $id)->get();
 
         // $data = DB::table('assesment_canvas')
@@ -307,6 +312,9 @@ class DomainController extends Controller
             if ($ass) {
                 $list->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target);
             }
+        }
+        if ($request->filled('sortBy') && $request->filled('sortType')) {
+            $list->orderBy('assesment_canvas.' . $sortBy, $sortType);
         }
         $data = $list->get();
         return Excel::download(new AssesmentDomain2Export($data,$assesment), 'Domain-Assesment-' . $assesment->nama . '.xlsx');

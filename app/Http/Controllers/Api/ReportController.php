@@ -393,7 +393,8 @@ class ReportController extends Controller
                 }
             }
 
-            SetCanvasHasilDataJob::dispatch($request->assement_id);
+            // SetCanvasHasilDataJob::dispatch($request->assement_id);
+            CobitHelper::ResetHasilCanvas(assement_id: $request->assement_id);
 
             DB::commit();
             return $this->successResponse($tes);

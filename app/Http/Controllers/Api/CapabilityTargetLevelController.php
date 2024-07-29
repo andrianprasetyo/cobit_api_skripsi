@@ -61,6 +61,9 @@ class CapabilityTargetLevelController extends Controller
             // ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')
             ->orderBy('domain.urutan','asc');
 
+        if ($request->filled('assesment')) {
+            $list->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target);
+        }
         $data = $this->paging($list);
         return $this->successResponse($data);
     }

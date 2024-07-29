@@ -1615,7 +1615,8 @@ class AsessmentController extends Controller
     public function ReportDetailOfi(Request $request)
     {
 
-        $list_ofi = CapabilityAssesmentOfi::where('capability_target_id', $request->capability_target_id);
+        // $list_ofi = CapabilityAssesmentOfi::where('capability_target_id', $request->capability_target_id);
+        $list_ofi = CapabilityAssesmentOfi::query();
 
         /*
         if($request->filled('capability_assesment_id')){

@@ -33,15 +33,17 @@ class CapabilityTargetLevelController extends Controller
                 ->where('capability_target_level.capability_target_id', $request->target_id)
                 ->select('capability_target_level.*')
                 ->orderBy('domain.urutan','asc');
+            $data = $this->paging($list, null, null, CapabilityTargetLevelResource::class);
         }else{
             $list = DB::table('domain')
                 ->leftJoin(DB::raw("capability_target_level ON domain.id=capability_target_level.domain_id AND capability_target_level.capability_target_id='$target_id'"), function ($join) {})
                 ->whereNull('capability_target_level.deleted_at')
                 ->whereNull('domain.deleted_at')
-                ->select('capability_target_level.*')
+                ->select('capability_target_level.*','domain.id as id_domain','domain.kode','domain.ket','domain.urutan')
                 ->orderBy('domain.urutan', 'asc');
+            $data = $this->paging($list, null, null);
         }
-        $data = $this->paging($list,null,null, CapabilityTargetLevelResource::class);
+
         return $this->successResponse($data);
     }
 

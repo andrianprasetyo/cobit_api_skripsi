@@ -27,12 +27,14 @@ class CapabilityTargetLevelController extends Controller
 
         $list=DB::table('capability_target_level')
             ->join('domain','capability_target_level.domain_id','=','domain.id')
-            ->where('capability_target_id',$target_id)
             ->whereNull('capability_target_level.deleted_at')
             ->whereNull('domain.deleted_at')
             ->select('capability_target_level.*')
             ->orderBy('domain.urutan','asc');
 
+        if($request->filled('target_id')){
+            $list->where('capability_target_id',$target_id);
+        }
         $data = $this->paging($list,null,null, CapabilityTargetLevelResource::class);
         return $this->successResponse($data);
     }
@@ -53,7 +55,7 @@ class CapabilityTargetLevelController extends Controller
         $list=DB::table('assesment_canvas')
             ->join('domain','assesment_canvas.domain_id','=','domain.id')
             ->where('assesment_canvas.assesment_id',$ass->id)
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target)
+            // ->where('assesment_canvas.aggreed_capability_level', '>=', $ass->minimum_target)
             ->whereNull('domain.deleted_at')
             ->select('domain.id','domain.kode','domain.ket','domain.urutan')
             // ->groupBy('domain.id', 'domain.kode', 'domain.ket', 'domain.urutan')

@@ -135,7 +135,7 @@ class CapabilityTargetLevelController extends Controller
             $cap_target->save();
 
             foreach ($_target as $_item_target) {
-                if($_item_target['target']){
+                if($_item_target['target'] != null){
 
                     $target = null;
                     if ($_item_target['id'] != null) {
@@ -148,6 +148,10 @@ class CapabilityTargetLevelController extends Controller
                     $target->capability_target_id = $cap_target->id;
                     $target->target = $_item_target['target'];
                     $target->save();
+                }else{
+                    if($_item_target['id']){
+                        CapabilityTargetLevel::find($_item_target['id'])->delete();
+                    }
                 }
             }
 

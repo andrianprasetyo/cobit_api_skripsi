@@ -15,13 +15,24 @@ class CapabilityTargetLevelResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $domain=Domain::find($this->domain_id);
-        return [
-            'id'=>$this->id,
-            'domain_id'=>$this->domain_id,
-            'capability_target_id'=>$this->capability_target_id,
-            'target'=>$this->target,
-            'domain'=>$domain,
-        ];
+        if(isset($this->id_domain)){
+            $domain = Domain::find($this->id_domain);
+            return [
+                'id' => $this->id,
+                'domain_id' => $this->domain_id,
+                'capability_target_id' => $this->capability_target_id,
+                'target' => $this->target,
+                'domain' => $domain,
+            ];
+        }else{
+            $domain = Domain::find($this->domain_id);
+            return [
+                'id' => $this->id,
+                'domain_id' => $this->domain_id,
+                'capability_target_id' => $this->capability_target_id,
+                'target' => $this->target,
+                'domain' => $domain,
+            ];
+        }
     }
 }

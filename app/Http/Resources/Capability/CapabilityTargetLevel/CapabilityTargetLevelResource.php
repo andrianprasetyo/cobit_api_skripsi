@@ -19,7 +19,7 @@ class CapabilityTargetLevelResource extends JsonResource
             $domain = Domain::find($this->id_domain);
             return [
                 'id' => $this->id,
-                'domain_id' => $this->domain_id,
+                'domain_id' => $this->id_domain,
                 'capability_target_id' => $this->capability_target_id,
                 'target' => $this->target,
                 'domain' => $domain,

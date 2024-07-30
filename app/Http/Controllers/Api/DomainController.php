@@ -441,7 +441,7 @@ class DomainController extends Controller
         return $this->successResponse($data);
     }
 
-    public function listDomainByAssesmentCapable(Request $request)
+    public function listDomainByAssesmentCapableBACKUP(Request $request)
     {
         $limit = $request->get('limit', 10);
         $page = $request->get('page', 1);
@@ -467,6 +467,26 @@ class DomainController extends Controller
 
         $list->orderBy($sortBy, $sortType);
         $data = $this->paging($list, $limit, $page);
+        return $this->successResponse($data);
+    }
+
+    public function listDomainByAssesmentCapable(Request $request)
+    {
+        $assesment = Assesment::find($request->assesment_id);
+        if (!$assesment) {
+            return $this->errorResponse('Assesment tidak terdafter', 404);
+        }
+
+        $list = CapabilityTargetLevel::join('capability_target','capability_target_level.capability_target_id','=','capability_target.id')
+            ->join('domain','capability_target_level.domain_id','=','domain.id')
+            ->where('capability_target.assesment_id',$request->assesment_id)
+            ->where('capability_target_level.target','>=', $assesment->minimum_target)
+            ->select('domain.id','domain.kode', 'domain.urutan')
+            ->groupBy('domain.id', 'domain.kode','domain.urutan')
+            ->orderBy('domain.urutan','ASC')
+            ->get();
+
+        $data['list']=$list;
         return $this->successResponse($data);
     }
 

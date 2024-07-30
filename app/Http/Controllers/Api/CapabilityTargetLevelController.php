@@ -150,7 +150,11 @@ class CapabilityTargetLevelController extends Controller
                     $target->save();
                 }else{
                     if($_item_target['id']){
-                        CapabilityTargetLevel::find($_item_target['id'])->delete();
+                        // CapabilityTargetLevel::find($_item_target['id'])->delete();
+                        CapabilityTargetLevel::where('id',$_item_target['id'])
+                            ->update([
+                                'target'=>null
+                            ]);
                     }
                 }
             }

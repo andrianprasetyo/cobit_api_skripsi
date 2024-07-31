@@ -32,25 +32,13 @@ class DashboardController extends Controller
         $total_assesment =0;
         $total_user_pic= UserAssesment::query();
         if($this->account->internal){
-            // $total_assesment = Assesment::query();
+            $total_assesment = Assesment::query();
             $total_user_pic->groupBy('users_id');
         }else{
             $total_user_pic->where('assesment_id',$this->account->assesment->assesment_id);
-            // $total_assesment = UserAssesment::where('users_id', $this->account->id);
+            $total_assesment = UserAssesment::where('users_id', $this->account->id);
             $total_responden->where('assesment_id',$this->account->assesment->assesment_id);
         }
-
-        $assesment = Assesment::find($this->account->assesment->assesment_id);
-        if (!$assesment) {
-            return $this->errorResponse('Assesment tidak terdafter', 404);
-        }
-
-        $total_assesment = DB::table('assesment_canvas')
-            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('domain.id', 'domain.kode')
-            ->where('assesment_canvas.assesment_id', $this->account->assesment->assesment_id)
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->whereNull('domain.deleted_at');
 
         $data['total']=array(
             'responden'=> $total_responden->count(),
@@ -154,6 +142,14 @@ class DashboardController extends Controller
         }
         $responden = AssessmentUsers::where('assesment_id',$assesment_id)->count();
         // $gamo = AssesmentDomain::where('assesment_id', $assesment_id)->count();
+        // $gamo = DB::table('assesment_canvas')
+        //     ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
+        //     ->select('domain.id', 'domain.kode')
+        //     ->where('assesment_canvas.assesment_id', $assesment_id)
+        //     ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
+        //     ->whereNull('domain.deleted_at')
+        //     ->count();
+
         $gamo = DB::table('assesment_canvas')
             ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
             ->select('domain.id', 'domain.kode')

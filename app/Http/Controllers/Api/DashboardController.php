@@ -7,6 +7,7 @@ use App\Models\Assesment;
 use App\Models\AssesmentDomain;
 use App\Models\AssessmentUsers;
 use App\Models\CapabilityTarget;
+use App\Models\CapabilityTargetLevel;
 use App\Models\Domain;
 use App\Models\UserAssesment;
 use App\Traits\JsonResponse;
@@ -150,12 +151,12 @@ class DashboardController extends Controller
         //     ->whereNull('domain.deleted_at')
         //     ->count();
 
-        $gamo = DB::table('assesment_canvas')
-            ->join('domain', 'assesment_canvas.domain_id', '=', 'domain.id')
-            ->select('domain.id', 'domain.kode')
-            ->where('assesment_canvas.assesment_id', $assesment_id)
-            ->where('assesment_canvas.aggreed_capability_level', '>=', $assesment->minimum_target)
-            ->whereNull('domain.deleted_at')
+        $gamo = CapabilityTargetLevel::join('capability_target', 'capability_target_level.capability_target_id', '=', 'capability_target.id')
+            ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
+            ->where('capability_target.assesment_id', $assesment_id)
+            ->where('capability_target_level.target', '>=', $assesment->minimum_target)
+            ->select('domain.id')
+            ->groupBy('domain.id')
             ->count();
 
         $capability_taget = CapabilityTarget::where('assesment_id', $assesment_id)->count();

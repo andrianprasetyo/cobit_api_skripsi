@@ -155,15 +155,13 @@ class DashboardController extends Controller
             ->join('domain', 'capability_target_level.domain_id', '=', 'domain.id')
             ->where('capability_target.assesment_id', $assesment_id)
             ->where('capability_target_level.target', '>=', $assesment->minimum_target)
-            ->select('domain.id',)
-            ->groupBy('domain.id')
-            ->get()
-            ->toArray();
+            ->distinct('domain.id')
+            ->count('domain.id');
 
         $capability_taget = CapabilityTarget::where('assesment_id', $assesment_id)->count();
 
         $data['responden'] = $responden;
-        $data['gamo'] = count($gamo);
+        $data['gamo'] = $gamo;
         $data['capability_taget']=$capability_taget;
         return $this->successResponse($data);
     }

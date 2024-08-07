@@ -4,8 +4,8 @@
     <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 100%;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
             <td class="sm-py-32 sm-px-24" style="background-color: #eceff1; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; padding: 48px; text-align: center;" align="center">
-              <a href="https://dev-cobit-fe.millennia-solusi.xyz/assets/logo/logo-msi-full-rounded.webp">
-                <img src="https://dev-cobit-fe.millennia-solusi.xyz/assets/logo/logo-msi-full-rounded.webp" width="155" alt="Logo" style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle;">
+              <a href="https://assesment-cobit-19.vercel.app/assets/logo/logo-msi-full-rounded.webp">
+                <img src="https://assesment-cobit-19.vercel.app/assets/logo/logo-msi-full-rounded.webp" width="155" alt="Logo" style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle;">
               </a>
             </td>
         </tr>
@@ -61,7 +61,7 @@
             </table>
             <p style="margin: 0 0 16px;">
                 Jika Anda tidak merasa mengatur ulang password, harap hubungi kami di
-                <a href="mailto:info@millennia-solusi.id" class="hover-underline" style="color: #203058; text-decoration: none;">info@millennia-solusi.id</a>
+                <a href="mailto:andrianprasetyo29@gmail.com" class="hover-underline" style="color: #203058; text-decoration: none;">andrianprasetyo29@gmail.com</a>
             </p>
             <p style="margin: 0 0 16px;">Terima Kasih, <br>Cobit 19</p>
             </td>
@@ -69,16 +69,6 @@
         <tr>
             <td style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; height: 20px;" height="20"></td>
         </tr>
-        {{-- <tr>
-            <td style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; font-size: 12px; padding-left: 48px; padding-right: 48px; color: #eceff1;">
-
-            <p style="color: #263238;">
-                COPYRIGHT © 2023
-                <a href="https://millennia-solusi.id/" class="hover-underline" style="color: #203058; text-decoration: none;">Jakarta Industrial Estate Pulogadung (JIEP)</a>
-                , All rights Reserved
-            </p>
-            </td>
-        </tr> --}}
         <tr>
             <td style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; height: 16px;" height="16"></td>
         </tr>

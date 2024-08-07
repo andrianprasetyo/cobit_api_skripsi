@@ -535,7 +535,7 @@ class AsessmentController extends Controller
                 $responden->status = 'diundang';
                 $responden->code = Str::random(50);
                 $responden->save();
-                // Notification::send($responden, new InviteRespondenNotif($organisasi));
+                Notification::send($responden, new InviteRespondenNotif($organisasi));
             }
             DB::commit();
             return $this->successResponse();
@@ -595,7 +595,7 @@ class AsessmentController extends Controller
         }
 
         $organisasi = $responden->assesment->organisasi;
-        // Notification::send($responden, new InviteRespondenNotif($organisasi,'Kirim ulang Undangan Kuisioner Responden'));
+        Notification::send($responden, new InviteRespondenNotif($organisasi,'Kirim ulang Undangan Kuisioner Responden'));
 
         return $this->successResponse();
     }
@@ -726,7 +726,7 @@ class AsessmentController extends Controller
         // $user->password = $_token;
         $user->save();
 
-        // Notification::send($user, new InviteUserNotif($user));
+        Notification::send($user, new InviteUserNotif($user));
         return $this->successResponse();
     }
 

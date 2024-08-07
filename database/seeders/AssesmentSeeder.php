@@ -27,7 +27,7 @@ class AssesmentSeeder extends Seeder
             ]);
         }*/
         $organisasi=new Organisasi();
-        $organisasi->nama="PT MSI";
+        $organisasi->nama="PT XYZ";
         $organisasi->deskripsi=null;
         $organisasi->save();
 

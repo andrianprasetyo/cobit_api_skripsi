@@ -4,8 +4,8 @@
 <table style="font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; width: 100%;" width="100%" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
             <td class="sm-py-32 sm-px-24" style="background-color: #eceff1; font-family: Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, Segoe UI; padding: 48px; text-align: center;" align="center">
-              <a href="https://dev-cobit-fe.millennia-solusi.xyz/assets/logo/logo-msi-full-rounded.webp">
-                <img src="https://dev-cobit-fe.millennia-solusi.xyz/assets/logo/logo-msi-full-rounded.webp" width="155" alt="Logo" style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle;">
+              <a href="https://assesment-cobit-19.vercel.app/assets/logo/logo-msi-full-rounded.webp">
+                <img src="https://assesment-cobit-19.vercel.app/assets/logo/logo-msi-full-rounded.webp" width="155" alt="Logo" style="border: 0; max-width: 100%; line-height: 100%; vertical-align: middle;">
               </a>
             </td>
         </tr>
